@@ -15,7 +15,9 @@ GetStations <- function(polygon, exclude.tribal.lands = TRUE, stations.channel.n
   
   # Get Stations within station database
   stations.channel <- RODBC::odbcConnect(stations.channel.name)
+  
   print("Retrieving information for all stations within the given area...")
+  
   s.time <- Sys.time()
   stations <- RODBC::sqlQuery(stations.channel, "SELECT * FROM VWStationsFinal", na.strings = "NA", stringsAsFactors=FALSE)
   e.time <- Sys.time()
@@ -31,7 +33,9 @@ GetStations <- function(polygon, exclude.tribal.lands = TRUE, stations.channel.n
   stations <- dplyr::filter(stations, MLocID %in% StationsInPoly(stations, polygon, outside = FALSE))
   
   if(exclude.tribal.lands){
-    print("Removing staions within tribal lands...")
+    
+    print(("Removing staions within tribal lands...")
+          
     tribal.lands <- rgdal::readOGR(dsn = "//deqhq1/WQNPS/Agriculture/Status_and_Trend_Analysis/R_support_files", 
                                    layer = 'tl_2017_or_aiannh', integer64="warn.loss", verbose = FALSE)
     

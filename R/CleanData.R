@@ -16,7 +16,7 @@ CleanData <- function(data)
   print("Checking for any missing start times...")
   print(any(is.na(data$SampleStartTime)))
   
-  data <- data[, c('MLocID', 'StationDes', 'OrganizationID','Lat_DD', 'Long_DD', 'Datum', 'HUC8', 'Char_Name', 'sample_datetime', 'Result',
+  data <- data[, c('MLocID', 'StationDes', 'OrganizationID', 'Org_Name', 'Lat_DD', 'Long_DD', 'Datum', 'HUC8', 'Char_Name', 'sample_datetime', 'Result',
                    'Result_Numeric', 'Result_Operator', 'Result_Unit', 'Statistical_Base', 'QualifierAbbr', 'Activity_Type', 'MRLValue',
                    'Result_status', "FishCode", "SpawnCode", "WaterTypeCode", "WaterBodyCode", "BacteriaCode", "DO_code", "ben_use_code", 
                    "pH_code", "DO_SpawnCode")]
@@ -40,7 +40,7 @@ CleanData <- function(data)
   data$sample_id <- paste(data$MLocID, data$Char_Name, data$sample_datetime, data$Statistical_Base, sep = " ")
   print("Checking for duplicate samples...")
   if(any(duplicated(data$sample_id))){
-    print("Duplicate samples found")
+    print(paste(NROW(data[duplicated(data$sample_id),"sample_id"]), "duplicate sample(s) found"))
     print(paste("Duplicated sample id(s):", paste(data[duplicated(data$sample_id),"sample_id"], sep = ", ")))
   } else {print("No duplicates found")}
   

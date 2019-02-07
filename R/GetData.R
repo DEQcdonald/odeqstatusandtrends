@@ -23,7 +23,9 @@ GetData <- function(parameters = NULL, stations, start.date, end.date, awqms.cha
   
   #### Define sample media to query ####
   sample.media <- 'Water'
+  
   print(paste('Querying the AWQMS database for data at', length(stations$MLocID), 'stations related to:', paste(parameters, collapse = ", ")))
+  
   s.time <- Sys.time()
   data.AWQMS <- AWQMSdata::AWQMS_Data(startdate = start.date, 
                                       enddate = end.date, 
