@@ -1,10 +1,10 @@
 #' Add Criteria Values
-#' 
+#'
 #' Adds criteria values to data based on the beneficial use codes
 #' @param data Dataframe produced from clean_data()
 #' @return Dataframe with added criteria columns
 #' @export
-#' @example 
+#' @example
 #' add_criteria(data = 'result-of-clean_data()')
 
 add_criteria <- function(data) {
@@ -12,7 +12,7 @@ add_criteria <- function(data) {
   if(any("Temperature, water" %in% parameters)) {
     temp_data <- data %>% filter(Char_Name == "Temperature, water")
     sdadm <- temp_data %>% filter(Statistical_Base == "7DADM")
-    
+
     data <- bind_rows(data[data$Char_Name != "Temperature, water",], sdadm)
     data$temp_crit <- Temp_crit[match(data$FishCode, Temp_crit$FishUse_code), "Temp_Criteria"]
   }
@@ -31,5 +31,19 @@ add_criteria <- function(data) {
     data$bact_crit_geomean <- Bact_crit[match(data$BacteriaCode, Bact_crit$BacteriaCode), "Geomean_Crit"]
     data$bact_crit_percent <- Bact_crit[match(data$BacteriaCode, Bact_crit$BacteriaCode), "Perc_Crit"]
   }
+
+  data$spawn_start <- as.numeric(lubridate::month(as.Date(LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnStart"], format="%m/%d")))*100 +
+    as.numeric(lubridate::day(as.Date(LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnStart"], format="%m/%d")))
+  data$spawn_end <- as.numeric(lubridate::month(as.Date(LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnEnd"], format="%m/%d")))*100 +
+    as.numeric(lubridate::day(as.Date(LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnEnd"], format="%m/%d")))
+  data$sample_mon_year <- as.numeric(lubridate::month(data$sample_datetime))*100 + as.numeric(lubridate::day(data$sample_datetime))
+  data$spawning <- if(is.na(data$spawn_start)){
+    FALSE
+  } else if(data$spawn_start < data$spawn_end & (data$sample_mon_year > data$spawn_start & data$sample_mon_year < data$spawn_end)){
+    TRUE
+  } else if(data$spawn_start > data$spawn_end & (data$sample_mon_year > data$spawn_start | data$sample_mon_year < data$spawn_end)){
+    TRUE
+  } else {FALSE}
+
   return(data)
 }

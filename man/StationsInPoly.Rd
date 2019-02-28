@@ -4,7 +4,8 @@
 \alias{StationsInPoly}
 \title{Clip stations to a polygon}
 \usage{
-StationsInPoly(stations, polygon, outside = FALSE)
+StationsInPoly(stations, polygon, outside = FALSE, id_col, datum_col,
+  lat_col, lon_col)
 }
 \arguments{
 \item{stations}{Dataframe of stations with latitude, longitude, and source datum.}
@@ -12,6 +13,14 @@ StationsInPoly(stations, polygon, outside = FALSE)
 \item{polygon}{Shapefile of the area to query}
 
 \item{outside}{Set to true if you want stations located outside of the polygon instead. Default is FALSE.}
+
+\item{id_col}{Quoted name of the station ID column}
+
+\item{datum_col}{Quoted name of the datum column}
+
+\item{lat_col}{Quoted name of the latitude column}
+
+\item{lon_col}{Quoted name of the longitude column}
 }
 \value{
 A list of stations inside, or outside if outside=TRUE, of a given polygon.
@@ -20,5 +29,6 @@ A list of stations inside, or outside if outside=TRUE, of a given polygon.
 Returns the stations located within a given shapefile, or outside if outside=TRUE.
 }
 \examples{
-StationsInPoly(stations = "result-of-GetStations()", polygon = "your-shapefile-here", outside=FALSE)
+StationsInPoly(stations = "result-of-GetStations()", polygon = "your-shapefile-here", outside=FALSE,
+id_col = "MLocID", datum_col = "Datum", lat_col = "Lat_DD", lon_col = "Lon_DD")
 }

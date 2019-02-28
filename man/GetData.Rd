@@ -4,17 +4,19 @@
 \alias{GetData}
 \title{Get data for water quality status and trends analysis}
 \usage{
-GetData(parameters = NULL, stations, start.date, end.date,
-  awqms.channel.name = "AWQMS")
+GetData(parameters = NULL, stations_AWQMS, start.date, end.date,
+  query_nwis = FALSE, stations_NWIS, awqms.channel.name = "AWQMS")
 }
 \arguments{
-\item{parameters}{A list of parameters to include in the query.}
+\item{parameters}{A list of parameters to include in the query}
 
-\item{stations}{Stations dataframe from GetStations().}
+\item{stations_AWQMS}{Stations dataframe from get_stations_AWQMS()}
 
 \item{start.date}{The earliest date to include in the query. "%Y-%m-%d"}
 
 \item{end.date}{The latest date to include in the query. "%Y-%m-%d"}
+
+\item{stations_NWIS}{Stations dataframe from get_stations_NWIS()}
 
 \item{awqms.channel.name}{The name in quotes of the AWQMS ODBC connection. Defaults to "AWQMS".}
 }
@@ -22,10 +24,14 @@ GetData(parameters = NULL, stations, start.date, end.date,
 A dataframe of all available data within AWQMS that fit the query.
 }
 \description{
-Queries the Oregon DEQ AWQMS database for water quality monitoring data fitting the given parameters. Requires permissions to the VW_AWQMS_Results 
-view in the AWQMS repository. This query is specific to the methods used in status and trends reporting. For a more comprehensive AWQMS query, see 
+Queries the Oregon DEQ AWQMS database for water quality monitoring data fitting the given parameters. Requires permissions to the VW_AWQMS_Results
+view in the AWQMS repository. This query is specific to the methods used in status and trends reporting. For a more comprehensive AWQMS query, see
 the AWQMS package by Travis Pritchard.
 }
 \examples{
-GetData(parameters = c("parameter1", "parameter2"), stations = result-of-GetStations(), start.date = "2010-01-01", end.date = "2019-01-01", awqms.channel.name = "AWQMS")
+GetData(parameters = c("parameter1", "parameter2"),
+stations_AWQMS = result-of-get_stations_AWQMS(),
+stations_NWIS = result-of-get_stations_NWIS(),
+start.date = "2010-01-01", end.date = "2019-01-01",
+awqms.channel.name = "AWQMS")
 }
