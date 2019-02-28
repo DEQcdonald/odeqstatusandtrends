@@ -13,6 +13,7 @@ add_criteria <- function(data) {
     temp_data <- data %>% filter(Char_Name == "Temperature, water")
     sdadm <- temp_data %>% filter(Statistical_Base == "7DADM")
     
+    data <- bind_rows(data[data$Char_Name != "Temperature, water",], sdadm)
     data$temp_crit <- Temp_crit[match(data$FishCode, Temp_crit$FishUse_code), "Temp_Criteria"]
   }
   if(any("Dissolved oxygen (DO)" %in% parameters)) {
@@ -30,4 +31,5 @@ add_criteria <- function(data) {
     data$bact_crit_geomean <- Bact_crit[match(data$BacteriaCode, Bact_crit$BacteriaCode), "Geomean_Crit"]
     data$bact_crit_percent <- Bact_crit[match(data$BacteriaCode, Bact_crit$BacteriaCode), "Perc_Crit"]
   }
+  return(data)
 }
