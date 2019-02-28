@@ -98,5 +98,5 @@ GetData <- function(parameters = NULL, stations_AWQMS, start.date, end.date, que
   # eTime <- Sys.time()
   # print(paste("This query took approximately", difftime(eTime, sTime, units = "secs"), "seconds."))
 
-  return(data.AWQMS)
+  return(data_AWQMS)
 }
