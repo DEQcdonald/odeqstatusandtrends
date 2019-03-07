@@ -2,7 +2,7 @@
 % Please edit documentation in R/status_stns.R
 \name{status_stns}
 \alias{status_stns}
-\title{Determine stations with sufiicient data for status analysis}
+\title{Determine stations with sufficient data for status analysis}
 \usage{
 status_stns(data, status_years = c((as.numeric(format(Sys.Date(), "\%Y"))
   - 2):format(Sys.Date(), "\%Y")))
@@ -10,11 +10,11 @@ status_stns(data, status_years = c((as.numeric(format(Sys.Date(), "\%Y"))
 \arguments{
 \item{data}{Dataframe to determine status from.}
 
-\item{status.years}{Which years to determine status by. Default is current year minus 2 to present year.}
+\item{status.years}{Years from which to determine status. Default is current year minus 2 to present year.}
 }
 \value{
-dataframe of stations with sufficient data
+Dataframe of stations with sufficient data
 }
 \description{
-Determine stations with sufiicient data for status analysis
+Creates a dataframe with stations, the number of years with data within the status years, and whether or not there were any exceedances.
 }

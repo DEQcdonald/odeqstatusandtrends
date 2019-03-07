@@ -10,8 +10,8 @@ sea_ken(data)
 \item{data}{Dataframe to conduct a Seasonal Kendall Trend Analysis.}
 }
 \value{
-dataframe of stations with the results of the Seasonal Kendall Trend Analysis
+Dataframe of stations with the results of the Seasonal Kendall Trend Analysis
 }
 \description{
-Run Seasonal Kendall trend analysis for all stations with sufficient data
+Run the Season Kendall trend analysis from the EnvStats package. See ??EnvStats::kendallSeasonalTrendTest() for method.
 }

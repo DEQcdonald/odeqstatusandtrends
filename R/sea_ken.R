@@ -1,8 +1,8 @@
 #' Run Seasonal Kendall trend analysis for all stations with sufficient data
 #'
-#'
+#' Run the Season Kendall trend analysis from the EnvStats package. See ??EnvStats::kendallSeasonalTrendTest() for method.
 #' @param data Dataframe to conduct a Seasonal Kendall Trend Analysis.
-#' @return dataframe of stations with the results of the Seasonal Kendall Trend Analysis
+#' @return Dataframe of stations with the results of the Seasonal Kendall Trend Analysis
 #' @export
 #' @example
 #' sea_ken(data = data.frame)

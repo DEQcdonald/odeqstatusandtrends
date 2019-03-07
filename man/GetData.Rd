@@ -16,6 +16,8 @@ GetData(parameters = NULL, stations_AWQMS, start.date, end.date,
 
 \item{end.date}{The latest date to include in the query. "%Y-%m-%d"}
 
+\item{query_nwis}{Logical. Should the function query the USGS NWIS database.}
+
 \item{stations_NWIS}{Stations dataframe from get_stations_NWIS()}
 
 \item{awqms.channel.name}{The name in quotes of the AWQMS ODBC connection. Defaults to "AWQMS".}

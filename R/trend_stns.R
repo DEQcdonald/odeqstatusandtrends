@@ -1,16 +1,17 @@
 #' Determine stations with sufficient data for trend analysis
 #'
-#'
-#' @param data Dataframe to determine trend years from.
-#' @param trend.years Which years to determine status by. Default is current year minus 2 to present year.
-#' @return dataframe of stations with sufficient data
+#' Creates a dataframe with stations and the number of years with data. Stations with less than 8 different years of data
+#' are not sufficient for trend analysis via the status and trends methods.
+#' @param data Dataframe to determine stations for trend analysis
+#' @param trend.years Which years to determine trend by. Default is the minimum year within the data to the current year.
+#' @return Dataframe of stations with sufficient years of data
 #' @export
 #' @example
 #' trend_stns(data = data.frame, status_years = c("current-year", "2-years-ago"))
 
 trend_stns <- function(data, trend_years = c(format(min(data$sample_datetime), "%Y"):format(Sys.Date(), "%Y"))) {
 
-  if(length(trend_years) < 8){break("Number of years should be less than or equal to 8")}
+  if(length(trend_years) < 8){stop("Number of years should be less than or equal to 8")}
 
   data$year <- lubridate::year(data$sample_datetime)
 

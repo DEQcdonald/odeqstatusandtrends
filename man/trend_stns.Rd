@@ -8,13 +8,14 @@ trend_stns(data, trend_years = c(format(min(data$sample_datetime),
   "\%Y"):format(Sys.Date(), "\%Y")))
 }
 \arguments{
-\item{data}{Dataframe to determine trend years from.}
+\item{data}{Dataframe to determine stations for trend analysis}
 
-\item{trend.years}{Which years to determine status by. Default is current year minus 2 to present year.}
+\item{trend.years}{Which years to determine trend by. Default is the minimum year within the data to the current year.}
 }
 \value{
-dataframe of stations with sufficient data
+Dataframe of stations with sufficient years of data
 }
 \description{
-Determine stations with sufficient data for trend analysis
+Creates a dataframe with stations and the number of years with data. Stations with less than 8 different years of data
+are not sufficient for trend analysis via the status and trends methods.
 }

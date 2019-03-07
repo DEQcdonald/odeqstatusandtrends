@@ -2,7 +2,7 @@
 % Please edit documentation in R/Locations.R
 \name{get_stations_NWIS}
 \alias{get_stations_NWIS}
-\title{Get stations in Oregon for status and trends analysis}
+\title{Get USGS stations in Oregon for status and trends analysis}
 \usage{
 get_stations_NWIS(polygon, exclude.tribal.lands = TRUE)
 }
@@ -15,7 +15,7 @@ get_stations_NWIS(polygon, exclude.tribal.lands = TRUE)
 A list of stations within a given shapefile.
 }
 \description{
-Queries the ODEQ stations database to pull all available stations within a given shapefile.
+Queries the NWIS portal to pull all available USGS stations within a given shapefile.
 }
 \examples{
 get_stations_NWIS(polygon = "your-shapefile-here", exclude.tribal.lands = TRUE)

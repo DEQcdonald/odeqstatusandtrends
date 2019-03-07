@@ -5,9 +5,10 @@
 #' the AWQMS package by Travis Pritchard.
 #' @param parameters A list of parameters to include in the query
 #' @param stations_AWQMS Stations dataframe from get_stations_AWQMS()
-#' @param stations_NWIS Stations dataframe from get_stations_NWIS()
 #' @param start.date The earliest date to include in the query. "%Y-%m-%d"
 #' @param end.date The latest date to include in the query. "%Y-%m-%d"
+#' @param query_nwis Logical. Should the function query the USGS NWIS database.
+#' @param stations_NWIS Stations dataframe from get_stations_NWIS()
 #' @param awqms.channel.name The name in quotes of the AWQMS ODBC connection. Defaults to "AWQMS".
 #' @return A dataframe of all available data within AWQMS that fit the query.
 #' @export
@@ -38,8 +39,10 @@ GetData <- function(parameters = NULL, stations_AWQMS, start.date, end.date, que
   e.time <- Sys.time()
   print(paste("This query took approximately", difftime(e.time, s.time, units = "secs"), "seconds."))
 
+  # Include only relevant monitoring location types
   data_AWQMS <- data_AWQMS %>% filter(MonLocType %in% c("River/Stream", "Lake", "Other-Surface Water", ""))
 
+  # Attach location datum info to observations
   data_AWQMS <- merge(data_AWQMS, stations_AWQMS[, c("MLocID", "Datum")], by="MLocID", all.x = TRUE, all.y = FALSE)
 
   if(query_nwis){
@@ -75,28 +78,6 @@ GetData <- function(parameters = NULL, stations_AWQMS, start.date, end.date, que
 
     data_combined <- bind_rows(data_AWQMS, data_NWIS)
   }
-
-  # #### connect to element and get data (must set up ODBC connection first) ####
-  # channel <- odbcConnect(awqms.channel.name)
-  # table <- "VW_AWQMS_Results"
-  #
-  # site.type = "'River/Stream', 'Lake', 'Other-Surface Water', 'Reservoir'"
-  #
-  # #### Create SQL query ####
-  # myQuery <- paste0("SELECT * FROM VW_AWQMS_Results WHERE MLocID IN ('", paste(stations, collapse = "', '"),
-  #                   "') AND Char_Name IN ('", paste(AWQMS.parms, collapse = "', '"),
-  #                   "') AND SampleStartDate BETWEEN '", start.date, "' AND '", end.date,
-  #                   "' AND SampleMedia='", sample.media,
-  #                   "' AND MonLocType IN (", site.type, ")"
-  # )
-  #
-  # print(paste('Querying', length(stations), 'stations from AWQMS for water quality data related to:', paste(parameters, collapse = ", ")))
-  #
-  # #### Pass the SQL query to AWQMS ####
-  # sTime <- Sys.time()
-  # AWQMS.data <- sqlQuery(channel, myQuery, errors = FALSE)
-  # eTime <- Sys.time()
-  # print(paste("This query took approximately", difftime(eTime, sTime, units = "secs"), "seconds."))
 
   return(data_AWQMS)
 }
