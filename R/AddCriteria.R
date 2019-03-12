@@ -11,18 +11,18 @@ add_criteria <- function(data) {
   parameters <- unique(data$Char_Name)
 
   print("Checking spawn dates...")
-  data$spawn_start <- as.POSIXct(LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnStart"], format="%m/%d")
-  data$spawn_end <- as.POSIXct(LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnEnd"], format="%m/%d")
-  data$spawn_start_numeric <- as.numeric(lubridate::month(as.Date(LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnStart"], format="%m/%d")))*100 +
-    as.numeric(lubridate::day(as.Date(LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnStart"], format="%m/%d")))
-  data$spawn_end_numeric <- as.numeric(lubridate::month(as.Date(LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnEnd"], format="%m/%d")))*100 +
-    as.numeric(lubridate::day(as.Date(LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnEnd"], format="%m/%d")))
-  data$sample_mon_year <- as.numeric(lubridate::month(data$sample_datetime))*100 + as.numeric(lubridate::day(data$sample_datetime))
-  data$spawning <- ifelse(is.na(data$spawn_start_numeric), "Non-Spawning",
-                          ifelse(data$spawn_start_numeric < data$spawn_end_numeric & (data$sample_mon_year > data$spawn_start_numeric & data$sample_mon_year < data$spawn_end_numeric), "Spawning",
-                                 ifelse(data$spawn_start_numeric > data$spawn_end_numeric & (data$sample_mon_year > data$spawn_start_numeric | data$sample_mon_year < data$spawn_end_numeric), "Spawning", "Non-Spawning")
-                          )
-  )
+  data$spawn_start <- LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnStart"]
+  data$spawn_end <- LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnEnd"]
+  # data$spawn_start_numeric <- as.numeric(lubridate::month(as.Date(LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnStart"], format="%m/%d")))*100 +
+  #   as.numeric(lubridate::day(as.Date(LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnStart"], format="%m/%d")))
+  # data$spawn_end_numeric <- as.numeric(lubridate::month(as.Date(LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnEnd"], format="%m/%d")))*100 +
+  #   as.numeric(lubridate::day(as.Date(LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnEnd"], format="%m/%d")))
+  # data$sample_mon_year <- as.numeric(lubridate::month(data$sample_datetime))*100 + as.numeric(lubridate::day(data$sample_datetime))
+  # data$spawning <- ifelse(is.na(data$spawn_start_numeric), "Non-Spawning",
+  #                         ifelse(data$spawn_start_numeric < data$spawn_end_numeric & (data$sample_mon_year > data$spawn_start_numeric & data$sample_mon_year < data$spawn_end_numeric), "Spawning",
+  #                                ifelse(data$spawn_start_numeric > data$spawn_end_numeric & (data$sample_mon_year > data$spawn_start_numeric | data$sample_mon_year < data$spawn_end_numeric), "Spawning", "Non-Spawning")
+  #                         )
+  # )
 
   if(any("Temperature, water" %in% parameters)) {
     print("Adding temperature criteria values...")
@@ -31,7 +31,7 @@ add_criteria <- function(data) {
 
     data <- bind_rows(data[data$Char_Name != "Temperature, water",], sdadm)
 
-    data$temp_crit <- ifelse(data$spawning == "Spawning", 13, Temp_crit[match(data$FishCode, Temp_crit$FishUse_code), "Temp_Criteria"])
+    data$temp_crit <- Temp_crit[match(data$FishCode, Temp_crit$FishUse_code), "Temp_Criteria"]
   }
   if(any("Dissolved oxygen (DO)" %in% parameters)) {
     print("Adding dissolved oxygen criteria values...")
