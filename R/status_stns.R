@@ -17,7 +17,8 @@ status_stns <- function(data, status_years = c((as.numeric(format(Sys.Date(), "%
       filter(year %in% status_years) %>%
       dplyr::group_by(MLocID, Char_Name) %>%
       dplyr::summarise(n_years = length(unique(year)),
-                       exceed = any(exceed)) %>%
+                       excursions = sum(excursion_cen),
+                       status = ifelse(any(excursion_cen == 1), "Not Attaining", "Attaining")) %>%
       filter(n_years>=2)
 
     print(paste("Data should be sufficient for", NROW(status_check), "different statuses to be determined."))

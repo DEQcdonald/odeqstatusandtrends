@@ -10,7 +10,7 @@
 
 plot_temperature <- function(data, seaKen, station){
   if(station %in% seaKen$MLocID){
-    slope <- seaKen[seaKen$MLocID == station, "slope"]
+    slope <- seaKen[seaKen$MLocID == station & seaKen$Char_Name == "Temperature, water", "slope"]
     x_min <- min(data$sample_datetime, na.rm = TRUE)
     x_max <- max(data$sample_datetime, na.rm = TRUE)
     x_delta <- as.numeric((x_max-x_min)/2)
@@ -21,9 +21,10 @@ plot_temperature <- function(data, seaKen, station){
 
   ymin <- min(c(data$Result_Numeric, data$temp_crit), na.rm = TRUE)
   ymax <- max(c(data$Result_Numeric, data$temp_crit), na.rm = TRUE)
+  data$excursion <- as.character(data$excursion)
 
   p <- ggplot(data) +
-    geom_point(aes(x=sample_datetime, y=Result_Numeric, color=exceed, linetype = exceed, shape=exceed)) +
+    geom_point(aes(x=sample_datetime, y=Result_Numeric, color = excursion, linetype = excursion, shape = excursion)) +
     ggtitle(paste(station)) +
     ylab("Temperature (degrees C)") +
     xlab("Datetime")
@@ -31,10 +32,13 @@ plot_temperature <- function(data, seaKen, station){
     p <- p + geom_segment(aes(x=x_min, xend=x_max, y=sk_min, yend=sk_max, color = "Trend", linetype = "Trend", shape = "Trend"))
   }
   if(any(!is.na(data$temp_crit))){
-    p <- p + geom_line(aes(x=sample_datetime, y=temp_crit, color=spawning, linetype=spawning, shape=spawning))
+    p <- p + geom_line(aes(x=sample_datetime, y=temp_crit, color=Spawn_type, linetype=Spawn_type, shape=Spawn_type))
+  }
+  if(any(data$Spawn_type == "Spawn")){
+    p <- p + geom_line(aes(x=sample_datetime, y=spawning_crit, color=Spawn_type, linetype=Spawn_type, shape=Spawn_type))
   }
 
-  if(any(data$spawning == "Spawning")){
+  if(any(data$Spawn_type == "Spawning")){
     spawn_start <- unique(data$spawn_start)
     spawn_end <- unique(data$spawn_end)
     years <- unique(lubridate::year(data$sample_datetime))
@@ -46,11 +50,10 @@ plot_temperature <- function(data, seaKen, station){
   }
 
   p <- p +
-    scale_color_manual(values = c('TRUE' = 'red', 'FALSE' = 'black', "Trend" = 'blue', "Spawning" = 'black', "Non-Spawning" = 'black')) +
-    scale_linetype_manual(values = c('TRUE' = 0, 'FALSE' = 0, "Trend" = 1, "Spawning" = 2, "Non-Spawning" = 3)) +
-    scale_shape_manual(values = c('TRUE' = 16, 'FALSE' = 16, "Trend" = 32, "Spawning" = 32, "Non-Spawning" = 32)) +
+    scale_color_manual(values = c('1' = 'red', '0' = 'black', "Trend" = 'blue', "Spawn" = 'black', "Not_Spawn" = 'black')) +
+    scale_linetype_manual(values = c('1' = 0, '0' = 0, "Trend" = 1, "Spawn" = 2, "Not_Spawn" = 3)) +
+    scale_shape_manual(values = c('1' = 16, '0' = 16, "Trend" = 32, "Spawn" = 32, "Not_Spawn" = 32)) +
     ylim(c(ymin, ymax))
 
   return(p)
 }
-
