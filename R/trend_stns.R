@@ -7,7 +7,7 @@
 #' @return Dataframe of stations with sufficient years of data
 #' @export
 #' @example
-#' trend_stns(data = data.frame, status_years = c("current-year", "2-years-ago"))
+#' trend_stns(data = data.frame, trend_years = c(format(min(data$sample_datetime), "%Y"):format(Sys.Date(), "%Y")))
 
 trend_stns <- function(data, trend_years = c(format(min(data$sample_datetime), "%Y"):format(Sys.Date(), "%Y"))) {
 

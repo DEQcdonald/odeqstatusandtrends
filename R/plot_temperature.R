@@ -9,51 +9,86 @@
 #' plot_temperature(data = data.frame, seaKen, station)
 
 plot_temperature <- function(data, seaKen, station){
+  # obtain data range limits for plotting
+  xmin <- min(data$sample_datetime, na.rm = TRUE)
+  xmax <- max(data$sample_datetime, na.rm = TRUE)
+  ymin <- min(c(data$Result_Numeric, data$temp_crit), na.rm = TRUE)
+  ymax <- max(c(data$Result_Numeric, data$temp_crit), na.rm = TRUE)
+  data$excursion <- if_else(data$excursion == 1, "Excursion", "Result") # change numeric value to descriptor
+
+  # obtain plotting values for trend line if applicable
   if(station %in% seaKen$MLocID){
     slope <- seaKen[seaKen$MLocID == station & seaKen$Char_Name == "Temperature, water", "slope"]
-    x_min <- min(data$sample_datetime, na.rm = TRUE)
-    x_max <- max(data$sample_datetime, na.rm = TRUE)
-    x_delta <- as.numeric((x_max-x_min)/2)
+    x_delta <- as.numeric((xmax-xmin)/2)
     y_median <- median(data$Result_Numeric, na.rm = TRUE)
     sk_min <- y_median - x_delta*slope/365.25
     sk_max <- y_median + x_delta*slope/365.25
   }
 
-  ymin <- min(c(data$Result_Numeric, data$temp_crit), na.rm = TRUE)
-  ymax <- max(c(data$Result_Numeric, data$temp_crit), na.rm = TRUE)
-  data$excursion <- as.character(data$excursion)
+  p <- ggplot(data)
 
-  p <- ggplot(data) +
-    geom_point(aes(x=sample_datetime, y=Result_Numeric, color = excursion, linetype = excursion, shape = excursion)) +
+  if(any(data$Spawn_type == "Spawn")){
+    # Convert spawning dates to datetimes
+    data$Start_spawn <- as.POSIXct(data$Start_spawn)
+    data$End_spawn <- as.POSIXct(data$End_spawn)
+
+    # create dataframe of spawning start/end dates, and relevant values for spawning zones and criteria lines
+    spawn_zones <- unique(data[,c("Start_spawn", "End_spawn")])
+    spawn_zones$next_start <- spawn_zones$Start_spawn + years(1)
+    spawn_zones$ymin <- -Inf
+    spawn_zones$ymax <- Inf
+    spawn_zones$temp_crit <- unique(data$temp_crit)
+    spawn_zones$spawn_crit <- 13
+    # adjust plot limits to allow for first and last spawning zones to plot
+    xmin <- min(xmin, min(spawn_zones$Start_spawn, na.rm = TRUE))
+    xmax <- max(xmax, max(spawn_zones$End_spawn, na.rm = TRUE))
+
+    # plot the shaded spawning zones
+    p <- p + geom_rect(data = spawn_zones, aes(xmin=Start_spawn, xmax=End_spawn, ymin=ymin, ymax=ymax,
+                       # linetype = 'Spawning Zone', shape = 'Spawning Zone', color = 'Spawning Zone',
+                       fill='Spawning Zone'),
+                       color = NA, alpha=.15, show.legend = c(fill=TRUE, linetype=FALSE, shape=FALSE, color=FALSE))
+
+    # plot non-spawning criteria lines within non-spawning zones
+    p <- p + geom_segment(data = spawn_zones,
+                          aes(x=End_spawn, xend=next_start, y=temp_crit, yend=temp_crit,
+                              color="Non-Spawning", linetype="Non-Spawning", shape="Non-Spawning"),
+                          size = 1)
+
+    # plot spawning criteria lines within spawning zones
+    p <- p + geom_segment(data = spawn_zones,
+                          aes(x=Start_spawn, xend=End_spawn, y=spawn_crit, yend=spawn_crit,
+                              color="Spawning", linetype="Spawning", shape="Spawning"),
+                          size = 1)
+
+  } else if(any(!is.na(data$temp_crit))){
+    # plot non-spawining line across data if no spawning zones apply
+    p <- p + geom_line(aes(x=sample_datetime, y=temp_crit, color="Non-Spawning", linetype="Non-Spawning", shape="Non-Spawning"))
+  }
+
+  # plot data with excursion colors
+  p <- p + geom_point(aes(x=sample_datetime, y=Result_Numeric, color = excursion, linetype = excursion, shape = excursion)) +
     ggtitle(paste(station)) +
     ylab("Temperature (degrees C)") +
     xlab("Datetime")
+
+  # plot the trend line if applicable
   if(station %in% seaKen$MLocID){
     p <- p + geom_segment(aes(x=x_min, xend=x_max, y=sk_min, yend=sk_max, color = "Trend", linetype = "Trend", shape = "Trend"))
   }
-  if(any(!is.na(data$temp_crit))){
-    p <- p + geom_line(aes(x=sample_datetime, y=temp_crit, color=Spawn_type, linetype=Spawn_type, shape=Spawn_type))
-  }
-  if(any(data$Spawn_type == "Spawn")){
-    p <- p + geom_line(aes(x=sample_datetime, y=spawning_crit, color=Spawn_type, linetype=Spawn_type, shape=Spawn_type))
-  }
 
-  if(any(data$Spawn_type == "Spawning")){
-    spawn_start <- unique(data$spawn_start)
-    spawn_end <- unique(data$spawn_end)
-    years <- unique(lubridate::year(data$sample_datetime))
-
-    rects <- data.frame(x1=as.POSIXct(paste0(years, "-", lubridate::month(spawn_start), "-", lubridate::day(spawn_start))),
-                        x2=as.POSIXct(paste0(years, "-", lubridate::month(spawn_end), "-", lubridate::day(spawn_end))),
-                        y1=-Inf, y2=Inf)
-    p + geom_rect(data = rects, aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), color = NA, alpha=.4, fill='grey')
-  }
-
+  # apply color, shape, line types, and range limits
   p <- p +
-    scale_color_manual(values = c('1' = 'red', '0' = 'black', "Trend" = 'blue', "Spawn" = 'black', "Not_Spawn" = 'black')) +
-    scale_linetype_manual(values = c('1' = 0, '0' = 0, "Trend" = 1, "Spawn" = 2, "Not_Spawn" = 3)) +
-    scale_shape_manual(values = c('1' = 16, '0' = 16, "Trend" = 32, "Spawn" = 32, "Not_Spawn" = 32)) +
-    ylim(c(ymin, ymax))
+    scale_color_manual(name = "Legend",
+                       values =    c('Excursion' = 'red', 'Result' = 'black', "Trend" = 'blue', "Spawning" = 'black', "Non-Spawning" = 'black')) +
+    scale_linetype_manual(name = "Legend",
+                          values = c('Excursion' = 0, 'Result' = 0, "Trend" = 1, "Spawning" = 2, "Non-Spawning" = 1)) +
+    scale_shape_manual(name = "Legend",
+                       values =    c('Excursion' = 16, 'Result' = 16, "Trend" = 32, "Spawning" = 32, "Non-Spawning" = 32)) +
+    scale_fill_manual(name = "", values = c("Spawning Zone" = 'black')) +
+    ylim(c(ymin, ymax)) +
+    xlim(c(xmin, xmax)) +
+    theme(legend.position="bottom", legend.direction = "horizontal", legend.box = "horizontal")
 
   return(p)
 }
