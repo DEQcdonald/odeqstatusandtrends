@@ -1,8 +1,9 @@
 #' Create temperature plots to display status and trend.
 #'
 #'
-#' @param data Dataframe to determine status from. Must have 'exceed' column generated.
+#' @param data Dataframe to determine status from. Must have 'excursion' column generated.
 #' @param seaKen Results of Seasonal Kendall Analysis
+#' @param station The station to plot
 #' @return dataframe of stations with sufficient data
 #' @export
 #' @example
@@ -68,7 +69,7 @@ plot_temperature <- function(data, seaKen, station){
 
   # plot data with excursion colors
   p <- p + geom_point(aes(x=sample_datetime, y=Result_Numeric, color = excursion, linetype = excursion, shape = excursion)) +
-    ggtitle(paste(station)) +
+    ggtitle(paste(station, 'Temperature')) +
     ylab("Temperature (degrees C)") +
     xlab("Datetime")
 

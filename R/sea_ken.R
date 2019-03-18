@@ -8,7 +8,7 @@
 #' sea_ken(data = data.frame)
 
 sea_ken <- function(data){
-  data$Month <- lubridate::month(data$sample_datetime)
+  data$Month <- lubridate::month(data$sample_datetime, label = TRUE, abbr = TRUE)
   data$Year <- lubridate::year(data$sample_datetime)
 
   sea_ken_df <- data.frame()
@@ -21,7 +21,9 @@ sea_ken <- function(data){
       print(i)
       subData_stn <- subData %>% filter(MLocID == i)
       tmp_seaKen <- EnvStats::kendallSeasonalTrendTest(Result_Numeric ~ Month + Year, data = subData_stn)
-      tmp_sample_size <- tmp_seaKen$sample.size
+      tmp_sample_size <- as.data.frame(bind_rows(tmp_seaKen$sample.size))
+      tmp_sample_size[, c("ID", "Char")] <- c(i, j)
+      print(tmp_sample_size)
       stn_seaKen <- data.frame(MLocID = i,
                                Char_Name = j,
                                p_value = tmp_seaKen$p.value[1],
@@ -33,6 +35,10 @@ sea_ken <- function(data){
       sea_ken_df <- bind_rows(sea_ken_df, stn_seaKen)
     }
   }
-  attr(sea_ken_df, "sample_size") <- sample_size
+
+  sea_ken_df$trend <- if_else(sea_ken_df$p_value >= .05 & !is.na(sea_ken_df$p_value), "Significant", "Insignificant")
+
+  attr(sea_ken_df, "sample_size") <- sample_size[, c('ID', 'Char', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
+                                                     'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Total')]
   return(sea_ken_df)
 }
