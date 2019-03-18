@@ -74,7 +74,7 @@ plot_temperature <- function(data, seaKen, station){
 
   # plot the trend line if applicable
   if(station %in% seaKen$MLocID){
-    p <- p + geom_segment(aes(x=x_min, xend=x_max, y=sk_min, yend=sk_max, color = "Trend", linetype = "Trend", shape = "Trend"))
+    p <- p + geom_segment(aes(x=xmin, xend=xmax, y=sk_min, yend=sk_max, color = "Trend", linetype = "Trend", shape = "Trend"))
   }
 
   # apply color, shape, line types, and range limits
