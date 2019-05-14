@@ -12,9 +12,9 @@ AWQMS_Char_Names <- function(parameters){
   if(is.null(parameters)){return(NULL)}
 
   #### Expand bacteria to include fecal and enterococcus ####
-  if(any(parameters == 'Bacteria')) {
+  if(any(parameters %in% c('Bacteria', 'bacteria'))) {
     parameters <- c(parameters, c('Ecoli','Fecal coliform','Enterococcus'))
-    parameters <- unique(parameters[parameters != "Bacteria"])
+    parameters <- unique(parameters[!parameters %in% c('Bacteria', 'bacteria')])
   }
 
   #### Lookup table for parameters and their AWQMS database name ####
