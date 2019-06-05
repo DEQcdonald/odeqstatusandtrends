@@ -1,0 +1,469 @@
+---
+title: "Untitled"
+author: "Ryan Michie"
+date: "4/25/2019"
+output: html_document
+---
+```{r setup}
+
+library(dplyr)
+library(tidyr)
+library(stringr)
+
+```
+
+```{r owri-db-connection}
+
+# -- Inputs ----
+owri.mdb <-  "F:/WorkSpace/Quantifying_Conservation/SouthernWillamette/OWEB/OWRI_ExportToAccess_122618/OwriDbExport_122618.mdb"
+#huc8.names <- c("Middle Fork Willamette", "Coast Fork Willamette","Upper Willamette", "McKenzie", "North Santiam", "South Santiam")
+
+huc8.names <- c("Middle Fork Willamette", "Coast Fork Willamette","Upper Willamette", "McKenzie", "North Santiam", "South Santiam", "Lower Willamette","Tualatin","Mollalla-Pudding")
+
+
+complete.years <- c(2017)
+
+# --- Load required packages  -----------------
+
+options(stringsAsFactors = FALSE)
+
+# --- Read OWRI data from access database -----------------
+
+# Requires use of 32 bit R and 32 bit compatible RStudio Desktop (version 1.1.463)
+library(DBI)
+library(odbc)
+
+db_connect_string <- paste0("Driver={Microsoft Access Driver (*.mdb, *.accdb)};","DBQ=", owri.mdb)
+
+channel <- dbConnect(odbc::odbc(),.connection_string = db_connect_string)
+
+# I'm keeping the dataframes the same name that OWEB uses
+ActivityCost <- dbReadTable(channel, "ActivityCost")
+ActivityLU <- dbReadTable(channel, "ActivityLU")
+ActivityTypeLU <- dbReadTable(channel, "ActivityTypeLU")
+ProjectInfo <- dbReadTable(channel, "ProjectInfo")
+Treatment <- dbReadTable(channel, "Treatment")
+TreatmentLU <- dbReadTable(channel, "TreatmentLU")
+TreatmentMetric <- dbReadTable(channel, "TreatmentMetric")
+TreatmentMetricLU <- dbReadTable(channel, "TreatmentMetricLU")
+UnitLU <- dbReadTable(channel, "UnitLU")
+RiparianVtrRcr <- dbReadTable(channel, "RiparianVtrRcr")
+InstreamWaterRight <- dbReadTable(channel, "InstreamWaterRight")
+dbDisconnect(channel)
+
+```
+
+
+
+```{r OWRI-treatment-summary}
+
+# Rename some of the Treatment Metrics
+TreatmentMetricLU2 <- data.frame(TreatmentMetricLUID=c(1:8),
+                                 TreatmentMetric=c("Area treated",
+                                                   "Number of treatments",
+                                                   "Stream sides treated",
+                                                   "Volume",
+                                                   "Length of treatment",
+                                                   "Percent urban area affected",
+                                                   "Percent watershed area affected",
+                                                   "Volumetric flow rate"))
+
+# Select only some of the riparian treatment metrics
+RiparianVtrRcr2 <- RiparianVtrRcr %>%
+  dplyr::select(TreatmentID, mile=LengthMiles,acre=BestAcres,feet=WidthFeet) %>%
+  tidyr::gather(-TreatmentID, key="Unit",value="Quantity") %>%
+  mutate(UnitLUID=case_when(Unit == "mile" ~ 10,
+                            Unit == "acre" ~ 1,
+                            Unit == "feet" ~ 8))
+
+df.treatments <- Treatment %>%
+  dplyr::select(PROJNUM ,ActivityTypeLUID, ActivityLUID, TreatmentLUID, TreatmentID) %>%
+  dplyr::left_join(ActivityTypeLU[,c("ActivityTypeLUID", "ActivityType")], by="ActivityTypeLUID") %>%
+  dplyr::left_join(ActivityLU[,c("ActivityLUID", "Activity")], by="ActivityLUID") %>%
+  dplyr::left_join(TreatmentLU[,c("TreatmentLUID", "Treatment")], by="TreatmentLUID") %>%
+  dplyr::left_join(TreatmentMetric, by="TreatmentID") %>%
+  dplyr::left_join(TreatmentMetricLU2, by="TreatmentMetricLUID") %>%
+  dplyr::left_join(UnitLU, by="UnitLUID") %>%
+  dplyr::left_join(ProjectInfo, by="PROJNUM") %>%
+  dplyr::filter(CompleteYear %in% complete.years & SubbasinActual %in% huc8.names)
+
+
+#tbl.all <- df.treatments %>%
+#  dplyr::group_by(ActivityType, Activity, ActivityLUID, Treatment, TreatmentLUID, TreatmentMetric, TreatmentMetricLUID ,Unit) %>%
+#  dplyr::summarise(Sum=sum(Quantity))
+
+
+#write.table(tbl.all, "clipboard-16384", sep="\t", row.names=FALSE)
+
+#-- Esturary ----
+
+tbl.estuary <- df.treatments %>%
+  dplyr::filter(ActivityType =="Estuary" & Unit == "acre") %>%
+  dplyr::mutate(Activity_Unit=paste0(Activity," (",str_to_title(Unit),"s)")) %>% 
+  #tidyr::unite(col="Activity_Unit", c("Activity", "Treatment", "Unit"), sep = ", ", remove=FALSE) %>% 
+  dplyr::group_by(SubbasinActual, Activity_Unit) %>%
+  dplyr::summarise(Sum=sum(Quantity)) %>%
+  tidyr::spread(Activity_Unit,Sum) %>%
+  dplyr::rename(Subbasin=SubbasinActual)
+
+eval.estuary <- ifelse(NROW(tbl.estuary) > 0, TRUE, FALSE)
+
+#-- Fish Pasage ----
+
+tbl.fish1 <- df.treatments %>%
+  dplyr::filter(ActivityType =="Fish Passage" & TreatmentMetricLUID==2) %>%
+  dplyr::mutate(Activity_Unit=paste0(ActivityType," ",Activity," (",TreatmentMetric,")")) %>% 
+  dplyr::group_by(SubbasinActual, Activity_Unit) %>%
+  dplyr::summarise(Sum=sum(Quantity)) %>%
+  tidyr::spread(Activity_Unit,Sum)
+
+tbl.fish.final <- df.treatments %>%
+  dplyr::filter(ActivityType =="Fish Screening" & TreatmentMetricLUID==2) %>%
+  dplyr::mutate(Activity_Unit=paste0(Treatment," (",TreatmentMetric,")")) %>% 
+  #tidyr::unite(col="Activity_Unit", c("Activity", "Treatment", "Unit"), sep = ", ", remove=FALSE) %>% 
+  dplyr::group_by(SubbasinActual, Activity_Unit) %>%
+  dplyr::summarise(Sum=sum(Quantity)) %>%
+  tidyr::spread(Activity_Unit,Sum) %>%
+  dplyr::full_join(tbl.fish1, by="SubbasinActual") %>%
+  dplyr::rename(Subbasin=SubbasinActual)
+
+eval.fish <- ifelse(NROW(tbl.fish.final) > 0, TRUE, FALSE)
+
+#-- Instream ----
+
+
+tbl.instream1 <- df.treatments %>%
+  dplyr::filter(ActivityType =="Instream"
+                & Unit =="mile"
+                & Activity %in% c("Bank stabilization")) %>%
+  dplyr::mutate(Activity_Unit="Stream bank stabilized (Miles)") %>% 
+  dplyr::group_by(SubbasinActual, Activity_Unit) %>%
+  dplyr::summarise(Sum=sum(Quantity)) %>%
+  tidyr::spread(Activity_Unit,Sum)
+
+tbl.instream2 <- df.treatments %>%
+  dplyr::filter(ActivityType =="Instream"
+                & Activity %in% c("Animal species removal",
+                                  "Beaver introduction/encouragement")) %>%
+  dplyr::mutate(Activity_Unit=paste0(Treatment," (",TreatmentMetric,")")) %>% 
+  dplyr::group_by(SubbasinActual, Activity_Unit) %>%
+  dplyr::summarise(Sum=sum(Quantity)) %>%
+  tidyr::spread(Activity_Unit,Sum)
+
+
+tbl.instream3 <- df.treatments %>%
+  dplyr::filter(ActivityType =="Instream"
+                & !(Unit %in% c("main channel", "structure"))
+                & Activity %in% c("Channel alteration")) %>%
+  dplyr::mutate(TreatmentMetric=if_else(TreatmentMetric=="Length of treatment", "Feet", TreatmentMetric)) %>%
+  dplyr::mutate(Activity_Unit=paste0(Treatment," (",TreatmentMetric,")")) %>% 
+  dplyr::group_by(SubbasinActual, Activity_Unit) %>%
+  dplyr::summarise(Sum=sum(Quantity)) %>%
+  tidyr::spread(Activity_Unit,Sum)
+
+tbl.instream4 <- df.treatments %>%
+  dplyr::filter(ActivityType =="Instream"
+                & Activity %in% c("Engineered structures")) %>%
+  dplyr::mutate(Activity_Unit="Engineered structures installed (Number of treatments)") %>% 
+  dplyr::group_by(SubbasinActual, Activity_Unit) %>%
+  dplyr::summarise(Sum=sum(Quantity)) %>%
+  tidyr::spread(Activity_Unit,Sum)
+
+tbl.instream5 <- df.treatments %>%
+  dplyr::filter(ActivityType =="Instream"
+                & ActivityLUID %in% c(8:13)) %>%
+  dplyr::mutate(Activity=gsub(" *\\(.*?\\) *", "", Activity)) %>%
+  dplyr::mutate(Activity_Unit=paste0(Activity," (",TreatmentMetric,")")) %>% 
+  dplyr::group_by(SubbasinActual, Activity_Unit) %>%
+  dplyr::summarise(Sum=sum(Quantity)) %>%
+  tidyr::spread(Activity_Unit,Sum)
+
+tbl.instream6 <- df.treatments %>%
+  dplyr::filter(ActivityType =="Instream"
+                & Activity %in% c("Off-channel habitat")
+                & TreatmentMetricLUID %in% c(2)) %>%
+  dplyr::mutate(Activity_Unit=paste0("Off-channel habitat created, protected, or reconnected (",TreatmentMetric,")")) %>% 
+  dplyr::group_by(SubbasinActual, Activity_Unit) %>%
+  dplyr::summarise(Sum=sum(Quantity)) %>%
+  tidyr::spread(Activity_Unit,Sum)
+
+tbl.instream7 <- df.treatments %>%
+  dplyr::filter(ActivityType =="Instream"
+                & Activity %in% c("Other instream activity")
+                & TreatmentLUID %in% c(76)) %>%
+  dplyr::mutate(Activity_Unit=paste0(Treatment," (",TreatmentMetric,")")) %>% 
+  dplyr::group_by(SubbasinActual, Activity_Unit) %>%
+  dplyr::summarise(Sum=sum(Quantity)) %>%
+  tidyr::spread(Activity_Unit,Sum)
+
+tbl.instream8 <- df.treatments %>%
+  dplyr::filter(ActivityType =="Instream"
+                & Activity %in% c("Salmon carcass placement")
+                & Unit %in% c("pound", "mile")) %>%
+  dplyr::mutate(Unit=if_else(Unit=="mile", "Linear stream miles of treatment", "Pounds")) %>%
+  dplyr::mutate(Activity_Unit=paste0(Activity," (",Unit,")")) %>% 
+  dplyr::group_by(SubbasinActual, Activity_Unit) %>%
+  dplyr::summarise(Sum=sum(Quantity)) %>%
+  tidyr::spread(Activity_Unit,Sum)
+
+
+tbl.instream.final1 <- tbl.instream1 %>%
+  dplyr::full_join(tbl.instream3, by="SubbasinActual") %>%
+  dplyr::rename(Subbasin=SubbasinActual)
+
+tbl.instream.final2 <- tbl.instream2 %>%
+  dplyr::full_join(tbl.instream7, by="SubbasinActual") %>%
+  dplyr::full_join(tbl.instream8, by="SubbasinActual") %>%
+  dplyr::rename(Subbasin=SubbasinActual)
+
+tbl.instream.final3 <- tbl.instream4 %>%
+  dplyr::full_join(tbl.instream5, by="SubbasinActual") %>%
+  dplyr::full_join(tbl.instream6, by="SubbasinActual") %>%
+  dplyr::rename(Subbasin=SubbasinActual)
+
+eval.instream1 <- ifelse(NROW(tbl.instream.final1) > 0, TRUE, FALSE)
+eval.instream2 <- ifelse(NROW(tbl.instream.final2) > 0, TRUE, FALSE)
+eval.instream3 <- ifelse(NROW(tbl.instream.final3) > 0, TRUE, FALSE)
+
+#-- Instream Flow ----
+
+tbl.flow <- df.treatments %>%
+  dplyr::filter(ActivityType =="Instream Flow"
+                & !(is.na(Unit))) %>%
+  dplyr::mutate(Activity_Unit=paste0(Treatment, " (",Unit,")")) %>% 
+  dplyr::group_by(SubbasinActual, Activity_Unit) %>%
+  dplyr::summarise(Sum=sum(Quantity)) %>%
+  tidyr::spread(Activity_Unit,Sum)
+
+eval.flow <- ifelse(NROW(tbl.flow) > 0, TRUE, FALSE)
+
+#-- Riparian Planting and Tree Retention -----
+
+# Voluntary Riparian Tree Retention
+tbl.rip1<- df.treatments %>%
+  dplyr::select(-Unit,-UnitLUID,-Quantity) %>%
+  dplyr::left_join(RiparianVtrRcr2, by="TreatmentID") %>%
+  dplyr::filter(ActivityType =="Riparian" & 
+                  Activity %in% c("Voluntary riparian tree retention") & 
+                  Unit %in% c("mile", "acre")) %>%
+  dplyr::mutate(Activity_Unit=paste0(Activity," (",str_to_title(Unit),"s)")) %>% 
+  dplyr::group_by(SubbasinActual, Activity_Unit) %>%
+  dplyr::summarise(Sum=sum(Quantity)) %>%
+  tidyr::spread(Activity_Unit, Sum)
+  
+
+# Riparian
+tbl.rip.final <- df.treatments %>%
+  dplyr::filter(ActivityType =="Riparian" & 
+                  Activity %in% c("Riparian tree planting", "Riparian fencing") & 
+                  Unit %in% c("mile", "acre")) %>%
+  dplyr::mutate(Activity_Unit=paste0(Activity," (",str_to_title(Unit),"s)")) %>% 
+  dplyr::group_by(SubbasinActual, Activity_Unit) %>%
+  dplyr::summarise(Sum=sum(Quantity)) %>%
+  tidyr::spread(Activity_Unit,Sum) %>%
+  dplyr::full_join(tbl.rip1, by="SubbasinActual") %>%
+  dplyr::rename(Subbasin=SubbasinActual)
+
+eval.rip <- ifelse(NROW(tbl.rip.final) > 0, TRUE, FALSE)
+
+# -- Road ----
+# check with OWEB on 'station' units?? Not being used here.
+
+tbl.road <- df.treatments %>%
+  dplyr::filter(ActivityType =="Road"
+                & TreatmentMetricLUID %in% c(2)) %>% 
+  dplyr::mutate(Activity_Unit=paste0(Activity," (",TreatmentMetric,")")) %>% 
+  dplyr::group_by(SubbasinActual, Activity_Unit) %>%
+  dplyr::summarise(Sum=sum(Quantity)) %>%
+  tidyr::spread(Activity_Unit,Sum) %>%
+  dplyr::rename(Subbasin=SubbasinActual)
+
+eval.road <- ifelse(NROW(tbl.road) > 0, TRUE, FALSE)
+
+# -- Upland ----
+
+tbl.upland1 <- df.treatments %>%
+  dplyr::filter(ActivityType =="Upland"
+                & Activity %in% c("Agriculture management",
+                                  "Conservation buffers",
+                                  "Conservation tillage",
+                                  "Irrigation system improvement")
+                & TreatmentMetricLUID %in% c(1, 2)) %>%
+  dplyr::mutate(TreatmentMetric=if_else(Unit=="acre", "acres treated", TreatmentMetric)) %>%
+  dplyr::mutate(Activity_Unit=paste0(Activity," (",TreatmentMetric,")")) %>% 
+  dplyr::group_by(SubbasinActual, Activity_Unit) %>%
+  dplyr::summarise(Sum=sum(Quantity)) %>%
+  tidyr::spread(Activity_Unit,Sum) %>%
+  dplyr::rename(Subbasin=SubbasinActual)
+
+tbl.upland2 <- df.treatments %>%
+  dplyr::filter(ActivityType =="Upland"
+                & Activity %in% c("Grazing management",
+                                  "Nutrient/manure management",
+                                  "Off-channel livestock or wildlife watering",
+                                  "Upland fencing")
+                & TreatmentMetricLUID %in% c(1, 2)) %>%
+  dplyr::mutate(TreatmentMetric=if_else(Unit=="acre", "acres treated", TreatmentMetric)) %>%
+  dplyr::mutate(Activity_Unit=paste0(Activity," (",TreatmentMetric,")")) %>% 
+  dplyr::group_by(SubbasinActual, Activity_Unit) %>%
+  dplyr::summarise(Sum=sum(Quantity)) %>%
+  tidyr::spread(Activity_Unit,Sum) %>%
+  dplyr::rename(Subbasin=SubbasinActual)
+
+
+tbl.upland3 <- df.treatments %>%
+  dplyr::filter(ActivityType =="Upland"
+                & Activity %in% c("Other upland activity",
+                                  "Terracing",
+                                  "Upland erosion control",
+                                  "Water/sediment control basins")
+                & TreatmentMetricLUID %in% c(1, 2)) %>%
+  dplyr::mutate(TreatmentMetric=if_else(Unit=="acre", "acres treated", TreatmentMetric)) %>%
+  dplyr::mutate(Activity_Unit=paste0(Activity," (",TreatmentMetric,")")) %>% 
+  dplyr::group_by(SubbasinActual, Activity_Unit) %>%
+  dplyr::summarise(Sum=sum(Quantity)) %>%
+  tidyr::spread(Activity_Unit,Sum) %>%
+  dplyr::rename(Subbasin=SubbasinActual)
+
+tbl.upland4 <- df.treatments %>%
+  dplyr::filter(ActivityType =="Upland"
+                & Activity %in% c("Upland invasive plant control",
+                                  "Upland tree planting",
+                                  "Upland vegetation management",
+                                  "Upland vegetation planting",
+                                  "Voluntary upland tree retention")
+                & TreatmentMetricLUID %in% c(1, 2)) %>%
+  dplyr::mutate(TreatmentMetric=if_else(Unit=="acre", "acres treated", TreatmentMetric)) %>%
+  dplyr::mutate(Activity_Unit=paste0(Activity," (",TreatmentMetric,")")) %>% 
+  dplyr::group_by(SubbasinActual, Activity_Unit) %>%
+  dplyr::summarise(Sum=sum(Quantity)) %>%
+  tidyr::spread(Activity_Unit,Sum) %>%
+  dplyr::rename(Subbasin=SubbasinActual)
+
+eval.upland1 <- ifelse(NROW(tbl.upland1) > 0, TRUE, FALSE)
+eval.upland2 <- ifelse(NROW(tbl.upland2) > 0, TRUE, FALSE)
+eval.upland3 <- ifelse(NROW(tbl.upland3) > 0, TRUE, FALSE)
+eval.upland4 <- ifelse(NROW(tbl.upland3) > 0, TRUE, FALSE)
+
+```
+
+
+```{r table-estuarine-by-subbasin, results="asis", eval=eval.estuary}
+
+knitr::kable(tbl.estuary,
+             padding = 2, digits = 1, row.names = FALSE, 
+             caption = tbls(name = "table_estuarine_by_subbasin", 
+                            caption ="Summary of OWEB grant funded estuarine projects completed in 2017, the most recent year data is available in the OWEB OWRI database."))
+
+```
+
+```{r table-fish-by-subbasin, results="asis", eval=eval.fish}
+
+knitr::kable(tbl.fish.final,
+             padding = 2, digits = 1, row.names = FALSE, 
+             caption = tbls(name = "table_fish_by_subbasin", 
+                            caption ="Summary of OWEB grant funded fish passage projects completed in 2017, the most recent year data is available in the OWEB OWRI database."))
+
+
+```
+
+```{r table-instream1-by-subbasin, results="asis", eval=eval.instream1}
+
+knitr::kable(tbl.instream.final1,
+             padding = 2, digits = 1, row.names = FALSE, 
+             caption = tbls(name = "table_instream1_by_subbasin", 
+                            caption ="Summary of OWEB grant funded instream projects completed in 2017, the most recent year data is available in the OWEB OWRI database."))
+
+
+```
+
+```{r table-instream2-by-subbasin, results="asis", eval=eval.instream2}
+
+knitr::kable(tbl.instream.final2,
+             padding = 2, digits = 1, row.names = FALSE, 
+             caption = tbls(name = "table_instream2_by_subbasin", 
+                            caption ="Summary of OWEB grant funded instream projects (continued) completed in 2017, the most recent year data is available in the OWEB OWRI database."))
+
+
+```
+
+
+```{r table-instream3-by-subbasin, results="asis", eval=eval.instream3}
+
+knitr::kable(tbl.instream.final3,
+             padding = 2, digits = 1, row.names = FALSE, 
+             caption = tbls(name = "table_instream3_by_subbasin", 
+                            caption ="Summary of OWEB grant funded instream projects completed (continued) in 2017, the most recent year data is available in the OWEB OWRI database."))
+
+
+```
+
+```{r table-flow-by-subbasin, results="asis", eval=eval.flow}
+
+knitr::kable(tbl.flow,
+             padding = 2, digits = 1, row.names = FALSE, 
+             caption = tbls(name = "table_flow_by_subbasin", 
+                            caption ="Summary of OWEB grant funded instream flow projects completed in 2017, the most recent year data is available in the OWEB OWRI database."))
+
+
+```
+
+```{r table-riparian-by-subbasin, results="asis", eval=eval.rip}
+
+knitr::kable(tbl.rip.final,
+             padding = 2, digits = 1, row.names = FALSE, 
+             caption = tbls(name = "table_riparian_by_subbasin", 
+                            caption ="Summary of OWEB grant funded riparian projects completed in 2017, the most recent year data is available in the OWEB OWRI database."))
+
+
+```
+
+```{r table-road-by-subbasin, results="asis", eval=eval.road}
+
+knitr::kable(tbl.road,
+             padding = 2, digits = 1, row.names = FALSE, 
+             caption = tbls(name = "table_road_by_subbasin", 
+                            caption ="Summary of OWEB grant funded road projects completed in 2017, the most recent year data is available in the OWEB OWRI database."))
+
+
+```
+
+```{r table-upland1-by-subbasin, results="asis", eval=eval.upland1}
+
+knitr::kable(tbl.upland1,
+             padding = 2, digits = 1, row.names = FALSE, 
+             caption = tbls(name = "table_upland_by_subbasin", 
+                            caption ="Summary of OWEB grant funded upland projects completed in 2017, the most recent year data is available in the OWEB OWRI database."))
+
+
+```
+
+```{r table-upland2-by-subbasin, results="asis", eval=eval.upland2}
+
+knitr::kable(tbl.upland2,
+             padding = 2, digits = 1, row.names = FALSE, 
+             caption = tbls(name = "table_upland2_by_subbasin", 
+                            caption ="Summary of OWEB grant funded upland projects (continued) completed in 2017, the most recent year data is available in the OWEB OWRI database."))
+
+
+```
+
+```{r table-upland3-by-subbasin, results="asis", eval=eval.upland3}
+
+knitr::kable(tbl.upland3,
+             padding = 2, digits = 1, row.names = FALSE, 
+             caption = tbls(name = "table_upland3_by_subbasin", 
+                            caption ="Summary of OWEB grant funded upland projects (continued) completed in 2017, the most recent year data is available in the OWEB OWRI database."))
+
+
+```
+
+```{r table-upland4-by-subbasin, results="asis", eval=eval.upland4}
+
+knitr::kable(tbl.upland4,
+             padding = 2, digits = 1, row.names = FALSE, 
+             caption = tbls(name = "table_upland4_by_subbasin", 
+                            caption ="Summary of OWEB grant funded upland projects (continued) completed in 2017, the most recent year data is available in the OWEB OWRI database."))
+
+
+```

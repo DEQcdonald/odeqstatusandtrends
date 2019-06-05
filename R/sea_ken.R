@@ -20,18 +20,20 @@ sea_ken <- function(data){
     for(i in unique(subData$MLocID)){
       print(i)
       subData_stn <- subData %>% filter(MLocID == i)
-      tmp_seaKen <- EnvStats::kendallSeasonalTrendTest(Result_Numeric ~ Month + Year, data = subData_stn)
-      tmp_sample_size <- as.data.frame(bind_rows(tmp_seaKen$sample.size))
-      tmp_sample_size[, c("ID", "Char")] <- c(i, j)
-      stn_seaKen <- data.frame(MLocID = i,
-                               Char_Name = j,
-                               p_value = tmp_seaKen$p.value[1],
-                               confidence = tmp_seaKen$interval$conf.level,
-                               slope = tmp_seaKen$estimate[2],
-                               intercept = tmp_seaKen$estimate[3])
+      tryCatch({
+        tmp_seaKen <- EnvStats::kendallSeasonalTrendTest(Result_Numeric ~ Month + Year, data = subData_stn)
+        tmp_sample_size <- as.data.frame(bind_rows(tmp_seaKen$sample.size))
+        tmp_sample_size[, c("ID", "Char")] <- c(i, j)
+        stn_seaKen <- data.frame(MLocID = i,
+                                 Char_Name = j,
+                                 p_value = tmp_seaKen$p.value[1],
+                                 confidence = tmp_seaKen$interval$conf.level,
+                                 slope = tmp_seaKen$estimate[2],
+                                 intercept = tmp_seaKen$estimate[3])
 
-      sample_size <- bind_rows(sample_size, tmp_sample_size)
-      sea_ken_df <- bind_rows(sea_ken_df, stn_seaKen)
+        sample_size <- bind_rows(sample_size, tmp_sample_size)
+        sea_ken_df <- bind_rows(sea_ken_df, stn_seaKen)
+        }, error = function(e){cat("ERROR :", conditionMessage(e),"\n")})
     }
   }
 
