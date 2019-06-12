@@ -37,13 +37,28 @@ sea_ken <- function(data){
     }
   }
 
-  sea_ken_df$significance <- if_else(sea_ken_df$p_value >= .05 & !is.na(sea_ken_df$p_value), "Significant", "No Significant Trend")
-  sea_ken_df$trend <-
-    if_else(sea_ken_df$slope > 0 & sea_ken_df$significance == "Significant", "Increasing",
-            if_else(sea_ken_df$slope < 0 & sea_ken_df$significance == "Significant", "Decreasing",
-                    if_else(sea_ken_df$slope == 0 & sea_ken_df$significance == "Significant", "Steady", "No Significant Trend")
-            )
-    )
+  sea_ken_df$significance <- if_else(sea_ken_df$p_value <= .05 & !is.na(sea_ken_df$p_value), "Significant", "No Significant Trend")
+
+  sea_ken_df$trend <- if_else(sea_ken_df$significance == "Significant",
+                              if_else(sea_ken_df$Char_Name %in% c("Dissolved oxygen (DO)"),
+                                      if_else(sea_ken_df$slope > 0, "Improving",
+                                              if_else(sea_ken_df$slope == 0, "Steady", "Degrading")
+                                      ),
+                                      if_else(sea_ken_df$Char_Name %in% c("pH"),
+                                              if_else(sea_ken_df$slope == 0, "Steady", "Degrading"),
+                                              if_else(sea_ken_df$slope < 0, "Improving",
+                                                      if_else(sea_ken_df$slope == 0, "Steady", "Degrading")
+                                              )
+                                      )
+                              ), "No Significant Trend"
+  )
+
+  # sea_ken_df$trend <-
+  #   if_else(sea_ken_df$slope > 0 & sea_ken_df$significance == "Significant", "Increasing",
+  #           if_else(sea_ken_df$slope < 0 & sea_ken_df$significance == "Significant", "Decreasing",
+  #                   if_else(sea_ken_df$slope == 0 & sea_ken_df$significance == "Significant", "Steady", "No Significant Trend")
+  #           )
+  #   )
 
   attr(sea_ken_df, "sample_size") <- sample_size[, c('ID', 'Char', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
                                                      'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Total')]

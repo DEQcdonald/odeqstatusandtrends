@@ -46,7 +46,11 @@ AWQMS_Char_Names <- function(parameters){
   )
 
   #### Convert parameters to AWQMS parameter names for query ####
-  AWQMS.parms <- parms.lookup[parms.lookup$General %in% tolower(parameters),"AWQMS.Name"]
+  AWQMS.parms <- parms.lookup[parms.lookup$General %in% tolower(parameters),]$AWQMS.Name
+
+  if(identical(AWQMS.parms, character(0))){
+    AWQMS.parms <- parameters
+  }
 
   return(AWQMS.parms)
 }
