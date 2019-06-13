@@ -24,6 +24,10 @@ GetData <- function(parameters = NULL, stations_AWQMS, start.date, end.date, que
   # Convert characteristic names
   AWQMS.parms <- AWQMS_Char_Names(parameters)
 
+  if(any(AWQMS.parms == "Dissolved oxygen (DO)")){
+    AWQMS.parms <- c(AWQMS.parms, "Dissolved oxygen saturation")
+  }
+
   #### Define sample media to query ####
   sample.media <- 'Water'
 

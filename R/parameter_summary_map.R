@@ -88,7 +88,7 @@ parameter_summary_map <- function(param_summary, area){
                 options = WMSTileOptions(format = "image/png",
                                          transparent = TRUE),
                 layers = "0") %>%
-    addPolygons(fill = FALSE, group = "Assessment Area", popup = "Assessment Area")
+    addPolygons(fill = FALSE, group = "Assessment Area", label = "Assessment Area")
 
   for(i in unique(param_summary$Char_Name)){
     print(paste("Adding layer for", i))
@@ -102,7 +102,9 @@ parameter_summary_map <- function(param_summary, area){
                      opacity = 0.7,
                      weight = 2,
                      color = "blue",
-                     popup = ~paste0("<b>", STREAM_NAM, "</b><br>", i,"<br>", LISTING_ST),
+                     popup = ~paste0("<b>", STREAM_NAM,
+                                     "<br>Parameter:</b> ", i,
+                                     "<br><b>Listing:</b> ", LISTING_ST),
                      group = i
         )
     } else {print(paste("No water quality limited streams for", i))}
@@ -112,8 +114,8 @@ parameter_summary_map <- function(param_summary, area){
                    opacity = 1,
                    weight = 3,
                    color = ~color,
-                   popup = ~paste0("<b>", AU_Name, "</b><br>(", AU_ID
-                                   , ")<br>", i, "<br>",
+                   popup = ~paste0("<b>", AU_Name, "<br>AU:</b> ", AU_ID,
+                                   "<br><b>Parameter:</b> ", i, "<br>",
                                    sapply(AU_ID, popupTable, station = NULL, param = i, USE.NAMES = FALSE)
                    ),
                    group = i
@@ -125,14 +127,18 @@ parameter_summary_map <- function(param_summary, area){
                                             iconColor = 'black',
                                             library = 'glyphicon',
                                             markerColor = ~color),
-                        popup = ~paste0("<b>", StationDes, "</b><br>(", MLocID, ")<br>", i, "<br>",
+                        popup = ~paste0("<b>", StationDes, "<br>ID:</b> ", MLocID,
+                                        "<br><b>AU:</b> ", AU_ID,
+                                        "<br><b>Parameter:</b> ", i, "<br>",
                                         sapply(MLocID, popupTable, AU = NULL, param = i, USE.NAMES = FALSE)),
                         group = i
       )
   }
 
-  map <- map %>% addLayersControl(baseGroups = unique(param_summary$Char_Name),
-                                  overlayGroups = c("Assessment Area", "World Imagery", "Hydrography", "Land Cover (NLCD 2016)")) %>%
+  map <- map %>%
+    # addLabelOnlyMarkers(group = "Labels") %>%
+    addLayersControl(baseGroups = unique(param_summary$Char_Name),
+                                  overlayGroups = c("Assessment Area", "World Imagery", "Hydrography", "Land Cover (NLCD 2016)", "Labels")) %>%
     hideGroup(c(unique(param_summary$Char_Name)[-1], "World Imagery", "Hydrography", "Land Cover (NLCD 2016)")) %>%
     addEasyButton(easyButton(
       icon = "fa-globe",
