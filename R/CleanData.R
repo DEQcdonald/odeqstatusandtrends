@@ -16,7 +16,7 @@ CleanData <- function(data)
   print("Checking for any missing start times...")
   print(any(is.na(data$SampleStartTime)))
 
-  data <- data[, c('MLocID', 'StationDes', 'OrganizationID', 'Org_Name', 'Lat_DD', 'Long_DD', 'Datum', 'HUC8', 'AU_ID', 'Reachcode', 'Char_Name', 'sample_datetime', 'Result',
+  data <- data[, c('MLocID', 'StationDes', 'OrganizationID', 'Org_Name', 'Lat_DD', 'Long_DD', 'ELEV_Ft', 'Datum', 'HUC8', 'AU_ID', 'Reachcode', 'Char_Name', 'sample_datetime', 'Result',
                    'Result_Numeric', 'Result_Operator', 'Result_Unit', 'Statistical_Base', 'QualifierAbbr', 'Method_Code', 'Activity_Type', 'act_id', 'MRLValue',
                    'Result_status', "FishCode", "SpawnCode", "WaterTypeCode", "WaterBodyCode", "BacteriaCode", "DO_code", "ben_use_code",
                    "pH_code", "DO_SpawnCode")]
