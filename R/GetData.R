@@ -25,7 +25,7 @@ GetData <- function(parameters = NULL, stations_AWQMS, start.date, end.date, que
   AWQMS.parms <- AWQMS_Char_Names(parameters)
 
   if(any(AWQMS.parms == "Dissolved oxygen (DO)")){
-    AWQMS.parms <- c(AWQMS.parms, "Dissolved oxygen saturation")
+    AWQMS.parms <- unique(c(AWQMS.parms, "Dissolved oxygen saturation", "Temperature, water"))
   }
 
   #### Define sample media to query ####
@@ -47,7 +47,7 @@ GetData <- function(parameters = NULL, stations_AWQMS, start.date, end.date, que
   data_AWQMS <- data_AWQMS %>% filter(MonLocType %in% c("River/Stream", "Lake", "Other-Surface Water", ""))
 
   # Attach location datum info to observations
-  data_AWQMS <- merge(data_AWQMS, stations_AWQMS[, c("MLocID", "Datum")], by="MLocID", all.x = TRUE, all.y = FALSE)
+  data_AWQMS <- merge(data_AWQMS, stations_AWQMS[, c("MLocID", "Datum", "ELEV_Ft")], by="MLocID", all.x = TRUE, all.y = FALSE)
 
   if(query_nwis){
     usgs_stations <- unique(stations_NWIS$site_no)
