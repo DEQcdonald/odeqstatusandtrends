@@ -22,7 +22,7 @@ CleanData <- function(data)
                    "pH_code", "DO_SpawnCode")]
 
   # Remove all Dissolved Oxygen summary statistics from analysis except for 'Minimum'
-  data <- data %>% dplyr::filter(!(Char_Name == "Dissolved oxygen" & Statistical_Base %in% c('7DADM', 'Maximum', 'Mean', '7DADMean', '7DADMin', '30DADMean')))
+  data <- data %>% dplyr::filter(!(Char_Name == "Dissolved oxygen" & Statistical_Base %in% c('7DADM', 'Maximum')))
 
   # Check for duplicate stations
   print("Checking for inconsistencies in station descriptions and Lat/Longs...")

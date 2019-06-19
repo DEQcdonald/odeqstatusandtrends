@@ -19,3 +19,6 @@ Dataframe of stations with sufficient years of data
 Creates a dataframe with stations and the number of years with data. Stations with less than 8 different years of data
 are not sufficient for trend analysis via the status and trends methods.
 }
+\examples{
+trend_stns(data = data.frame, trend_years = c(format(min(data$sample_datetime), "\%Y"):format(Sys.Date(), "\%Y")))
+}

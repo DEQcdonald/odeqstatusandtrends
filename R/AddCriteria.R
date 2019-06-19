@@ -4,7 +4,7 @@
 #' @param data Dataframe produced from clean_data()
 #' @return Dataframe with added criteria columns
 #' @export
-#' @example
+#' @examples
 #' add_criteria(data = 'result-of-clean_data()')
 
 add_criteria <- function(data) {
@@ -26,10 +26,10 @@ add_criteria <- function(data) {
 
   if(any("Temperature, water" %in% parameters)) {
     print("Adding temperature criteria values...")
-    temp_data <- data %>% filter(Char_Name == "Temperature, water")
-    sdadm <- temp_data %>% filter(Statistical_Base == "7DADM")
+    # temp_data <- data %>% filter(Char_Name == "Temperature, water")
+    # sdadm <- temp_data %>% filter(Statistical_Base == "7DADM")
 
-    data <- bind_rows(data[data$Char_Name != "Temperature, water",], sdadm)
+    # data <- bind_rows(data[data$Char_Name != "Temperature, water",], sdadm)
 
     data$temp_crit <- Temp_crit[match(data$FishCode, Temp_crit$FishUse_code), "Temp_Criteria"]
   }

@@ -6,7 +6,7 @@
 #' @param station The station to plot
 #' @return dataframe of stations with sufficient data
 #' @export
-#' @example
+#' @examples
 #' plot_pH(data = data.frame, seaKen, station)
 
 plot_pH <- function(data, seaKen, station){

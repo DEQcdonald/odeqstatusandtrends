@@ -4,7 +4,7 @@
 #' @param data Dataframe to conduct a Seasonal Kendall Trend Analysis.
 #' @return Dataframe of stations with the results of the Seasonal Kendall Trend Analysis
 #' @export
-#' @example
+#' @examples
 #' sea_ken(data = data.frame)
 
 sea_ken <- function(data){

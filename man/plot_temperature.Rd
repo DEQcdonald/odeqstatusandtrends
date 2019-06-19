@@ -19,3 +19,6 @@ dataframe of stations with sufficient data
 \description{
 Create temperature plots to display status and trend.
 }
+\examples{
+plot_temperature(data = data.frame, seaKen, station)
+}

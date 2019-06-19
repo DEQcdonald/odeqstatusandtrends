@@ -4,7 +4,7 @@
 #' @param param_summary Parameter summary table from parameter_summary()
 #' @return map of status and trends results
 #' @export
-#' @example parameter_summary_map(param_summary = parameter_summary_df)
+#' @examples parameter_summary_map(param_summary = parameter_summary_df)
 
 parameter_summary_map <- function(param_summary, area){
 
@@ -132,14 +132,33 @@ parameter_summary_map <- function(param_summary, area){
                                         "<br><b>Parameter:</b> ", i, "<br>",
                                         sapply(MLocID, popupTable, AU = NULL, param = i, USE.NAMES = FALSE)),
                         group = i
-      )
+      ) %>%
+       addPopups(data = filter(param_summary, Char_Name == i),
+                           lat = ~Lat_DD,
+                           lng = ~Long_DD,
+                           popup = ~MLocID,
+                 options = popupOptions(noHide = T,
+                                        direction = 'top',
+                                        textOnly = T,
+                                        style = list(
+                                          "font-style" = "bold",
+                                          "font-size" = "15px",
+                                          "offset" = "relative",
+                                          "bottom" = "10px",
+                                          "background" = "white",
+                                          "padding" = "1px",
+                                          "border-radius" = "5px",
+                                          "height" = "10px"
+                                        )),
+                 group = paste0(i, " Labels"))
   }
 
   map <- map %>%
     # addLabelOnlyMarkers(group = "Labels") %>%
     addLayersControl(baseGroups = unique(param_summary$Char_Name),
-                                  overlayGroups = c("Assessment Area", "World Imagery", "Hydrography", "Land Cover (NLCD 2016)", "Labels")) %>%
-    hideGroup(c(unique(param_summary$Char_Name)[-1], "World Imagery", "Hydrography", "Land Cover (NLCD 2016)")) %>%
+                                  overlayGroups = c("Assessment Area", "World Imagery", "Hydrography", "Land Cover (NLCD 2016)",
+                                                    paste(unique(param_summary$Char_Name), "Labels"))) %>%
+    hideGroup(c(unique(param_summary$Char_Name)[-1], paste(unique(param_summary$Char_Name)[-1], "Labels"), "World Imagery", "Hydrography", "Land Cover (NLCD 2016)")) %>%
     addEasyButton(easyButton(
       icon = "fa-globe",
       onClick = JS("function(btn, map){

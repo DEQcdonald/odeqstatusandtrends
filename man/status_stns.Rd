@@ -18,3 +18,6 @@ Dataframe of stations with sufficient data
 \description{
 Creates a dataframe with stations, the number of years with data within the status years, and whether or not there were any exceedances.
 }
+\examples{
+status_stns(data = data.frame, status_years = c("current-year", "2-years-ago"))
+}

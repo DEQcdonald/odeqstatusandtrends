@@ -6,7 +6,7 @@
 #' @param station The station to plot
 #' @return dataframe of stations with sufficient data
 #' @export
-#' @example
+#' @examples
 #' plot_temperature(data = data.frame, seaKen, station)
 
 plot_temperature <- function(data, seaKen, station){

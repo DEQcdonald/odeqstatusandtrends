@@ -6,7 +6,7 @@
 #' @param stations Result of get_stations_AWQMS
 #' @return Dataframe of summarized status and trends information
 #' @export
-#' @example parameter_summary(status = status_df, seaken = seasonal_kendall_df)
+#' @examples parameter_summary(status = status_df, seaken = seasonal_kendall_df)
 
 parameter_summary <- function(status, sea_ken, stations){
   st_stations <- unique(c(status$MLocID, sea_ken$MLocID))

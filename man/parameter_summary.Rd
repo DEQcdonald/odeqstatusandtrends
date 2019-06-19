@@ -19,3 +19,6 @@ Dataframe of summarized status and trends information
 \description{
 Create parameter summary table for status and trends report
 }
+\examples{
+parameter_summary(status = status_df, seaken = seasonal_kendall_df)
+}

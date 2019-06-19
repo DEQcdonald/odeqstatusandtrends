@@ -15,3 +15,6 @@ Dataframe of stations with the results of the Seasonal Kendall Trend Analysis
 \description{
 Run the Season Kendall trend analysis from the EnvStats package. See ??EnvStats::kendallSeasonalTrendTest() for method.
 }
+\examples{
+sea_ken(data = data.frame)
+}

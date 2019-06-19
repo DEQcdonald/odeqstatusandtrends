@@ -15,3 +15,6 @@ map of status and trends results
 \description{
 Create parameter summary map for status and trends report
 }
+\examples{
+parameter_summary_map(param_summary = parameter_summary_df)
+}

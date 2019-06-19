@@ -15,3 +15,6 @@ Dataframe with added criteria columns
 \description{
 Adds criteria values to data based on the beneficial use codes
 }
+\examples{
+add_criteria(data = 'result-of-clean_data()')
+}

@@ -5,7 +5,7 @@
 #' @param status.years Years from which to determine status. Default is current year minus 2 to present year.
 #' @return Dataframe of stations with sufficient data
 #' @export
-#' @example
+#' @examples
 #' status_stns(data = data.frame, status_years = c("current-year", "2-years-ago"))
 
 status_stns <- function(data, status_years = c((as.numeric(format(Sys.Date(), "%Y"))-2):format(Sys.Date(), "%Y"))) {

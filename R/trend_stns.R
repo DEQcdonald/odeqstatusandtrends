@@ -6,7 +6,7 @@
 #' @param trend.years Which years to determine trend by. Default is the minimum year within the data to the current year.
 #' @return Dataframe of stations with sufficient years of data
 #' @export
-#' @example
+#' @examples
 #' trend_stns(data = data.frame, trend_years = c(format(min(data$sample_datetime), "%Y"):format(Sys.Date(), "%Y")))
 
 trend_stns <- function(data, trend_years = c(format(min(data$sample_datetime), "%Y"):format(Sys.Date(), "%Y"))) {

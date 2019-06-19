@@ -19,3 +19,6 @@ dataframe of stations with sufficient data
 \description{
 Create pH plots to display status and trend.
 }
+\examples{
+plot_pH(data = data.frame, seaKen, station)
+}
