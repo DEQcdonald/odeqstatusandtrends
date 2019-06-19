@@ -4,20 +4,25 @@
 \alias{status_stns}
 \title{Determine stations with sufficient data for status analysis}
 \usage{
-status_stns(data, status_years = c((as.numeric(format(Sys.Date(), "\%Y"))
-  - 2):format(Sys.Date(), "\%Y")))
+status_stns(data, year_range = c(year(Sys.Date()) - 21, year(Sys.Date())
+  - 1), status_period = 4)
 }
 \arguments{
 \item{data}{Dataframe to determine status from.}
 
-\item{status.years}{Years from which to determine status. Default is current year minus 2 to present year.}
+\item{year_range}{Years from which to determine status. Default is most
+recent full year and the 20 years previous.}
+
+\item{status_period}{Number of whole to include in a status analysis.
+The range of years in status years will be binned by this number}
 }
 \value{
 Dataframe of stations with sufficient data
 }
 \description{
-Creates a dataframe with stations, the number of years with data within the status years, and whether or not there were any exceedances.
+Creates a dataframe with stations, the number of years with data within
+the status years, and whether or not there were any exceedances.
 }
 \examples{
-status_stns(data = data.frame, status_years = c("current-year", "2-years-ago"))
+status_stns(data = data.frame, year_range = c(start_year, end_year), status_period = 5)
 }
