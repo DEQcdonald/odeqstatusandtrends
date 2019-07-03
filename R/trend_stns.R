@@ -18,7 +18,7 @@ trend_stns <- function(data, trend_years = c(format(min(data$sample_datetime), "
   if(any(unique(data$year) %in% trend_years)){
     trend_check <- data %>%
       filter(year %in% trend_years) %>%
-      dplyr::group_by(MLocID, Char_Name) %>%
+      dplyr::group_by(MLocID, Char_Name, Statistical_Base) %>%
       dplyr::summarise(n_years = length(unique(year)),
                        avg_obs = n()/n_years,
                        min_year = min(year),

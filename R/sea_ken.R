@@ -17,6 +17,9 @@ sea_ken <- function(data){
   for(j in unique(data$Char_Name)){
     print(j)
     subData <- filter(data, Char_Name == j)
+    if(j == "Dissolved oxygen (DO)"){
+      subData <- filter(subData, !Statistical_Base %in% c(""))
+    }
     for(i in unique(subData$MLocID)){
       print(i)
       subData_stn <- subData %>% filter(MLocID == i)

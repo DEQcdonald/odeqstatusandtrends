@@ -20,7 +20,7 @@ status_stns <- function(data, year_range = c(year(Sys.Date())-21, year(Sys.Date(
   breaks <- seq(year_range[2], year_range[1], by = -4)
   cols <- sapply(breaks, function(x){
     start <- x - status_period + 1
-    return(paste0("_", start, "_", x))
+    return(paste0("s_", start, "_", x))
   })
   bins <- lapply(breaks, function(x){
     start <- x - status_period + 1
@@ -36,7 +36,7 @@ status_stns <- function(data, year_range = c(year(Sys.Date())-21, year(Sys.Date(
 
   if(any(unique(data$year) %in% year_range)){
     status_check <- data %>%
-      filter(year %in% status_years) %>%
+      filter(year %in% years) %>%
       dplyr::group_by(MLocID, Char_Name, bin) %>%
       dplyr::summarise(n_years = length(unique(year)),
                        excursions = sum(excursion_cen, na.rm = TRUE),
@@ -53,5 +53,5 @@ status_stns <- function(data, year_range = c(year(Sys.Date())-21, year(Sys.Date(
     status_check <- "No stations meet Status criteria"
     print(status_check)
   }
-  return(status_check)
+  return(status_check[,c(1,2,rev(3:length(colnames(status_check))))])
 }

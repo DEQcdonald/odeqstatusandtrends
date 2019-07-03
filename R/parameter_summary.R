@@ -15,6 +15,8 @@ parameter_summary <- function(status, sea_ken, stations){
 
   param_sum <- merge(st_stations_info, status, by = "MLocID")
   param_sum <- merge(param_sum, sea_ken, by = c("MLocID","Char_Name"))
-  param_sum <- dplyr::select(param_sum, AU_ID, GNIS_Name, Char_Name, MLocID, StationDes, status, trend, Lat_DD, Long_DD, HUC8)
+  param_sum <- dplyr::select(param_sum, AU_ID, GNIS_Name, Char_Name, MLocID, StationDes, trend,
+                             status = colnames(status)[3],
+                             colnames(status)[4:length(colnames(status))], Lat_DD, Long_DD, HUC8)
   param_sum <- param_sum[order(param_sum[,1], param_sum[,3], param_sum[,4]),]
 }
