@@ -2,6 +2,7 @@
 #'
 #'
 #' @param param_summary Parameter summary table from parameter_summary()
+#' @param area Shapefile for assessment areas
 #' @return map of status and trends results
 #' @export
 #' @examples parameter_summary_map(param_summary = parameter_summary_df)
@@ -38,9 +39,20 @@ parameter_summary_map <- function(param_summary, area){
 
 # Create functions for mapping --------------------------------------------------------
 
-  au_colors <- param_summary %>% group_by(AU_ID, Char_Name) %>% summarise(color = if_else(any(status == "Not Attaining"), "orange", "green"))
+  au_colors <- param_summary %>% group_by(AU_ID, Char_Name) %>%
+    summarise(color = if_else(all(is.na(status)),
+                              "grey",
+                              if_else(any(status == "Not Attaining"),
+                                      "orange",
+                                      "green")
+                              )
+              )
 
-  param_summary$color <- if_else(param_summary$status == "Attaining", "green", "orange")
+  param_summary$color <- if_else(is.na(param_summary$status),
+                                 "gray",
+                                 if_else(param_summary$status == "Attaining",
+                                         "green",
+                                         "orange"))
   param_summary$icon <- sapply(param_summary$trend,
                                function(x){
                                  if(x == "Improving"){
@@ -127,44 +139,84 @@ parameter_summary_map <- function(param_summary, area){
                                             iconColor = 'black',
                                             library = 'glyphicon',
                                             markerColor = ~color),
+                        label = ~MLocID,
                         popup = ~paste0("<b>", StationDes, "<br>ID:</b> ", MLocID,
                                         "<br><b>AU:</b> ", AU_ID,
                                         "<br><b>Parameter:</b> ", i, "<br>",
                                         sapply(MLocID, popupTable, AU = NULL, param = i, USE.NAMES = FALSE)),
+                        labelOptions = list(className = "stationLabels", noHide = T, permanent = T, interactive = T, direction = "auto",
+                                            offset = c(-10,-25), opacity = 0.9, textsize = "14px", sticky = TRUE),
+
                         group = i
-      ) %>%
-       addPopups(data = filter(param_summary, Char_Name == i),
-                           lat = ~Lat_DD,
-                           lng = ~Long_DD,
-                           popup = ~MLocID,
-                 options = popupOptions(noHide = T,
-                                        direction = 'top',
-                                        textOnly = T,
-                                        style = list(
-                                          "font-style" = "bold",
-                                          "font-size" = "15px",
-                                          "offset" = "relative",
-                                          "bottom" = "10px",
-                                          "background" = "white",
-                                          "padding" = "1px",
-                                          "border-radius" = "5px",
-                                          "height" = "10px"
-                                        )),
-                 group = paste0(i, " Labels"))
+      )
   }
 
   map <- map %>%
-    # addLabelOnlyMarkers(group = "Labels") %>%
     addLayersControl(baseGroups = unique(param_summary$Char_Name),
-                                  overlayGroups = c("Assessment Area", "World Imagery", "Hydrography", "Land Cover (NLCD 2016)",
-                                                    paste(unique(param_summary$Char_Name), "Labels"))) %>%
-    hideGroup(c(unique(param_summary$Char_Name)[-1], paste(unique(param_summary$Char_Name)[-1], "Labels"), "World Imagery", "Hydrography", "Land Cover (NLCD 2016)")) %>%
+                                  overlayGroups = c("Assessment Area", "World Imagery", "Hydrography", "Land Cover (NLCD 2016)")) %>%
+    hideGroup(c(unique(param_summary$Char_Name)[-1],paste(unique(param_summary$Char_Name), "Labels"),
+                "World Imagery", "Hydrography", "Land Cover (NLCD 2016)")) %>%
     addEasyButton(easyButton(
       icon = "fa-globe",
+      title = "Zoom to assessment area",
       onClick = JS("function(btn, map){
                 var groupLayer = map.layerManager.getLayerGroup('Assessment Area');
                 map.fitBounds(groupLayer.getBounds());
-                 }")))
+                 }"))) %>%
+    addEasyButton(easyButton(
+      icon = "fa-map-signs",
+      title = "Toggle Station ID labels",
+      onClick = JS("function(btn, map){
+    var elements = document.getElementsByClassName('stationLabels');
+    var index;
+
+    elements = elements.length ? elements : [elements];
+  for (index = 0; index < elements.length; index++) {
+    element = elements[index];
+
+    if (isElementHidden(element)) {
+      element.style.display = '';
+
+      // If the element is still hidden after removing the inline display
+      if (isElementHidden(element)) {
+        element.style.display = 'block';
+      }
+    } else {
+      element.style.display = 'none';
+    }
+  }
+  function isElementHidden (element) {
+    return window.getComputedStyle(element, null).getPropertyValue('display') === 'none';
+  }
+               }"
+      )
+    ))
+
+# map <- browsable(
+#     tagList(list(
+#       tags$head(
+#         tags$style(
+#           ".leaflet-popup {
+# margin-bottom: 55px;
+# }
+#
+# .leaflet-popup-content-wrapper {
+# background: white;
+# offset: relative;
+# color: black;
+# padding: 5px;
+# }
+#
+# .leaflet-popup-content {
+#           font-style: bold;
+# font-size: 15px;
+# margin: auto;
+# }"
+#         )
+#       ),
+#       map
+#     ))
+# )
 
   return(map)
 }

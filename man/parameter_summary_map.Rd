@@ -8,6 +8,8 @@ parameter_summary_map(param_summary, area)
 }
 \arguments{
 \item{param_summary}{Parameter summary table from parameter_summary()}
+
+\item{area}{Shapefile for assessment areas}
 }
 \value{
 map of status and trends results
