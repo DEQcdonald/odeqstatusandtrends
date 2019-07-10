@@ -48,6 +48,11 @@ GetData <- function(parameters = NULL, stations_AWQMS, start.date, end.date, que
 
   # Attach location datum info to observations
   data_AWQMS <- merge(data_AWQMS, stations_AWQMS[, c("MLocID", "Datum", "ELEV_Ft")], by="MLocID", all.x = TRUE, all.y = FALSE)
+  data_AWQMS[, c("StationDes", "HUC8", "HUC8_Name", "HUC10", "HUC12", "HUC12_Name",
+                 "Lat_DD", "Long_DD", "Reachcode", "Measure", "AU_ID")] <-
+    stations_AWQMS[match(data_AWQMS$MLocID, stations_AWQMS$MLocID),
+                   c("StationDes", "HUC8", "HUC8_Name", "HUC10", "HUC12", "HUC12_Name",
+                     "Lat_DD", "Long_DD", "Reachcode", "Measure", "AU_ID")]
 
   if(query_nwis){
     usgs_stations <- unique(stations_NWIS$site_no)
