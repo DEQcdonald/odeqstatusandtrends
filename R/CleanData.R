@@ -25,7 +25,7 @@ CleanData <- function(data)
 
   # Removing unnecessary columns
   data <- data[, c('MLocID', 'StationDes', 'OrganizationID', 'Project1', 'Org_Name', 'Lat_DD', 'Long_DD', 'ELEV_Ft', 'Datum', 'HUC8', 'AU_ID', 'Reachcode', 'Char_Name', 'sample_datetime', 'Result',
-                   'Result_Numeric', 'Result_Operator', 'Result_Unit', 'Statistical_Base', 'Result_Depth', 'QualifierAbbr', 'Method_Code', 'Activity_Type', 'act_id', 'MRLValue',
+                   'Result_Numeric', 'Result_Operator', 'Result_Unit', 'Statistical_Base', 'act_depth_height', 'QualifierAbbr', 'Method_Code', 'Activity_Type', 'act_id', 'MRLValue',
                    'Result_status', "FishCode", "SpawnCode", "WaterTypeCode", "WaterBodyCode", "BacteriaCode", "DO_code", "ben_use_code",
                    "pH_code", "DO_SpawnCode")]
 
@@ -66,7 +66,7 @@ CleanData <- function(data)
 
   # Check for duplicate samples
   print("Creating sample IDs...")
-  data$sample_id <- paste(data$MLocID, data$Char_Name, data$sample_datetime, data$Statistical_Base, data$Method_Code, data$Result_Depth, sep = " ")
+  data$sample_id <- paste(data$MLocID, data$Char_Name, data$sample_datetime, data$Statistical_Base, data$Method_Code, data$act_depth_height, sep = " ")
   print("Checking for duplicate samples...")
   if(any(duplicated(data$sample_id))){
     duplicated_ids <- data[duplicated(data$sample_id),"sample_id"]
@@ -76,24 +76,64 @@ CleanData <- function(data)
 
     print("Categorizing duplication...")
     dup_checks <- duplicates %>% dplyr::group_by(sample_id) %>%
-      dplyr::summarise(sample_routine = if_else("Field Msr/Obs" %in% Activity_Type & "Sample-Routine" %in% Activity_Type, 1, 0),
-                       dup_results = if_else(length(unique(Result)) == 1 & length(unique(QualifierAbbr)) == 1, 1, 0))
+      dplyr::summarise(n_dups = n(),
+                       sample_routine = if_else("Field Msr/Obs" %in% Activity_Type & "Sample-Routine" %in% Activity_Type, 1, 0),
+                       dup_results = if_else(length(unique(Result)) == 1 & length(unique(QualifierAbbr)) == 1, 1, 0),
+                       diff_DQL = if_else(length(unique(QualifierAbbr)) == 1, 0, 1),
+                       out_of_range = if_else(unique(Char_Name) %in% c("Temperature, water", "Dissolved oxygen (DO)") &
+                                                (max(Result_Numeric, na.rm = TRUE) - min(Result_Numeric, na.rm = TRUE)) > 1.0, 1,
+                                              if_else(unique(Char_Name) %in% c("pH") &
+                                                        (max(Result_Numeric, na.rm = TRUE) - min(Result_Numeric, na.rm = TRUE)) > 0.5, 1, 0)),
+                       avg_result = mean(Result_Numeric, na.rm = TRUE)
+      ) %>%
+      dplyr::mutate(avg_calc = if_else((sample_routine + dup_results + diff_DQL + out_of_range) == 0, 1, 0))
 
     print("Prioritizing field measurements over lab audit...")
     sample_routine_check <- dup_checks %>% dplyr::filter(sample_routine == 1)
 
-    print("Checking for duplicate results...")
-    same_result_check <- dup_checks %>% dplyr::filter(dup_results == 1)
+    data <- data %>% dplyr::filter(!(sample_id %in% sample_routine_check$sample_id & Activity_Type == "Sample-Routine"))
+
+    print("Resolving duplicate results...")
+    same_result_check <- dup_checks %>% dplyr::filter(dup_results == 1, !sample_id %in% c(sample_routine_check$sample_id))
     same_result_data <- data %>% dplyr::filter(sample_id %in% unique(same_result_check$sample_id))
     same_result_data <- same_result_data[!duplicated(same_result_data$sample_id),]
 
-    data <- data %>% dplyr::filter(!(sample_id %in% sample_routine_check$sample_id & Activity_Type == "Sample-Routine"),
-                                   !(sample_id %in% unique(same_result_check$sample_id)))
+    data <- data %>% dplyr::filter(!(sample_id %in% unique(same_result_check$sample_id)))
 
-    data <- bind_rows(data, same_result_data)
+    print("Resolving different DQLs...")
+    DQL_check <- dup_checks %>% dplyr::filter(diff_DQL == 1, !sample_id %in% c(sample_routine_check$sample_id,
+                                                                               same_result_check$sample_id))
+    DQL_check_data <- data %>% dplyr::filter(sample_id %in% unique(DQL_check$sample_id))
+    DQL_resolve <- NULL
+    for(i in unique(DQL_check$sample_id)){
+      tmp <- DQL_check_data %>% dplyr::filter(sample_id == i)
+      if("DQL=A" %in% tmp$QualifierAbbr){
+        tmp <- tmp %>% dplyr::filter(QualifierAbbr == "DQL=A")
+      } else {tmp <- tmp %>% dplyr::filter(QualifierAbbr == "DQL=B")}
+      DQL_resolve <- bind_rows(DQL_resolve, tmp)
+    }
 
-    print(paste("Removed", n, "lab audit result(s) where field measures were available"))
-    print(paste("Remaining duplicate sample id(s):", paste(duplicated_ids <- data[duplicated(data$sample_id),"sample_id"], collapse = ", ")))
+    data <- data %>% dplyr::filter(!(sample_id %in% unique(DQL_check$sample_id)))
+
+    print("Resolving duplicate results outside of acceptable quality control range...")
+    out_of_range <- dup_checks %>% dplyr::filter(out_of_range == 1, !sample_id %in% c(sample_routine_check$sample_id,
+                                                                                      same_result_check$sample_id,
+                                                                                      DQL_check$sample_id))
+
+    data <- data %>% dplyr::filter(!(sample_id %in% out_of_range$sample_id))
+
+    print("Calculating averages for remaining duplicates...")
+    avg_ids <- dup_checks %>% dplyr::filter(avg_calc == 1)
+    avg_result_data <- data %>% dplyr::filter(sample_id %in% unique(avg_ids$sample_id))
+    avg_result_data <- avg_result_data[!duplicated(avg_result_data$sample_id),]
+    avg_result_data[,"Result_Numeric"] <- avg_ids[match(avg_result_data$sample_id, avg_ids$sample_id), "avg_result"]
+
+    data <- data %>% dplyr::filter(!(sample_id %in% avg_ids$sample_id))
+
+    data <- bind_rows(data, same_result_data, DQL_resolve, avg_result_data)
+
+    duplicated_ids <- data[duplicated(data$sample_id),"sample_id"]
+    print(paste("Remaining duplicate sample id(s):", paste(duplicated_ids, collapse = ", ")))
   } else {print("No duplicates found")}
 
   return(data)
