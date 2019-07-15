@@ -37,7 +37,7 @@ get_stations_AWQMS <- function(polygon, exclude.tribal.lands = TRUE, stations.ch
 
   if(exclude.tribal.lands){
 
-    print("Removing staions within tribal lands...")
+    print("Removing stations within tribal lands...")
 
     tribal.lands <- rgdal::readOGR(dsn = "//deqhq1/WQNPS/Agriculture/Status_and_Trend_Analysis/R_support_files",
                                    layer = 'tl_2017_or_aiannh', integer64="warn.loss", verbose = FALSE)
@@ -45,6 +45,11 @@ get_stations_AWQMS <- function(polygon, exclude.tribal.lands = TRUE, stations.ch
     stations <- dplyr::filter(stations, MLocID %in% StationsInPoly(stations, tribal.lands, outside = TRUE,
                                                                    id_col="MLocID", lat_col="Lat_DD",
                                                                    lon_col="Long_DD", datum_col="Datum"))
+  }
+
+  if(any(stations$AU_ID == "99")){
+    print("Removing Assessment Unit '99'...")
+    stations <- stations %>% dplyr::filter(AU_ID != "99")
   }
 
   return(stations)
