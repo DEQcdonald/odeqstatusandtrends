@@ -51,17 +51,17 @@ parameter_summary_map <- function(param_summary, area){
 # Create functions for mapping --------------------------------------------------------
 
   au_colors <- param_summary %>% group_by(AU_ID, Char_Name) %>%
-    summarise(color = if_else(all(is.na(status)),
-                              "grey",
-                              if_else(any(status == "Not Attaining"),
+    summarise(color = if_else(all(status_current %in% c("Unassessed", "Insufficient Data")),
+                              "lightgray",
+                              if_else(any(status_current == "Not Attaining"),
                                       "orange",
                                       "green")
                               )
               )
 
-  param_summary$color <- if_else(is.na(param_summary$status),
-                                 "gray",
-                                 if_else(param_summary$status == "Attaining",
+  param_summary$color <- if_else(param_summary$status_current %in% c("Unassessed", "Insufficient Data"),
+                                 "lightgray",
+                                 if_else(param_summary$status_current == "Attaining",
                                          "green",
                                          "orange"))
   param_summary$icon <- sapply(param_summary$trend,
@@ -81,14 +81,18 @@ parameter_summary_map <- function(param_summary, area){
   # This function is called on the click of a station marker in the parameter summary map.
   popupTable <- function(station = NULL, AU = NULL, param){
     if(!is.null(station)){
-      table <- kable(filter(param_summary[, c("MLocID", "Char_Name", "status", "trend")],
-                            MLocID == station, Char_Name == param) %>% select(status, trend),
+      table <- kable(filter(param_summary[, c("MLocID", "Char_Name", "status_current", "trend")],
+                            MLocID == station, Char_Name == param) %>%
+                       dplyr::select(status_current, trend) %>%
+                       dplyr::rename(Status = status_current, Trend = trend),
                      format = "html", row.names = FALSE) %>%
         kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
     }
     if(!is.null(AU)){
-      table <- kable(filter(param_summary[, c("AU_ID", "Char_Name", "MLocID", "status", "trend")],
-                            AU_ID == AU, Char_Name == param) %>% select(MLocID, status, trend),
+      table <- kable(filter(param_summary[, c("AU_ID", "Char_Name", "MLocID", "status_current", "trend")],
+                            AU_ID == AU, Char_Name == param) %>%
+                       dplyr::select(MLocID, status_current, trend) %>%
+                       dplyr::rename(Status = status_current, Trend = trend),
                      format = "html", row.names = FALSE) %>%
         kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
     }
@@ -124,7 +128,15 @@ parameter_summary_map <- function(param_summary, area){
                 options = WMSTileOptions(format = "image/png",
                                          transparent = TRUE),
                 layers = "0") %>%
-    addPolygons(data = area, fill = FALSE, group = "Assessment Area", label = "Assessment Area")
+    addPolygons(data = area, fill = FALSE, group = "Assessment Area", label = "Assessment Area") %>%
+    addMarkers(data = unique(param_summary[,c("AU_ID", "MLocID", "StationDes", "Lat_DD", "Long_DD")]),
+               label = ~paste0(MLocID, ": ", StationDes),
+               popup = ~paste0("<b>", MLocID, "</b>: ", StationDes, "<br>",
+                               "AU: ", AU_ID),
+               lat = ~Lat_DD,
+               lng = ~Long_DD,
+               group = "search"
+               )
 
     # if(nrow(wql_streams_data) > 0){
       # map <- map %>%
@@ -193,7 +205,7 @@ parameter_summary_map <- function(param_summary, area){
                                         "<br><b>Parameter:</b> ", i, "<br>",
                                         sapply(MLocID, popupTable, AU = NULL, param = i, USE.NAMES = FALSE)),
                         popupOptions = popupOptions(maxWidth = 600),
-                        labelOptions = list(className = "stationLabels", noHide = T, permanent = T, interactive = T, direction = "auto",
+                        labelOptions = list(className = "stationLabels", noHide = T, permanent = T, interactive = T,
                                             offset = c(-10,-25), opacity = 0.9, textsize = "14px", sticky = TRUE),
 
                         group = i
@@ -241,7 +253,32 @@ parameter_summary_map <- function(param_summary, area){
   }
                }"
       )
-    )) %>% leaflet.extras::addSearchFeatures(targetGroups = unique(param_summary$Char_Name))
+    )) %>%
+    leaflet.extras::addSearchFeatures(targetGroups = "search",
+                                      options = searchFeaturesOptions(openPopup = TRUE)) %>%
+    htmlwidgets::onRender(jsCode = "function(el, x){
+    var elements = document.getElementsByClassName('stationLabels');
+    var index;
+
+    elements = elements.length ? elements : [elements];
+  for (index = 0; index < elements.length; index++) {
+    element = elements[index];
+
+    if (isElementHidden(element)) {
+      element.style.display = '';
+
+      // If the element is still hidden after removing the inline display
+      if (isElementHidden(element)) {
+        element.style.display = 'block';
+      }
+    } else {
+      element.style.display = 'none';
+    }
+  }
+  function isElementHidden (element) {
+    return window.getComputedStyle(element, null).getPropertyValue('display') === 'none';
+  }
+               }") %>% hideGroup("search")
 
 # map <- browsable(
 #     tagList(list(
