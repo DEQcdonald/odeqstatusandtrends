@@ -1,0 +1,66 @@
+---
+title: params$subbasin
+author: "Colin Donald"
+date: "7/16/2019"
+output: html_document
+params:
+  subbasin: subbasin
+  par_sum: par_sum
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+subbasin <- params$subbasin
+par_sum <- params$par_sum
+
+tbls  <- captioner(prefix="Table")
+```
+
+
+```{r Temperature, eval = any(par_sum$Char_Name == "Temperature, water"), results = 'asis'}
+temp <- par_sum %>% filter(Char_Name == "Temperature, water")
+
+cat(paste("The Department of Environmental Quality assessed all available temperature data within", subbasin, "for status and trends. The results of these assessments are summarized by assessment unit throughout the following section.\n\n"))
+    
+for(i in unique(temp$AU_ID)){
+  
+  data <- temp %>% filter(AU_ID == i)
+  au_name <- if(any(!is.na(data$GNIS_Name))){unique(data$GNIS_Name)} else {unique(data$AU_ID)}
+ 
+  cat(paste(tbls(paste0(au_name, "_tempTab"), display = "cite"), "shows a summary of the temperature status and trends at each station assessed within", au_name))
+  
+  knitr::kable(data, padding = 2, digits = 1, row.names = FALSE, 
+               caption = tbls(name = paste0(au_name, "_tempTab"), 
+                              caption = paste("Temperature water quality status and trends for", au_name))
+  )
+  
+   cat("\n\n")
+}
+
+```
+
+
+```{r DissolvedOxygen}
+
+```
+
+
+```{r pH}
+
+```
+
+
+```{r EColi}
+
+```
+
+
+```{r TP}
+
+```
+
+
+```{r TSS}
+
+```

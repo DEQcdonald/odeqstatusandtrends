@@ -1,0 +1,74 @@
+---
+title: "`r paste('Willamette', 'Basin Status and Trends Report')`"
+author: "Colin Donald"
+date: "7/16/2019"
+output: 
+  html_document:
+    mode: selfcontained
+    number_sections: yes
+    toc: yes
+    toc_depth: 2
+    toc_float: yes
+  word_document:
+    fig_caption: yes
+    toc: yes  
+always_allow_html: yes
+---
+
+```{r setup, include=FALSE}
+
+options(knitr.duplicate.label = 'allow')
+
+knitr::opts_chunk$set(echo = FALSE,
+                      message = FALSE,
+                      warning=FALSE,
+                      error = FALSE,
+                      cache = FALSE,
+                      include = TRUE,
+                      fig.keep='all',
+                      fig.path='Figures/')
+
+param_sum <- read.csv("//deqhq1/wqnps/Agriculture/Status_and_Trend_Analysis/Willamette Basin/Willamette_param_sum.csv")
+
+library(dplyr)
+library(kableExtra)
+library(captioner)
+```
+
+# Introduction
+
+## Purpose
+
+DEQ Total Maximum Daily Load (TMDLs) and Nonpoint Source (NPS) program staff conduct these reviews based on ODA's biennial review schedule of their area rules and plans. ODA's Agriculture Water Quality Program is outcome based, explicitly describing prohibited conditions, similar to DEQ's TMDL and NPS programs which explicitly define water quality targets and goals.  The analysis of landscape conditions and water quality data is used for implementing these programs as well as identifying data gaps. 
+
+This report presents data and analysis that will help DEQ fulfill its roles in the biennial review process described in the [Memorandum of Agreement](https://www.oregon.gov/ODA/shared/Documents/Publications/NaturalResources/DEQODAmoa.pdf) between ODA and DEQ. Water quality status and trends reports are created to inform discussions between DEQ Basin Coordinators and ODA Agriculture Water Quality Specialists prior to the Local Advisory Committee meeting. The discussions between DEQ and ODA prior to the LAC meeting could include: water quality and what's working and not working, source(s) and solutions, data needs and future monitoring to answer these questions. This report presents an analysis of water quality data readily accessible from public databases and available in sufficient quantity to indicate status and trends. Dependent on data availability, DEQ will use the available water quality data to answer the first three questions below. For the fourth bullet, the report is expected to inform DEQ Basin Coordinator analysis, interpretation, and discussion with ODA and the LAC about possible or potential sources of pollution:
+
+*	What is the status of water quality? 
+*	What is the trend in water quality? 
+*	When applicable, are TMDL load allocations being met?
+
+
+```{r cars}
+
+# rmarkdown::render("//deqhq1/WQNPS/Agriculture/Status_and_Trend_Analysis/StatusAndTrends_Package/odeqstatusandtrends/R/subbasin.Rmd",
+#                   params = list(
+#                     subbasin = subbasin,
+#                     par_sum = par_sum))
+
+for(i in unique(param_sum$HUC8)){
+  
+  data <- param_sum %>% filter(HUC8 == i) %>% select(-Lat_DD, -Long_DD, -HUC8, -X)
+  
+  cat(paste("#", i, "\n\n"))
+  
+  knitr::knit_child(
+    rmarkdown::render("C:/workspace/subbasin.Rmd", output_format = "html_document",
+                      params = list(
+                        subbasin = i,
+                        par_sum = data))
+  )
+}  
+
+```
+
+# Some other text
