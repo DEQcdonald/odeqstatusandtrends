@@ -4,7 +4,7 @@
 \alias{GetData}
 \title{Get data for water quality status and trends analysis}
 \usage{
-GetData(parameters = NULL, stations_AWQMS, start.date, end.date,
+GetData(parameters = NULL, stations_AWQMS, start.date, end.date, huc8,
   query_nwis = FALSE, stations_NWIS, awqms.channel.name = "AWQMS")
 }
 \arguments{
@@ -15,6 +15,8 @@ GetData(parameters = NULL, stations_AWQMS, start.date, end.date,
 \item{start.date}{The earliest date to include in the query. "%Y-%m-%d"}
 
 \item{end.date}{The latest date to include in the query. "%Y-%m-%d"}
+
+\item{huc8}{List of hucs within boundary}
 
 \item{query_nwis}{Logical. Should the function query the USGS NWIS database.}
 
