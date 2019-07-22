@@ -10,6 +10,7 @@
 #' @param query_nwis Logical. Should the function query the USGS NWIS database.
 #' @param stations_NWIS Stations dataframe from get_stations_NWIS()
 #' @param awqms.channel.name The name in quotes of the AWQMS ODBC connection. Defaults to "AWQMS".
+#' @param huc8 List of hucs within boundary
 #' @return A dataframe of all available data within AWQMS that fit the query.
 #' @export
 #' @examples
@@ -19,7 +20,8 @@
 #' start.date = "2010-01-01", end.date = "2019-01-01",
 #' awqms.channel.name = "AWQMS")
 
-GetData <- function(parameters = NULL, stations_AWQMS, start.date, end.date, query_nwis = FALSE, stations_NWIS, awqms.channel.name = "AWQMS") {
+GetData <- function(parameters = NULL, stations_AWQMS, start.date, end.date, huc8,
+                    query_nwis = FALSE, stations_NWIS, awqms.channel.name = "AWQMS") {
 
   # Convert characteristic names
   AWQMS.parms <- AWQMS_Char_Names(parameters)
@@ -40,6 +42,21 @@ GetData <- function(parameters = NULL, stations_AWQMS, start.date, end.date, que
                                       media = sample.media,
                                       crit_codes = TRUE,
                                       station = stations_AWQMS$MLocID)
+  e.time <- Sys.time()
+  print(paste("This query took approximately", difftime(e.time, s.time, units = "secs"), "seconds."))
+
+  print(paste('Querying the Water Quality Portal for data at', length(stations_AWQMS$MLocID), 'stations related to:', paste(parameters, collapse = ", ")))
+
+  s.time <- Sys.time()
+  data_AWQMS <- dataRetrieval::readWQPdata(statecode = "US:OR",
+                                           startDate = start.date,
+                                           endDate = end.date,
+                                           char = AWQMS.parms,
+                                           sampleMedia = sample.media,
+                                           siteType = wqp_siteType,
+                                           # crit_codes = TRUE,
+                                           station = stations_AWQMS$MLocID,
+                                           querySummary = TRUE)
   e.time <- Sys.time()
   print(paste("This query took approximately", difftime(e.time, s.time, units = "secs"), "seconds."))
 

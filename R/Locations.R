@@ -55,6 +55,60 @@ get_stations_AWQMS <- function(polygon, exclude.tribal.lands = TRUE, stations.ch
   return(stations)
 }
 
+#' Get WQP stations in Oregon for status and trends analysis
+#'
+#' Queries the Water Quality Portal stations database to pull all available stations within a given shapefile.
+#' @param polygon Shapefile of the area to query
+#' @param exclude.tribal.lands Whether or not to exclude stations located on tribal lands. Defaults to TRUE.
+#' @param start_date Date to begin query
+#' @param end_date Date to end query
+#' @return A list of stations within a given shapefile.
+#' @export
+#' @examples
+#' get_stations_AWQMS(polygon = "your-shapefile-here", exclude.tribal.lands = TRUE, start_date, end_date)
+
+#@param parameters A list of parameters with which to filter the query.
+
+get_stations_WQP <- function(polygon, start_date, end_date, huc8, exclude.tribal.lands = TRUE) {
+
+  # Get Stations within WQP database
+  wqp_siteType = 'Estuary;Ocean;Stream;Lake, Reservoir, Impoundment'
+  wqp_hucs <- paste(huc8, collapse = ";")
+  wqp_enddate <- format(as.Date(end.date, format = "%Y-%m-%d"), "%m-%d-%Y")
+
+  s.time <- Sys.time()
+  stations <- dataRetrieval::whatWQPsites(huc = wqp_hucs, providers = "STORET", startDateLo = "11-01-2018",
+                                           startDateHi = wqp_enddate, siteType = wqp_siteType)
+  e.time <- Sys.time()
+  print(paste("This query took approximately", difftime(e.time, s.time, units = "secs"), "seconds"))
+
+  stations <- stations %>% dplyr::rename(OrgID = OrganizationIdentifier, MLocID = MonitoringLocationIdentifier,
+                                         StationDes = MonitoringLocationName, Lat_DD = LatitudeMeasure, Long_DD = LongitudeMeasure,
+                                         Datum = HorizontalCoordinateReferenceSystemDatumName)
+
+  stations <- stations %>% dplyr::filter(!OrgID == "OREGONDEQ")
+
+  # Clip stations to input polygon
+  print("Clipping stations to your shapefile...")
+  stations <- dplyr::filter(stations, MLocID %in% StationsInPoly(stations, polygon, outside = FALSE,
+                                                                 id_col="MLocID", lat_col="Lat_DD",
+                                                                 lon_col="Long_DD", datum_col="Datum"))
+
+  if(exclude.tribal.lands){
+
+    print("Removing stations within tribal lands...")
+
+    tribal.lands <- rgdal::readOGR(dsn = "//deqhq1/WQNPS/Agriculture/Status_and_Trend_Analysis/R_support_files",
+                                   layer = 'tl_2017_or_aiannh', integer64="warn.loss", verbose = FALSE)
+
+    stations <- dplyr::filter(stations, MLocID %in% StationsInPoly(stations, tribal.lands, outside = TRUE,
+                                                                   id_col="MLocID", lat_col="Lat_DD",
+                                                                   lon_col="Long_DD", datum_col="Datum"))
+  }
+
+  return(stations)
+}
+
 #' Get USGS stations in Oregon for status and trends analysis
 #'
 #' Queries the NWIS portal to pull all available USGS stations within a given shapefile.
@@ -151,9 +205,9 @@ StationsInPoly <- function(stations, polygon, outside=FALSE, id_col, datum_col, 
   if(outside) {
     # stations outside polygon
     stations.out <- unique(df.nad83[!df.nad83@data[,id_col] %in% unique(df.nad83[poly.nad83,]@data[,id_col]),]@data[,id_col])
-    return(stations.out)
+    return(stations.out[[id_col]])
   } else {
     stations.in <- unique(df.nad83[poly.nad83,]@data[,id_col])
-    return(stations.in)
+    return(stations.in[[id_col]])
   }
 }
