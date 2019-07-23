@@ -5,6 +5,7 @@
 #' the AWQMS package by Travis Pritchard.
 #' @param parameters A list of parameters to include in the query
 #' @param stations_AWQMS Stations dataframe from get_stations_AWQMS()
+#' @param stations_WQP Stations dataframe from get_stations_WQP()
 #' @param start.date The earliest date to include in the query. "%Y-%m-%d"
 #' @param end.date The latest date to include in the query. "%Y-%m-%d"
 #' @param query_nwis Logical. Should the function query the USGS NWIS database.
@@ -16,11 +17,12 @@
 #' @examples
 #' GetData(parameters = c("parameter1", "parameter2"),
 #' stations_AWQMS = result-of-get_stations_AWQMS(),
+#' stations_WQP = result-of-get_stations_WQP(),
 #' stations_NWIS = result-of-get_stations_NWIS(),
 #' start.date = "2010-01-01", end.date = "2019-01-01",
 #' awqms.channel.name = "AWQMS")
 
-GetData <- function(parameters = NULL, stations_AWQMS, start.date, end.date, huc8,
+GetData <- function(parameters = NULL, stations_AWQMS, stations_WQP, start.date, end.date, huc8,
                     query_nwis = FALSE, stations_NWIS, awqms.channel.name = "AWQMS") {
 
   # Convert characteristic names
@@ -45,31 +47,25 @@ GetData <- function(parameters = NULL, stations_AWQMS, start.date, end.date, huc
   e.time <- Sys.time()
   print(paste("This query took approximately", difftime(e.time, s.time, units = "secs"), "seconds."))
 
-  print(paste('Querying the Water Quality Portal for data at', length(stations_AWQMS$MLocID), 'stations related to:', paste(parameters, collapse = ", ")))
+  if(nrow(stations_WQP) > 0){
+    print(paste('Querying the Water Quality Portal for data at', length(stations_WQP$MLocID), 'stations related to:', paste(parameters, collapse = ", ")))
 
-  s.time <- Sys.time()
-  data_AWQMS <- dataRetrieval::readWQPdata(statecode = "US:OR",
-                                           startDate = start.date,
-                                           endDate = end.date,
-                                           char = AWQMS.parms,
-                                           sampleMedia = sample.media,
-                                           siteType = wqp_siteType,
-                                           # crit_codes = TRUE,
-                                           station = stations_AWQMS$MLocID,
-                                           querySummary = TRUE)
-  e.time <- Sys.time()
-  print(paste("This query took approximately", difftime(e.time, s.time, units = "secs"), "seconds."))
+    s.time <- Sys.time()
+    data_WQP <- dataRetrieval::readWQPdata(statecode = "US:OR",
+                                             startDate = start.date,
+                                             endDate = end.date,
+                                             char = AWQMS.parms,
+                                             sampleMedia = sample.media,
+                                             siteType = wqp_siteType,
+                                             # crit_codes = TRUE,
+                                             station = stations_WQP$MLocID,
+                                             querySummary = TRUE)
+    e.time <- Sys.time()
+    print(paste("This query took approximately", difftime(e.time, s.time, units = "secs"), "seconds."))
 
+    }
   # Include only relevant monitoring location types
   data_AWQMS <- data_AWQMS %>% filter(MonLocType %in% c("River/Stream", "Lake", "Other-Surface Water", ""))
-
-  # Attach location datum info to observations
-  data_AWQMS <- merge(data_AWQMS, stations_AWQMS[, c("MLocID", "Datum", "ELEV_Ft")], by="MLocID", all.x = TRUE, all.y = FALSE)
-  data_AWQMS[, c("StationDes", "HUC8", "HUC8_Name", "HUC10", "HUC12", "HUC12_Name",
-                 "Lat_DD", "Long_DD", "Reachcode", "Measure", "AU_ID")] <-
-    stations_AWQMS[match(data_AWQMS$MLocID, stations_AWQMS$MLocID),
-                   c("StationDes", "HUC8", "HUC8_Name", "HUC10", "HUC12", "HUC12_Name",
-                     "Lat_DD", "Long_DD", "Reachcode", "Measure", "AU_ID")]
 
   if(query_nwis){
     usgs_stations <- unique(stations_NWIS$site_no)
