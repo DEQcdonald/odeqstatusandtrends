@@ -4,13 +4,16 @@
 \alias{GetData}
 \title{Get data for water quality status and trends analysis}
 \usage{
-GetData(parameters = NULL, stations_AWQMS, start.date, end.date, huc8,
-  query_nwis = FALSE, stations_NWIS, awqms.channel.name = "AWQMS")
+GetData(parameters = NULL, stations_AWQMS, stations_WQP, start.date,
+  end.date, huc8, query_nwis = FALSE, stations_NWIS,
+  awqms.channel.name = "AWQMS")
 }
 \arguments{
 \item{parameters}{A list of parameters to include in the query}
 
 \item{stations_AWQMS}{Stations dataframe from get_stations_AWQMS()}
+
+\item{stations_WQP}{Stations dataframe from get_stations_WQP()}
 
 \item{start.date}{The earliest date to include in the query. "%Y-%m-%d"}
 
@@ -35,6 +38,7 @@ the AWQMS package by Travis Pritchard.
 \examples{
 GetData(parameters = c("parameter1", "parameter2"),
 stations_AWQMS = result-of-get_stations_AWQMS(),
+stations_WQP = result-of-get_stations_WQP(),
 stations_NWIS = result-of-get_stations_NWIS(),
 start.date = "2010-01-01", end.date = "2019-01-01",
 awqms.channel.name = "AWQMS")

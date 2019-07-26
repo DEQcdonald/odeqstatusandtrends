@@ -23,12 +23,6 @@ get_stations_AWQMS <- function(polygon, exclude.tribal.lands = TRUE, stations.ch
   e.time <- Sys.time()
   print(paste("This query took approximately", difftime(e.time, s.time, units = "secs"), "seconds"))
 
-  # # Convert AWQMS characteristic names
-  # AWQMS.parms <- AWQMS_Char_Names(parameters)
-  #
-  # # Get stations
-  # stations <- AWQMSdata::AWQMS_Stations(char = AWQMS.parms)
-
   # Clip stations to input polygon
   print("Clipping stations to your shapefile...")
   stations <- dplyr::filter(stations, MLocID %in% StationsInPoly(stations, polygon, outside = FALSE,
@@ -59,9 +53,9 @@ get_stations_AWQMS <- function(polygon, exclude.tribal.lands = TRUE, stations.ch
 #'
 #' Queries the Water Quality Portal stations database to pull all available stations within a given shapefile.
 #' @param polygon Shapefile of the area to query
-#' @param exclude.tribal.lands Whether or not to exclude stations located on tribal lands. Defaults to TRUE.
 #' @param start_date Date to begin query
 #' @param end_date Date to end query
+#' @param exclude.tribal.lands Whether or not to exclude stations located on tribal lands. Defaults to TRUE.
 #' @return A list of stations within a given shapefile.
 #' @export
 #' @examples
@@ -85,6 +79,8 @@ get_stations_WQP <- function(polygon, start_date, end_date, huc8, exclude.tribal
   stations <- stations %>% dplyr::rename(OrgID = OrganizationIdentifier, MLocID = MonitoringLocationIdentifier,
                                          StationDes = MonitoringLocationName, Lat_DD = LatitudeMeasure, Long_DD = LongitudeMeasure,
                                          Datum = HorizontalCoordinateReferenceSystemDatumName)
+
+  stations <- as.data.frame(stations)
 
   stations <- stations %>% dplyr::filter(!OrgID == "OREGONDEQ")
 
@@ -205,9 +201,9 @@ StationsInPoly <- function(stations, polygon, outside=FALSE, id_col, datum_col, 
   if(outside) {
     # stations outside polygon
     stations.out <- unique(df.nad83[!df.nad83@data[,id_col] %in% unique(df.nad83[poly.nad83,]@data[,id_col]),]@data[,id_col])
-    return(stations.out[[id_col]])
+    return(stations.out)
   } else {
     stations.in <- unique(df.nad83[poly.nad83,]@data[,id_col])
-    return(stations.in[[id_col]])
+    return(stations.in)
   }
 }
