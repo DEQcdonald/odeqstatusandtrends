@@ -10,7 +10,6 @@
 CleanData <- function(data)
 {
   # Add datetime columns and remove unused variables
-  data[is.na(data$SampleStartTime), "SampleStartTime"] <- "00:00:00.000000"
   data$sample_datetime <- paste(data$SampleStartDate, data$SampleStartTime)
   data$sample_datetime <- as.POSIXct(data$sample_datetime, format = '%Y-%m-%d %H:%M:%S')
 

@@ -67,6 +67,9 @@ GetData <- function(parameters = NULL, stations_AWQMS, stations_WQP, start.date,
   # Include only relevant monitoring location types
   data_AWQMS <- data_AWQMS %>% filter(MonLocType %in% c("River/Stream", "Lake", "Other-Surface Water", ""))
 
+  data_AWQMS[is.na(data_AWQMS$SampleStartTime), "SampleStartTime"] <- "00:00:00.000000"
+  data_AWQMS[is.na(data_AWQMS$SampleStartTime), "SampleStartTZ"] <- "NA"
+
   if(query_nwis){
     usgs_stations <- unique(stations_NWIS$site_no)
     if("Temperature, water" %in% AWQMS.parms) {

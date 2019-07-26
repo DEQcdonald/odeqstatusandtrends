@@ -34,23 +34,65 @@ status_stns <- function(data, year_range = c(year(Sys.Date())-21, year(Sys.Date(
       return(names(bins[i]))
     })
 
-  if(any(unique(data$year) %in% year_range)){
-    status_check <- data %>%
-      filter(year %in% years) %>%
-      dplyr::group_by(MLocID, Char_Name, bin) %>%
-      dplyr::summarise(n_years = length(unique(year)),
-                       excursions = sum(excursion_cen, na.rm = TRUE),
-                       status = if_else(n_years < 1 | is.na(n_years) | all(is.na(excursion_cen)),
-                                        "Unassessed",
-                                        if_else(n_years < 2,
-                                                "Insufficient Data",
-                                                if_else(any(excursion_cen == 1, na.rm = TRUE),
-                                                        "Attaining",
-                                                        "Not Attaining")
-                                                )
-                                        )
-                       ) %>%
-      ungroup() %>% select(-n_years, -excursions) %>% spread(key = bin, value = status)
+
+   if(any(unique(data$year) %in% years)){
+
+     status_check <- data %>%
+       filter(year %in% years,
+              !(BacteriaCode == 3 & Char_Name == "Fecal Coliform")) %>%
+       dplyr::group_by(MLocID, Char_Name, bin) %>%
+       dplyr::summarise(n_years = length(unique(year)),
+                        excursions = sum(excursion_cen, na.rm = TRUE),
+                        status = if_else(n_years < 1 | is.na(n_years) | all(is.na(excursion_cen)),
+                                         "Unassessed",
+                                         if_else(n_years < 2,
+                                                 "Insufficient Data",
+                                                 if_else(any(excursion_cen == 1, na.rm = TRUE),
+                                                         "Not Attaining",
+                                                         "Attaining")
+                                         )
+                        )
+       ) %>%
+       ungroup() %>% select(-n_years, -excursions) %>% spread(key = bin, value = status)
+
+     if(any(data$year %in% years & data$BacteriaCode == 3 & data$Char_Name == "Fecal Coliform")){
+       shell_status <- data %>%
+         dplyr::filter(year %in% years,
+                       BacteriaCode == 3,
+                       Char_Name == "Fecal Coliform") %>%
+         dplyr::group_by(MLocID, Char_Name, bin) %>%
+         dplyr::summarise(num_samples = n(),
+                          median = if_else(num_samples >= 5, median(Result_cen), NaN),
+                          num_exceed = sum(perc_exceed),
+                          bact_crit_percent = first(bact_crit_percent),
+                          bact_crit_ss = first(bact_crit_ss),
+                          n_years = length(unique(year)),
+                          excursion = if_else((!is.na(median) & median > bact_crit_ss),
+                                              1,
+                                              if_else(num_samples >= 10 & num_exceed/num_samples > 0.10,
+                                                      1,
+                                                      if_else(num_samples >= 5 & num_samples <= 9 & num_exceed >= 1,
+                                                              1, 0)
+                                              )),
+                          status = if_else(n_years < 1 | is.na(n_years) | all(is.na(excursion)),
+                                           "Unassessed",
+                                           if_else(n_years < 2,
+                                                   "Insufficient Data",
+                                                   if_else(excursion == 1,
+                                                           "Not Attaining",
+                                                           "Attaining")
+                                           )
+                          )
+
+         ) %>%
+         ungroup() %>% select(MLocID, Char_Name, bin, status) %>% spread(key = bin, value = status)
+
+       if(nrow(shell_status) >0){
+         status_check <- bind_rows(status_check, shell_status)
+       }
+
+     }
+
 
     status_check[is.na(status_check)] <- "Unassessed"
 
@@ -58,7 +100,7 @@ status_stns <- function(data, year_range = c(year(Sys.Date())-21, year(Sys.Date(
 
   } else {
     status_check <- "No stations meet Status criteria"
-    print(status_check)
+    return(status_check)
   }
   return(status_check[,c(1,2,rev(3:length(colnames(status_check))))])
 }
