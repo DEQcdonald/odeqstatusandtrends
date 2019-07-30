@@ -81,20 +81,22 @@ parameter_summary_map <- function(param_summary, area){
   # This function is called on the click of a station marker in the parameter summary map.
   popupTable <- function(station = NULL, AU = NULL, param){
     if(!is.null(station)){
-      table <- kable(filter(param_summary[, c("MLocID", "Char_Name", "status_current", "trend")],
+      table <- kable(filter(param_summary[, c(4, 3, 7:11, 6)],
                             MLocID == station, Char_Name == param) %>%
-                       dplyr::select(status_current, trend) %>%
-                       dplyr::rename(Status = status_current, Trend = trend),
+                       # dplyr::select(status_current, trend) %>%
+                       dplyr::rename(current_status = status_current, Trend = trend),
                      format = "html", row.names = FALSE) %>%
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                      full_width = TRUE, font_size = 10)
     }
     if(!is.null(AU)){
-      table <- kable(filter(param_summary[, c("AU_ID", "Char_Name", "MLocID", "status_current", "trend")],
+      table <- kable(filter(param_summary[, c(1, 3, 4, 7:11, 6)],
                             AU_ID == AU, Char_Name == param) %>%
-                       dplyr::select(MLocID, status_current, trend) %>%
-                       dplyr::rename(Status = status_current, Trend = trend),
+                       # dplyr::select(MLocID, status_current, trend) %>%
+                       dplyr::rename(current_status = status_current, Trend = trend),
                      format = "html", row.names = FALSE) %>%
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                      full_width = TRUE, font_size = 10)
     }
     return(table)
   }
@@ -104,7 +106,8 @@ parameter_summary_map <- function(param_summary, area){
       table <- kable(filter(wql_streams_data,
                             SEGMENT_ID == seg_ID, Char_Name == param) %>% select(Char_Name, LISTING_ST, SEASON, TMDL_INFO) %>% unique(),
                      format = "html", row.names = FALSE) %>%
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = TRUE)
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                      full_width = TRUE, font_size = 10)
     }
     return(table)
   }
@@ -156,9 +159,11 @@ parameter_summary_map <- function(param_summary, area){
 
   for(i in unique(param_summary$Char_Name)){
     print(paste("Adding layer for", i))
-    au_data <- filter(assessment_units[, c("AU_ID", "AU_Name")], AU_ID %in% unique(param_summary[param_summary$Char_Name == i,]$AU_ID))
-    au_data <- merge(au_data, filter(au_colors, Char_Name == i)[,c("AU_ID", "color")], by = "AU_ID")
-    wql_streams_tmp <- filter(wql_streams, Char_Name == i)
+    psum <- param_summary %>% dplyr::filter(Char_Name == i)
+    psum_AU <- psum %>% dplyr::filter(!(status_current %in% c("Unassessed", "Insufficient Data") & trend == "Insufficient Data"))
+    au_data <- dplyr::filter(assessment_units[, c("AU_ID", "AU_Name")], AU_ID %in% unique(psum_AU$AU_ID))
+    au_data <- merge(au_data, dplyr::filter(au_colors, Char_Name == i)[,c("AU_ID", "color")], by = "AU_ID")
+    wql_streams_tmp <- dplyr::filter(wql_streams, Char_Name == i)
 
     if(nrow(wql_streams_data) > 0){
       map <- map %>%
@@ -173,7 +178,8 @@ parameter_summary_map <- function(param_summary, area){
                                      "<br>Parameter:</b> ", Char_Name,
                                      "<br></b>",
                                      sapply(SEGMENT_ID, WQLpopupTable, param = i, USE.NAMES = FALSE)),
-                     popupOptions = popupOptions(maxWidth = 600),
+                     popupOptions = popupOptions(maxWidth = 1200),
+                     smoothFactor = 1.5,
                      group = i
         )
     } else {print(paste("No water quality limited streams for", i))}
@@ -187,12 +193,13 @@ parameter_summary_map <- function(param_summary, area){
                                    "<br><b>Parameter:</b> ", i, "<br>",
                                    sapply(AU_ID, popupTable, station = NULL, param = i, USE.NAMES = FALSE)
                    ),
-                   popupOptions = popupOptions(maxWidth = 600),
+                   popupOptions = popupOptions(maxWidth = 1200),
+                   smoothFactor = 1.5,
                    group = i
       )
 
      map <- map %>%
-      addAwesomeMarkers(data = filter(param_summary, Char_Name == i),
+      addAwesomeMarkers(data = psum,
                         lat = ~Lat_DD,
                         lng = ~Long_DD,
                         icon = awesomeIcons(icon = ~icon,
@@ -204,7 +211,7 @@ parameter_summary_map <- function(param_summary, area){
                                         "<br><b>AU:</b> ", AU_ID,
                                         "<br><b>Parameter:</b> ", i, "<br>",
                                         sapply(MLocID, popupTable, AU = NULL, param = i, USE.NAMES = FALSE)),
-                        popupOptions = popupOptions(maxWidth = 600),
+                        popupOptions = popupOptions(maxWidth = 1200),
                         labelOptions = list(className = "stationLabels", noHide = T, permanent = T, interactive = T,
                                             offset = c(-10,-25), opacity = 0.9, textsize = "14px", sticky = TRUE),
 
@@ -255,7 +262,7 @@ parameter_summary_map <- function(param_summary, area){
       )
     )) %>%
     leaflet.extras::addSearchFeatures(targetGroups = "search",
-                                      options = searchFeaturesOptions(openPopup = TRUE)) %>%
+                                      options = searchFeaturesOptions(openPopup = TRUE, textPlaceholder = "Search Station IDs...")) %>%
     htmlwidgets::onRender(jsCode = "function(el, x){
     var elements = document.getElementsByClassName('stationLabels');
     var index;
