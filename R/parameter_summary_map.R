@@ -212,20 +212,22 @@ parameter_summary_map <- function(param_summary, area){
     au_data <- merge(au_data, dplyr::filter(au_colors, Char_Name == i)[,c("AU_ID", "color")], by = "AU_ID")
     # wql_streams_tmp <- dplyr::filter(wql_streams, Char_Name == i)
 
-     map <- map %>%
-      addPolylines(data = au_data,
-                   opacity = 1,
-                   weight = 3,
-                   color = ~color,
-                   popup = ~paste0("<b>", AU_Name, "<br>AU ID:</b> ", AU_ID,
-                                   "<br><b>Parameter:</b> ", i, "<br>",
-                                   sapply(AU_ID, popupTable, station = NULL, param = i, USE.NAMES = FALSE)
-                   ),
-                   popupOptions = popupOptions(maxWidth = 1200),
-                   label = ~AU_ID,
-                   smoothFactor = 1.5,
-                   group = i
-      )
+    if(nrow(au_data) > 0){
+      map <- map %>%
+        addPolylines(data = au_data,
+                     opacity = 1,
+                     weight = 3,
+                     color = ~color,
+                     popup = ~paste0("<b>", AU_Name, "<br>AU ID:</b> ", AU_ID,
+                                     "<br><b>Parameter:</b> ", i, "<br>",
+                                     sapply(AU_ID, popupTable, station = NULL, param = i, USE.NAMES = FALSE)
+                     ),
+                     popupOptions = popupOptions(maxWidth = 1200),
+                     label = ~AU_ID,
+                     smoothFactor = 1.5,
+                     group = i
+        )
+    }
 
      map <- map %>%
       addAwesomeMarkers(data = psum,
