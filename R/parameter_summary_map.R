@@ -250,7 +250,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                      ),
                      popupOptions = popupOptions(maxWidth = 1200),
                      label = ~AU_ID,
-                     smoothFactor = 1.5,
+                     smoothFactor = 2,
                      options = pathOptions(className = "assessmentUnits", interactive = TRUE),
                      highlightOptions = highlightOptions(color = "black", weight = 8, opacity = 1),
                      group = i
@@ -273,7 +273,6 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                         popupOptions = popupOptions(maxWidth = 1200),
                         labelOptions = list(className = "stationLabels", noHide = T, permanent = T, interactive = T,
                                             offset = c(-10,-25), opacity = 0.9, textsize = "14px", sticky = TRUE),
-
                         group = i
       )
 
@@ -342,6 +341,56 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
   }
   function isElementHidden (element) {
     return window.getComputedStyle(element, null).getPropertyValue('display') === 'none';
+  }
+               }"
+      )
+    )) %>%
+    addEasyButton(easyButton(
+      icon = "fa-map-marker",
+      title = "Toggle Station Markers",
+      onClick = JS("function(btn, map){
+    var elements = document.getElementsByClassName('leaflet-pane leaflet-marker-pane');
+    var index;
+
+    elements = elements.length ? elements : [elements];
+  for (index = 0; index < elements.length; index++) {
+    element = elements[index];
+
+    if (isElementHidden(element)) {
+      element.style.display = '';
+
+      // If the element is still hidden after removing the inline display
+      if (isElementHidden(element)) {
+        element.style.display = 'block';
+      }
+    } else {
+      element.style.display = 'none';
+    }
+  }
+  function isElementHidden (element) {
+    return window.getComputedStyle(element, null).getPropertyValue('display') === 'none';
+  }
+
+  var shadows = document.getElementsByClassName('leaflet-pane leaflet-shadow-pane');
+    var index;
+
+    shadows = shadows.length ? shadows : [shadows];
+  for (index = 0; index < shadows.length; index++) {
+    shadow = shadows[index];
+
+    if (isElementHidden(shadow)) {
+      shadow.style.display = '';
+
+      // If the shadow is still hidden after removing the inline display
+      if (isElementHidden(shadow)) {
+        shadow.style.display = 'block';
+      }
+    } else {
+      shadow.style.display = 'none';
+    }
+  }
+  function isElementHidden(shadow) {
+    return window.getComputedStyle(shadow, null).getPropertyValue('display') === 'none';
   }
                }"
       )
