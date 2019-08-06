@@ -230,13 +230,16 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
   for(i in unique(param_summary$Char_Name)){
     print(paste("Adding layer for", i))
     psum <- param_summary %>% dplyr::filter(Char_Name == i)
+    psum$z_offset <- if_else(!(psum[[status_current]] %in% c("Unassessed", "Insufficient Data") & psum$trend %in% c("Insufficient Data", "No Significant Trend")),
+                             100, 0)
     psum_AU <- psum[!(psum[[status_current]] %in% c("Unassessed", "Insufficient Data") & psum$trend == "Insufficient Data"),]
     au_data <- dplyr::filter(assessment_units[, c("AU_ID", "AU_Name")], AU_ID %in% unique(psum_AU$AU_ID))
     au_data <- merge(au_data, dplyr::filter(au_colors, Char_Name == i)[,c("AU_ID", "color")], by = "AU_ID")
-    au_data <- rmapshaper::ms_simplify(au_data)
     # wql_streams_tmp <- dplyr::filter(wql_streams, Char_Name == i)
 
     if(nrow(au_data) > 0){
+      au_data <- rmapshaper::ms_simplify(au_data)
+
       map <- map %>%
         addPolylines(data = au_data,
                      stroke = TRUE,
@@ -273,6 +276,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                         popupOptions = popupOptions(maxWidth = 1200),
                         labelOptions = list(className = "stationLabels", noHide = T, permanent = T, interactive = T,
                                             offset = c(-10,-25), opacity = 0.9, textsize = "14px", sticky = TRUE),
+                        options = ~markerOptions(zIndexOffset = z_offset),
                         group = i
       )
 
@@ -289,34 +293,6 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                 var groupLayer = map.layerManager.getLayerGroup('Assessment Area');
                 map.fitBounds(groupLayer.getBounds());
                  }"))) %>%
-    addEasyButton(easyButton(
-      icon = "fa-map-signs",
-      title = "Toggle Station ID labels",
-      onClick = JS("function(btn, map){
-    var elements = document.getElementsByClassName('stationLabels');
-    var index;
-
-    elements = elements.length ? elements : [elements];
-  for (index = 0; index < elements.length; index++) {
-    element = elements[index];
-
-    if (isElementHidden(element)) {
-      element.style.display = '';
-
-      // If the element is still hidden after removing the inline display
-      if (isElementHidden(element)) {
-        element.style.display = 'block';
-      }
-    } else {
-      element.style.display = 'none';
-    }
-  }
-  function isElementHidden (element) {
-    return window.getComputedStyle(element, null).getPropertyValue('display') === 'none';
-  }
-               }"
-      )
-    )) %>%
     addEasyButton(easyButton(
       icon = "fa-sitemap",
       title = "Toggle Assessment Units",
@@ -391,6 +367,34 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
   }
   function isElementHidden(shadow) {
     return window.getComputedStyle(shadow, null).getPropertyValue('display') === 'none';
+  }
+               }"
+      )
+    )) %>%
+    addEasyButton(easyButton(
+      icon = "fa-map-signs",
+      title = "Toggle Station ID labels",
+      onClick = JS("function(btn, map){
+    var elements = document.getElementsByClassName('stationLabels');
+    var index;
+
+    elements = elements.length ? elements : [elements];
+  for (index = 0; index < elements.length; index++) {
+    element = elements[index];
+
+    if (isElementHidden(element)) {
+      element.style.display = '';
+
+      // If the element is still hidden after removing the inline display
+      if (isElementHidden(element)) {
+        element.style.display = 'block';
+      }
+    } else {
+      element.style.display = 'none';
+    }
+  }
+  function isElementHidden (element) {
+    return window.getComputedStyle(element, null).getPropertyValue('display') === 'none';
   }
                }"
       )
