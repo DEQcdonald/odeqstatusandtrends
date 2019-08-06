@@ -6,8 +6,8 @@
 #' @param parameters A list of parameters to include in the query
 #' @param stations_AWQMS Stations dataframe from get_stations_AWQMS()
 #' @param stations_WQP Stations dataframe from get_stations_WQP()
-#' @param start.date The earliest date to include in the query. "%Y-%m-%d"
-#' @param end.date The latest date to include in the query. "%Y-%m-%d"
+#' @param start.date The earliest date to include in the query. "YYYY-MM-DD"
+#' @param end.date The latest date to include in the query. "YYYY-MM-DD"
 #' @param query_nwis Logical. Should the function query the USGS NWIS database.
 #' @param stations_NWIS Stations dataframe from get_stations_NWIS()
 #' @param awqms.channel.name The name in quotes of the AWQMS ODBC connection. Defaults to "AWQMS".

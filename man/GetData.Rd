@@ -15,9 +15,9 @@ GetData(parameters = NULL, stations_AWQMS, stations_WQP, start.date,
 
 \item{stations_WQP}{Stations dataframe from get_stations_WQP()}
 
-\item{start.date}{The earliest date to include in the query. "%Y-%m-%d"}
+\item{start.date}{The earliest date to include in the query. "YYYY-MM-DD"}
 
-\item{end.date}{The latest date to include in the query. "%Y-%m-%d"}
+\item{end.date}{The latest date to include in the query. "YYYY-MM-DD"}
 
 \item{huc8}{List of hucs within boundary}
 
