@@ -2,12 +2,13 @@
 #'
 #'
 #' @param param_summary Parameter summary table from parameter_summary()
+#' @param assess_summary Assessment summary table from parameter_summary()
 #' @param area Shapefile for assessment areas
 #' @return map of status and trends results
 #' @export
 #' @examples parameter_summary_map(param_summary = parameter_summary_df)
 
-parameter_summary_map <- function(param_summary, area){
+parameter_summary_map <- function(param_summary, au_param_summary, area){
 
   status_current <- as.symbol(colnames(param_summary)[grep("trend", colnames(param_summary)) - 1])
 
@@ -49,6 +50,10 @@ parameter_summary_map <- function(param_summary, area){
 
   st_crs(area)
   area <- st_transform(area, 4326)
+
+  assessment_units <- assessment_units %>% group_by(AU_ID, AU_Name) %>% dplyr::summarise()
+  wql_streams_data <- sf::st_drop_geometry(wql_streams)
+  wql_streams_shp <- wql_streams %>% group_by(STREAM_NAM, SEGMENT_ID) %>% dplyr::summarise()
 
 # Create functions for mapping --------------------------------------------------------
 
@@ -92,12 +97,13 @@ parameter_summary_map <- function(param_summary, area){
   # This function is called on the click of a station marker in the parameter summary map.
   popupTable <- function(station = NULL, AU = NULL, param){
 
-    data <- param_summary %>% dplyr::rename(Pollutant = Char_Name, Station_ID = MLocID, Station_Description = StationDes)
+    data <- param_summary %>% dplyr::rename(Parameter = Char_Name, Station_ID = MLocID, Station_Description = StationDes)
 
     if(!is.null(station)){
       data <- filter(data[, c(4, 3, 6:11)],
-                     Station_ID == station, Pollutant == param) %>%
-        dplyr::select(-Pollutant, -Station_ID)
+                     Station_ID == station, Parameter == param)
+      # %>%
+        # dplyr::select(-Parameter, -Station_ID)
 
       colnames(data) <- gsub("(?<=[0-9])[^0-9]", "-", colnames(data), perl = TRUE)
       colnames(data) <- gsub("_", " ", colnames(data), perl = TRUE)
@@ -111,8 +117,8 @@ parameter_summary_map <- function(param_summary, area){
     }
     if(!is.null(AU)){
       data <- dplyr::filter(data[, c(1, 4, 3, 6:11)],
-                     AU_ID == AU, Pollutant == param) %>%
-        dplyr::select(-AU_ID, -Pollutant)
+                     AU_ID == AU, Parameter == param) %>%
+        dplyr::select(-AU_ID)
 
       colnames(data) <- gsub("(?<=[0-9])[^0-9]", "-", colnames(data), perl = TRUE)
       colnames(data) <- gsub("_", " ", colnames(data), perl = TRUE)
@@ -124,6 +130,24 @@ parameter_summary_map <- function(param_summary, area){
                       full_width = TRUE, font_size = 10)
 
     }
+    return(table)
+  }
+
+  au_table <- function(AU = NULL, param){
+
+    data <- au_param_summary %>% dplyr::rename(Parameter = Char_Name)
+
+    data <- dplyr::filter(data, AU_ID == AU, Parameter == param)
+
+    colnames(data) <- gsub("(?<=[0-9])[^0-9]", "-", colnames(data), perl = TRUE)
+    colnames(data) <- gsub("_", " ", colnames(data), perl = TRUE)
+    colnames(data) <- sapply(colnames(data), simpleCap, USE.NAMES = FALSE)
+
+    table <- kable(data,
+                   format = "html", row.names = FALSE) %>%
+      kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                    full_width = TRUE, font_size = 10)
+
     return(table)
   }
 
@@ -142,8 +166,6 @@ parameter_summary_map <- function(param_summary, area){
 # Create parameter summary map --------------------------------------------
 
   print("Creating Map...")
-
-  wql_streams_data <- sf::st_drop_geometry(wql_streams)
 
   map <- leaflet() %>% addTiles() %>%
     addProviderTiles(providers$Esri.WorldImagery, group = "World Imagery") %>%
@@ -170,8 +192,8 @@ parameter_summary_map <- function(param_summary, area){
 
   if(nrow(wql_streams_data)>0){
     map <- map %>%
-      addPolylines(data = wql_streams,
-                   opacity = 0.7,
+      addPolylines(data = wql_streams_shp,
+                   opacity = 1,
                    weight = 3.5,
                    color = "red",
                    # popup = ~paste0("<b>", STREAM_NAM,
@@ -182,6 +204,7 @@ parameter_summary_map <- function(param_summary, area){
                                    "<br></b><br>",
                                    sapply(SEGMENT_ID, WQLpopupTable, param = i, USE.NAMES = FALSE)),
                    popupOptions = popupOptions(maxWidth = 1200),
+                   highlightOptions = highlightOptions(color = "red", weight = 8, opacity = 1),
                    label = ~STREAM_NAM,
                    smoothFactor = 1.5,
                    group = "WQ Listed Streams"
@@ -210,21 +233,26 @@ parameter_summary_map <- function(param_summary, area){
     psum_AU <- psum[!(psum[[status_current]] %in% c("Unassessed", "Insufficient Data") & psum$trend == "Insufficient Data"),]
     au_data <- dplyr::filter(assessment_units[, c("AU_ID", "AU_Name")], AU_ID %in% unique(psum_AU$AU_ID))
     au_data <- merge(au_data, dplyr::filter(au_colors, Char_Name == i)[,c("AU_ID", "color")], by = "AU_ID")
+    au_data <- rmapshaper::ms_simplify(au_data)
     # wql_streams_tmp <- dplyr::filter(wql_streams, Char_Name == i)
 
     if(nrow(au_data) > 0){
       map <- map %>%
         addPolylines(data = au_data,
-                     opacity = 1,
+                     stroke = TRUE,
+                     opacity = 0.8,
                      weight = 3,
                      color = ~color,
-                     popup = ~paste0("<b>", AU_Name, "<br>AU ID:</b> ", AU_ID,
-                                     "<br><b>Parameter:</b> ", i, "<br>",
+                     popup = ~paste0("<b>", AU_Name, "<br>",
+                                     # "<br><b>Parameter:</b> ", i, "<br>",
+                                     sapply(AU_ID, au_table, param = i, USE.NAMES = FALSE),
                                      sapply(AU_ID, popupTable, station = NULL, param = i, USE.NAMES = FALSE)
                      ),
                      popupOptions = popupOptions(maxWidth = 1200),
                      label = ~AU_ID,
                      smoothFactor = 1.5,
+                     options = pathOptions(className = "assessmentUnits", interactive = TRUE),
+                     highlightOptions = highlightOptions(color = "black", weight = 8, opacity = 1),
                      group = i
         )
     }
@@ -239,8 +267,8 @@ parameter_summary_map <- function(param_summary, area){
                                             markerColor = ~color),
                         label = ~MLocID,
                         popup = ~paste0("<b>", StationDes, "<br>ID:</b> ", MLocID,
-                                        "<br><b>AU:</b> ", AU_ID,
-                                        "<br><b>Parameter:</b> ", i, "<br>",
+                                        "<br><b>AU ID:</b> ", AU_ID,
+                                        "<br>",
                                         sapply(MLocID, popupTable, AU = NULL, param = i, USE.NAMES = FALSE)),
                         popupOptions = popupOptions(maxWidth = 1200),
                         labelOptions = list(className = "stationLabels", noHide = T, permanent = T, interactive = T,
@@ -254,10 +282,7 @@ parameter_summary_map <- function(param_summary, area){
   map <- map %>%
     addLayersControl(baseGroups = sort(unique(param_summary$Char_Name)),
                      overlayGroups = c("Assessment Area", "WQ Listed Streams", "World Imagery", "Hydrography", "Land Cover (NLCD 2016)")) %>%
-    hideGroup(c(
-      # unique(param_summary$Char_Name)[-1],
-                # paste(unique(param_summary$Char_Name), "Labels"),
-                "World Imagery", "Hydrography", "Land Cover (NLCD 2016)", "WQ Listed Streams")) %>%
+    hideGroup(c("World Imagery", "Hydrography", "Land Cover (NLCD 2016)", "WQ Listed Streams")) %>%
     addEasyButton(easyButton(
       icon = "fa-globe",
       title = "Zoom to assessment area",
@@ -270,6 +295,34 @@ parameter_summary_map <- function(param_summary, area){
       title = "Toggle Station ID labels",
       onClick = JS("function(btn, map){
     var elements = document.getElementsByClassName('stationLabels');
+    var index;
+
+    elements = elements.length ? elements : [elements];
+  for (index = 0; index < elements.length; index++) {
+    element = elements[index];
+
+    if (isElementHidden(element)) {
+      element.style.display = '';
+
+      // If the element is still hidden after removing the inline display
+      if (isElementHidden(element)) {
+        element.style.display = 'block';
+      }
+    } else {
+      element.style.display = 'none';
+    }
+  }
+  function isElementHidden (element) {
+    return window.getComputedStyle(element, null).getPropertyValue('display') === 'none';
+  }
+               }"
+      )
+    )) %>%
+    addEasyButton(easyButton(
+      icon = "fa-sitemap",
+      title = "Toggle Assessment Units",
+      onClick = JS("function(btn, map){
+    var elements = document.getElementsByClassName('assessmentUnits');
     var index;
 
     elements = elements.length ? elements : [elements];
