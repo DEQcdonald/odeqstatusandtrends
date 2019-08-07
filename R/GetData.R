@@ -68,7 +68,7 @@ GetData <- function(parameters = NULL, stations_AWQMS, stations_WQP, start.date,
   data_AWQMS <- data_AWQMS %>% filter(MonLocType %in% c("River/Stream", "Lake", "Other-Surface Water", ""))
 
   data_AWQMS[is.na(data_AWQMS$SampleStartTime), "SampleStartTime"] <- "00:00:00.000000"
-  data_AWQMS[is.na(data_AWQMS$SampleStartTime), "SampleStartTZ"] <- "NA"
+  data_AWQMS[is.na(data_AWQMS$SampleStartTime), "SampleStartTZ"] <- "unknown"
 
   if(query_nwis){
     usgs_stations <- unique(stations_NWIS$site_no)
