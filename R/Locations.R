@@ -25,9 +25,14 @@ get_stations_AWQMS <- function(polygon, exclude.tribal.lands = TRUE, stations.ch
 
   # Clip stations to input polygon
   print("Clipping stations to your shapefile...")
-  stations <- dplyr::filter(stations, MLocID %in% StationsInPoly(stations, polygon, outside = FALSE,
-                                                                 id_col="MLocID", lat_col="Lat_DD",
-                                                                 lon_col="Long_DD", datum_col="Datum"))
+  stations <- dplyr::filter(stations,
+                            MLocID %in% StationsInPoly(stations, polygon, outside = FALSE,
+                                                       id_col="MLocID", lat_col="Lat_DD",
+                                                       lon_col="Long_DD", datum_col="Datum"),
+                            MonLocType %in% c("River/Stream", "Reservoir", "Lake",
+                                              "River/Stream Perennial", "Other-Surface Water",
+                                              "Estuary", "BEACH Program Site-Ocean", "Ocean", "Spring")
+  )
 
   if(exclude.tribal.lands){
 
@@ -39,6 +44,13 @@ get_stations_AWQMS <- function(polygon, exclude.tribal.lands = TRUE, stations.ch
     stations <- dplyr::filter(stations, MLocID %in% StationsInPoly(stations, tribal.lands, outside = TRUE,
                                                                    id_col="MLocID", lat_col="Lat_DD",
                                                                    lon_col="Long_DD", datum_col="Datum"))
+  }
+
+  if(any(is.na(stations$AU_ID))){
+    print("The following stations have missing AU IDs and were removed...")
+    missing_au <- stations[is.na(stations$AU_ID),]
+    stations <- stations %>% dplyr::filter(!MLocID %in% missing_au$MLocID)
+    print(missing_au[,c("OrgID", "MLocID", "AU_ID", "Lat_DD", "Long_DD")])
   }
 
   if(any(stations$AU_ID == "99")){
