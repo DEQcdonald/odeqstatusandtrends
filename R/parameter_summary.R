@@ -45,7 +45,7 @@ parameter_summary_by_au <- function(status, sea_ken, stations){
   param_sum[is.na(param_sum$trend), "trend"] <- "Insufficient Data"
 
   assess_sum <- param_sum %>% dplyr::select(-MLocID, -StationDes, -trend, -Lat_DD, -Long_DD, -HUC8, -HUC8_Name) %>%
-    dplyr::group_by(AU_ID, Char_Name) %>%
+    dplyr::group_by(AU_ID, AU_Name, Char_Name) %>%
     dplyr::summarise_all(function(x){
       y <- if_else(any(x == "Not Attaining"),
                    "Not Attaining",
