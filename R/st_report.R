@@ -18,5 +18,5 @@ st_report <- function(basin, param_summary, file_name, out_path){
                     param_sum = param_summary),
                   output_file = file_name,
                   output_dir = out_path,
-                  envir = globalenv())
+                  envir = parent.frame())
 }
