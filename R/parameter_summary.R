@@ -15,7 +15,7 @@ parameter_summary_by_station <- function(status, sea_ken, stations){
 
   param_sum <- merge(st_stations_info, status, by = "MLocID")
   param_sum <- merge(param_sum, sea_ken, by = c("MLocID", "Char_Name"), all.x = TRUE)
-  param_sum <- dplyr::select(param_sum, AU_Name, AU_ID, Char_Name, MLocID, StationDes,
+  param_sum <- dplyr::select(param_sum, AU_ID, AU_Name, Char_Name, MLocID, StationDes,
                              rev(colnames(status)[3:length(colnames(status))]), trend, Lat_DD, Long_DD, HUC8, HUC8_Name)
   param_sum <- param_sum[order(param_sum[,1], param_sum[,3], param_sum[,4]),]
   param_sum[is.na(param_sum$trend), "trend"] <- "Insufficient Data"
