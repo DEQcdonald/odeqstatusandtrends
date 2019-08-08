@@ -14,12 +14,12 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
 
 # Set up shapefiles for map -----------------------------------------------
   print("Processing shapefiles...")
-  query <- paste0("SELECT * FROM AssessmentUnits_OR_Lines WHERE AU_ID IN ('",
+  query <- paste0("SELECT * FROM AssessmentUnits_OR_Dissolve WHERE AU_ID IN ('",
                   paste(unique(param_summary$AU_ID), collapse = "', '"), "')")
 
   assessment_units <- sf::st_read(
     dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/Assessment.gdb",
-    layer = "AssessmentUnits_OR_Lines",
+    layer = "AssessmentUnits_OR_Dissolve",
     query = query, stringsAsFactors = FALSE
   )
 
