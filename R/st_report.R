@@ -5,6 +5,8 @@
 #' @param param_summary A parameter summary table as returned from odeqstatusandtrends::parameter_summary().
 #' @param file_name The name of the output .html file
 #' @param out_path The output path
+#' @param complete_years A list of complete years within analysis
+#' @param hucs A list of huc8s within analysis area
 #' @return An html report located in the output path
 #' @export
 #' @examples

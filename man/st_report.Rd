@@ -4,7 +4,7 @@
 \alias{st_report}
 \title{Create Status and Trends Report}
 \usage{
-st_report(basin, param_summary, file_name, out_path)
+st_report(basin, param_summary, file_name, out_path, complete_years, hucs)
 }
 \arguments{
 \item{basin}{The name of the basin for reporting}
@@ -14,6 +14,10 @@ st_report(basin, param_summary, file_name, out_path)
 \item{file_name}{The name of the output .html file}
 
 \item{out_path}{The output path}
+
+\item{complete_years}{A list of complete years within analysis}
+
+\item{hucs}{A list of huc8s within analysis area}
 }
 \value{
 An html report located in the output path
