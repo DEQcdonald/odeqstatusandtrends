@@ -50,7 +50,7 @@ status_stns <- function(data, year_range = c(year(Sys.Date())-21, year(Sys.Date(
                                                          "Attaining")
                         )
        ) %>%
-       ungroup() %>% select(-n_years, -excursions) %>% spread(key = bin, value = status)
+       ungroup() %>% select(-samples, -excursions) %>% spread(key = bin, value = status)
 
      if(any(data$year %in% years & data$BacteriaCode == 3 & data$Char_Name == "Fecal Coliform")){
        shell_status <- data %>%
@@ -87,8 +87,14 @@ status_stns <- function(data, year_range = c(year(Sys.Date())-21, year(Sys.Date(
 
      }
 
-
     status_check[is.na(status_check)] <- "Unassessed"
+    cols <- c("MLocID", "Char_Name", cols)
+
+    for(i in cols[!cols %in% colnames(status_check)]){
+      status_check[,i] <- "Unassessed"
+    }
+
+    status_check <- status_check[,cols]
 
     print(paste("Data should be sufficient for", NROW(status_check), "different statuses to be determined."))
 
