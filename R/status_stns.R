@@ -41,16 +41,13 @@ status_stns <- function(data, year_range = c(year(Sys.Date())-21, year(Sys.Date(
        filter(year %in% years,
               !(BacteriaCode == 3 & Char_Name == "Fecal Coliform")) %>%
        dplyr::group_by(MLocID, Char_Name, bin) %>%
-       dplyr::summarise(n_years = length(unique(year)),
+       dplyr::summarise(samples = n(),
                         excursions = sum(excursion_cen, na.rm = TRUE),
-                        status = if_else(n_years < 1 | is.na(n_years) | all(is.na(excursion_cen)),
+                        status = if_else(samples < 1 | is.na(samples) | all(is.na(excursion_cen)),
                                          "Unassessed",
-                                         if_else(n_years < 2,
-                                                 "Insufficient Data",
                                                  if_else(any(excursion_cen == 1, na.rm = TRUE),
                                                          "Not Attaining",
                                                          "Attaining")
-                                         )
                         )
        ) %>%
        ungroup() %>% select(-n_years, -excursions) %>% spread(key = bin, value = status)
@@ -74,14 +71,11 @@ status_stns <- function(data, year_range = c(year(Sys.Date())-21, year(Sys.Date(
                                                       if_else(num_samples >= 5 & num_samples <= 9 & num_exceed >= 1,
                                                               1, 0)
                                               )),
-                          status = if_else(n_years < 1 | is.na(n_years) | all(is.na(excursion)),
+                          status = if_else(num_samples < 1 | is.na(num_samples) | all(is.na(excursion)),
                                            "Unassessed",
-                                           if_else(n_years < 2,
-                                                   "Insufficient Data",
-                                                   if_else(excursion == 1,
-                                                           "Not Attaining",
-                                                           "Attaining")
-                                           )
+                                           if_else(any(excursion == 1, na.rm = TRUE),
+                                                   "Not Attaining",
+                                                   "Attaining")
                           )
 
          ) %>%
