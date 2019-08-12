@@ -23,6 +23,13 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
     query = query, stringsAsFactors = FALSE
   )
 
+  agwqma <- sf::st_read(
+    dsn = "//deqhq1/WQNPS/Status_and_Trend_Reports/GIS",
+    layer = "ODA_AgWQMA",
+    stringsAsFactors = FALSE
+  )
+  agwqma <- agwqma[,c("PlanName","AgWQ_Repor")]
+
   wql_streams <- sf::st_read(
     dsn = "//deqhq1/WQNPS/Agriculture/Status_and_Trend_Analysis/R_support_files",
     layer = "WQL_Streams_2012",
@@ -34,6 +41,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
 
   assessment_units <- sf::st_zm(assessment_units, what = "ZM")
   wql_streams <- sf::st_zm(wql_streams, what = "ZM")
+  agwqma <- sf::st_zm(agwqma, what = "ZM")
 
   st_crs(assessment_units)
   assessment_units <- st_transform(assessment_units, 4326)
@@ -43,6 +51,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
   wql_streams <- filter(wql_streams[, c("STREAM_NAM", "SEGMENT_ID", "SEASON", "Char_Name", "LISTING_ST", "TMDL_INFO")], Char_Name %in% unique(param_summary$Char_Name))
   wql_streams <- wql_streams[lapply(wql_streams$`_ogr_geometry_`, length) != 0,]
   wql_streams$TMDL_INFO <- vapply(strsplit(wql_streams$TMDL_INFO, "<a"), `[`, 1, FUN.VALUE=character(1))
+  st_crs(agwqma)
+  agwqma <- st_transform(agwqma, 4326)
 
   if(!any(class(area) == "sf")){
     area <- sf::st_as_sf(area)
@@ -50,6 +60,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
 
   st_crs(area)
   area <- st_transform(area, 4326)
+  agwqma <- agwqma %>% dplyr::filter(lengths(st_intersects(., area)) > 0)
+  x <- agwqma %>% dplyr::filter(PlanName %in% st_join(area, agwqma, largest = TRUE)$PlanName)
 
   assessment_units <- assessment_units %>% group_by(AU_ID, AU_Name) %>% dplyr::summarise()
   wql_streams_data <- sf::st_drop_geometry(wql_streams)
@@ -180,7 +192,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                 options = WMSTileOptions(format = "image/png",
                                          transparent = TRUE),
                 layers = "0") %>%
-    addPolygons(data = area, fill = FALSE, group = "Assessment Area") %>%
+    addPolygons(data = agwqma, fill = TRUE, color = "black", fillColor = "black", opacity = 0.8, weight = 5,
+                group = "Ag WQ Management Areas", label = ~PlanName) %>%
+    addPolygons(data = area, fill = FALSE, group = "Assessment Area", opacity = 0.8, label = "Assessment Area") %>%
     addMarkers(data = unique(param_summary[,c("AU_ID", "MLocID", "StationDes", "Lat_DD", "Long_DD")]),
                label = ~paste0(MLocID, ": ", StationDes),
                popup = ~paste0("<b>", MLocID, "</b>: ", StationDes, "<br>",
@@ -284,8 +298,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
 
   map <- map %>%
     addLayersControl(baseGroups = sort(unique(param_summary$Char_Name)),
-                     overlayGroups = c("Assessment Area", "WQ Listed Streams", "World Imagery", "Hydrography", "Land Cover (NLCD 2016)")) %>%
-    hideGroup(c("World Imagery", "Hydrography", "Land Cover (NLCD 2016)", "WQ Listed Streams")) %>%
+                     overlayGroups = c("Assessment Area", "WQ Listed Streams", "Ag WQ Management Areas",
+                                       "World Imagery", "Hydrography", "Land Cover (NLCD 2016)")) %>%
+    hideGroup(c("World Imagery", "Hydrography", "Ag WQ Management Areas", "Land Cover (NLCD 2016)", "WQ Listed Streams")) %>%
     addEasyButton(easyButton(
       icon = "fa-globe",
       title = "Zoom to assessment area",
