@@ -60,8 +60,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
 
   st_crs(area)
   area <- st_transform(area, 4326)
-  agwqma <- agwqma %>% dplyr::filter(lengths(st_intersects(., area)) > 0)
-  x <- agwqma %>% dplyr::filter(PlanName %in% st_join(area, agwqma, largest = TRUE)$PlanName)
+  p_stns <- st_as_sf(param_summary, coords = c("Long_DD", "Lat_DD"), crs = 4326)
+  agwqma <- agwqma %>% dplyr::filter(lengths(st_intersects(., p_stns)) > 0)
 
   assessment_units <- assessment_units %>% group_by(AU_ID, AU_Name) %>% dplyr::summarise()
   wql_streams_data <- sf::st_drop_geometry(wql_streams)
@@ -112,7 +112,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
     data <- param_summary %>% dplyr::rename(Parameter = Char_Name, Station_ID = MLocID, Station_Description = StationDes)
 
     if(!is.null(station)){
-      data <- filter(data[, c(4, 3, 6:11)],
+      data <- filter(data[, c(4, 3, grep("status", colnames(param_summary)), "trend")],
                      Station_ID == station, Parameter == param)
       # %>%
         # dplyr::select(-Parameter, -Station_ID)
@@ -128,7 +128,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
 
     }
     if(!is.null(AU)){
-      data <- dplyr::filter(data[, c(1, 4, 3, 6:11)],
+      data <- dplyr::filter(data[, c(1, 4, 3, grep("status", colnames(param_summary)))],
                      AU_ID == AU, Parameter == param) %>%
         dplyr::select(-AU_ID)
 
