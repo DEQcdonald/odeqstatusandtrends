@@ -3,8 +3,7 @@
 #' Creates a dataframe with stations, the number of years with data within
 #' the status years, and whether or not there were any exceedances.
 #' @param data Dataframe to determine status from.
-#' @param year_range Years from which to determine status. Default is most
-#' recent full year and the 20 years previous.
+#' @param year_range Years from which to determine status. If null, the year range for data provided is used.
 #' @param status_period Number of whole to include in a status analysis.
 #' The range of years in status years will be binned by this number
 #' @return Dataframe of stations with sufficient data
@@ -12,10 +11,14 @@
 #' @examples
 #' status_stns(data = data.frame, year_range = c(start_year, end_year), status_period = 5)
 
-status_stns <- function(data, year_range = c(year(Sys.Date())-21, year(Sys.Date())-1),
-                        status_period = 4) {
+status_stns <- function(data, year_range = NULL, status_period = 4) {
 
   data$year <- lubridate::year(data$sample_datetime)
+
+  if(is.null(year_range)){
+    year_range <- c(min(data$year, na.rm = TRUE), max(data$year, na.rm = TRUE))
+  }
+
   years <- year_range[2]:year_range[1]
   breaks <- seq(year_range[2], year_range[1], by = -4)
   cols <- sapply(breaks, function(x){

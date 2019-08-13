@@ -4,14 +4,12 @@
 \alias{status_stns}
 \title{Determine stations with sufficient data for status analysis}
 \usage{
-status_stns(data, year_range = c(year(Sys.Date()) - 21, year(Sys.Date())
-  - 1), status_period = 4)
+status_stns(data, year_range = NULL, status_period = 4)
 }
 \arguments{
 \item{data}{Dataframe to determine status from.}
 
-\item{year_range}{Years from which to determine status. Default is most
-recent full year and the 20 years previous.}
+\item{year_range}{Years from which to determine status. If null, the year range for data provided is used.}
 
 \item{status_period}{Number of whole to include in a status analysis.
 The range of years in status years will be binned by this number}
