@@ -9,12 +9,21 @@
 #' @examples parameter_summary(status = status_df, seaken = seasonal_kendall_df)
 
 parameter_summary_by_station <- function(status, sea_ken, stations){
-  st_stations <- unique(c(status$MLocID, sea_ken$MLocID))
+  st_stations <- unique(status$MLocID)
+
+  if(!is.null(sea_ken)){
+    st_stations <- unique(c(status$MLocID, sea_ken$MLocID))
+  }
+
   st_stations_info <- stations %>% dplyr::filter(MLocID %in% st_stations) %>%
     dplyr::select(AU_Name, AU_ID, MLocID, StationDes, Lat_DD, Long_DD, HUC8, HUC8_Name)
 
   param_sum <- merge(st_stations_info, status, by = "MLocID")
-  param_sum <- merge(param_sum, sea_ken, by = c("MLocID", "Char_Name"), all.x = TRUE)
+
+  if(!is.null(sea_ken)){
+    param_sum <- merge(param_sum, sea_ken, by = c("MLocID", "Char_Name"), all.x = TRUE)
+  } else {param_sum$trend <- "Insufficient Data"}
+
   param_sum <- dplyr::select(param_sum, AU_ID, AU_Name, Char_Name, MLocID, StationDes,
                              # rev(colnames(status)[3:length(colnames(status))]),
                              colnames(status)[3:length(colnames(status))], trend, Lat_DD, Long_DD, HUC8, HUC8_Name)
@@ -34,12 +43,21 @@ parameter_summary_by_station <- function(status, sea_ken, stations){
 #' @examples parameter_summary(status = status_df, seaken = seasonal_kendall_df)
 
 parameter_summary_by_au <- function(status, sea_ken, stations){
-  st_stations <- unique(c(status$MLocID, sea_ken$MLocID))
+  st_stations <- unique(status$MLocID)
+
+  if(!is.null(sea_ken)){
+    st_stations <- unique(c(status$MLocID, sea_ken$MLocID))
+  }
+
   st_stations_info <- stations %>% dplyr::filter(MLocID %in% st_stations) %>%
     dplyr::select(AU_ID, AU_Name, MLocID, StationDes, Lat_DD, Long_DD, HUC8, HUC8_Name)
 
   param_sum <- merge(st_stations_info, status, by = "MLocID")
-  param_sum <- merge(param_sum, sea_ken, by = c("MLocID", "Char_Name"), all.x = TRUE)
+
+  if(!is.null(sea_ken)){
+    param_sum <- merge(param_sum, sea_ken, by = c("MLocID", "Char_Name"), all.x = TRUE)
+  } else {param_sum$trend <- "Insufficient Data"}
+
   param_sum <- dplyr::select(param_sum, AU_ID, AU_Name, Char_Name, MLocID, StationDes,
                              # rev(colnames(status)[3:length(colnames(status))]),
                              colnames(status)[3:length(colnames(status))], trend, Lat_DD, Long_DD, HUC8, HUC8_Name)

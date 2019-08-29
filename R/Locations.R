@@ -1,4 +1,4 @@
-#' Get stations in Oregon for status and trends analysis
+#' Get stations in Oregon from DEQ's Ambient Water Quality Monitoring System for status and trends analysis
 #'
 #' Queries the ODEQ stations database to pull all available stations within a given shapefile.
 #' @param polygon Shapefile of the area to query
@@ -8,8 +8,6 @@
 #' @export
 #' @examples
 #' get_stations_AWQMS(polygon = "your-shapefile-here", exclude.tribal.lands = TRUE, stations.channel.name = "STATIONS")
-
-#@param parameters A list of parameters with which to filter the query.
 
 get_stations_AWQMS <- function(polygon, exclude.tribal.lands = TRUE, stations.channel.name = "STATIONS") {
 
@@ -51,6 +49,7 @@ get_stations_AWQMS <- function(polygon, exclude.tribal.lands = TRUE, stations.ch
     missing_au <- stations[is.na(stations$AU_ID),]
     stations <- stations %>% dplyr::filter(!MLocID %in% missing_au$MLocID)
     print(missing_au[,c("OrgID", "MLocID", "AU_ID", "Lat_DD", "Long_DD")])
+    attr(stations, 'missing_AUs') <- missing_au[,c("OrgID", "MLocID", "AU_ID", "Lat_DD", "Long_DD")]
   }
 
   if(any(stations$AU_ID == "99")){
@@ -61,9 +60,9 @@ get_stations_AWQMS <- function(polygon, exclude.tribal.lands = TRUE, stations.ch
   return(stations)
 }
 
-#' Get WQP stations in Oregon for status and trends analysis
+#' Get Water Quality Portal stations in Oregon for status and trends analysis
 #'
-#' Queries the Water Quality Portal stations database to pull all available stations within a given shapefile.
+#' Queries the Water Quality Portal stations database to pull all available stations within a given shapefile, ignoring OREGONDEQ orgIDs.
 #' @param polygon Shapefile of the area to query
 #' @param start_date Date to begin query
 #' @param end_date Date to end query
@@ -88,6 +87,10 @@ get_stations_WQP <- function(polygon, start_date, end_date, huc8, exclude.tribal
   e.time <- Sys.time()
   print(paste("This query took approximately", difftime(e.time, s.time, units = "secs"), "seconds"))
 
+  if(nrow(stations) < 1 | is.na(stations[1,])){
+    return(paste("There are no STORET stations available for these query parameters"))
+  }
+
   stations <- stations %>% dplyr::rename(OrgID = OrganizationIdentifier, MLocID = MonitoringLocationIdentifier,
                                          StationDes = MonitoringLocationName, Lat_DD = LatitudeMeasure, Long_DD = LongitudeMeasure,
                                          Datum = HorizontalCoordinateReferenceSystemDatumName)
@@ -95,6 +98,10 @@ get_stations_WQP <- function(polygon, start_date, end_date, huc8, exclude.tribal
   stations <- as.data.frame(stations)
 
   stations <- stations %>% dplyr::filter(!OrgID == "OREGONDEQ")
+
+  if(nrow(stations) < 1 | is.na(stations[1,])){
+    return(paste("There are no STORET stations available for these query parameters"))
+  }
 
   # Clip stations to input polygon
   print("Clipping stations to your shapefile...")

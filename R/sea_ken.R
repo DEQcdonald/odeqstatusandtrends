@@ -63,6 +63,12 @@ sea_ken <- function(data){
   #           )
   #   )
 
+  for (i in c('ID', 'Char', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Total')){
+    col_add <- if(!i %in% colnames(sample_size)){
+      sample_size[i] <- NA
+    }
+  }
+
   attr(sea_ken_df, "sample_size") <- sample_size[, c('ID', 'Char', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
                                                      'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Total')]
   return(sea_ken_df)

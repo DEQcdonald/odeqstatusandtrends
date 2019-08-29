@@ -47,7 +47,7 @@ GetData <- function(parameters = NULL, stations_AWQMS, stations_WQP, start.date,
   e.time <- Sys.time()
   print(paste("This query took approximately", difftime(e.time, s.time, units = "secs"), "seconds."))
 
-  if(nrow(stations_WQP) > 0){
+  if(!is.null(stations_WQP) && nrow(stations_WQP) > 0){
     print(paste('Querying the Water Quality Portal for data at', length(stations_WQP$MLocID), 'stations related to:', paste(parameters, collapse = ", ")))
 
     s.time <- Sys.time()

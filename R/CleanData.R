@@ -16,6 +16,8 @@ CleanData <- function(data)
   print("Checking for any missing start times...")
   print(any(is.na(data$SampleStartTime)))
 
+  print("Remove missing start times...")
+  data <- data %>% dplyr::filter(!is.na(sample_datetime))
   # Removing DQL values lower than C and rejected results
   print("Removing DQL values below 'C' and 'rejected' results...")
   data <- filter(data,

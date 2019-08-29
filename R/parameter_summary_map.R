@@ -11,6 +11,7 @@
 parameter_summary_map <- function(param_summary, au_param_summary, area){
 
   status_current <- as.symbol(colnames(param_summary)[grep("trend", colnames(param_summary)) - 1])
+  au_param_summary <- au_param_summary %>% filter(AU_ID != "")
 
 # Set up shapefiles for map -----------------------------------------------
   print("Processing shapefiles...")
@@ -149,16 +150,16 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
 
     data <- au_param_summary %>% dplyr::rename(Parameter = Char_Name)
 
-    data <- dplyr::filter(data, AU_ID == AU, Parameter == param)
-
     colnames(data) <- gsub("(?<=[0-9])[^0-9]", "-", colnames(data), perl = TRUE)
     colnames(data) <- gsub("_", " ", colnames(data), perl = TRUE)
     colnames(data) <- sapply(colnames(data), simpleCap, USE.NAMES = FALSE)
 
-    table <- kable(data,
-                   format = "html", row.names = FALSE) %>%
+    table <- kable(data, format = "html",
+                   table.attr = "id=\"mytable\"", row.names = FALSE) %>%
       kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
                     full_width = TRUE, font_size = 10)
+
+    data <- dplyr::filter(data, AU_ID == AU, Parameter == param)
 
     return(table)
   }
@@ -180,6 +181,16 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
   print("Creating Map...")
 
   map <- leaflet() %>% addTiles() %>%
+    htmlwidgets::appendContent(HTML(table)) %>%
+  #   htmlwidgets::onRender(
+  #     "
+  # function(el, x) {
+  #   // our leaflet map is available as this
+  #   mymap = this;
+  # }
+  # "
+  #   ) %>%
+    addEsriDependency() %>%
     addProviderTiles(providers$Esri.WorldImagery, group = "World Imagery") %>%
     addWMSTiles(baseUrl = 'https://www.mrlc.gov/geoserver/mrlc_display/NLCD_2016_Land_Cover_L48/wms?',
                 group = "Land Cover (NLCD 2016)",
@@ -251,6 +262,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
     # au_data <- merge(au_data, dplyr::filter(au_colors, Char_Name == i)[,c("AU_ID", "color")], by = "AU_ID")
     au_data <- au_colors %>% dplyr::filter(Char_Name == i)
     # wql_streams_tmp <- dplyr::filter(wql_streams, Char_Name == i)
+    green_ids <- au_data[au_data$color == "green", ]$AU_ID
 
     if(nrow(au_data) > 0){
     #   au_data <- rmapshaper::ms_simplify(au_data)
@@ -285,16 +297,33 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                                     ),
                                   highlightOptions = highlightOptions(color = "black", weight = 8, opacity = 1, bringToFront = TRUE),
                                   color = j, fill = FALSE, group = i, opacity = 1, labelProperty = "AU_Name",
-                                  pathOptions = leaflet::pathOptions(className = "assessmentUnits", interactive = TRUE),
+                                  pathOptions = leaflet::pathOptions(className = "assessmentUnits", interactive = TRUE)
+                                  ,
                                   popupProperty = JS(paste0(
                                     "function(feature) {",
+                                    "var input, filter, table, tr, td, i, txtValue;",
+                                    "input = {AU_ID};",
+                                    "table = ", table, ";",
+                                    "tr = table.getElementsByTagName('tr');",
+                                    "for (i = 0; i < tr.length; i++) {
+                                    td = tr[i].getElementsByTagName('td')[0];
+                                    if (td) {
+                                    txtValue = td.textContent || td.innerText;
+                                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                                    tr[i].style.display = '';
+                                    } else {
+                                    tr[i].style.display = 'none';
+                                    }
+                                    }
+                                    }",
                                     "  return L.Util.template(",
                                     " '",
                                     "<b>{AU_Name}<br>",
-                                    gsub("\\n", "",
-                                         sapply(k, au_table, param = i, USE.NAMES = FALSE)),
-                                    gsub("\\n", "",
-                                         sapply(k, popupTable, station = NULL, param = i, USE.NAMES = FALSE)),
+                                    table,
+                                    # gsub("\\n", "",
+                                    #      sapply(k, au_table, param = i, USE.NAMES = FALSE)),
+                                    # gsub("\\n", "",
+                                    #      sapply(k, popupTable, station = NULL, param = i, USE.NAMES = FALSE)),
                                     "   ' ,",
                                     "    feature.properties",
                                     "  );",
@@ -471,7 +500,52 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
   function isElementHidden (element) {
     return window.getComputedStyle(element, null).getPropertyValue('display') === 'none';
   }
-               }") %>% hideGroup("search")
+               }") %>%
+    htmlwidgets::onRender(paste0(
+      "function(el, x) {",
+      "var assessmentUnits = L.esri.featureLayer({",
+      "url: 'https://deq14.deq.state.or.us/arcgis/rest/services/WQ/WQ_2018_IR_V3/MapServer/14',",
+      "where: ",
+      '"', "AU_ID IN ('", paste0("AU_ID IN ('", paste(k, collapse = "', '"), "')"), '",',
+      # "OR_LK_1709001203_02_100869','OR_SR_1709000110_02_104584','OR_SR_1709000204_02_103787','OR_SR_1709000301_02_103796')", '",',
+      "style: function (feature) {",
+      "var c;",
+      "switch (feature.properties.AU_ID) {",
+      'case "', paste0(au_data[au_data$color == "green", ]$AU_ID, collapse = ","), '"',
+      "c = '#179639';",
+      "break;",
+      'case "', paste0(au_data[au_data$color == "orange", ]$AU_ID, collapse = ","), '"',
+      "c = '#fc923a';",
+      "break;",
+      'case "', paste0(au_data[au_data$color == "lightgray", ]$AU_ID, collapse = ","), '"',
+      "c = '#a3a3a3';",
+      "break;",
+      "default: '#ff00f2';",
+      "}",
+      "return {color: c, opacity: 1, weight: 8};",
+      "}",
+      "}).addTo(this);",
+      "assessmentUnits.bindPopup(",
+      "function (layer) {",
+      "var input, table, tr, td, i, txtValue;",
+      "input = layer.feature.properties.AU_ID;",
+      "table = document.getElementById('mytable');",
+      "tr = table.getElementsByTagName('tr');",
+      "for (i = 0; i < tr.length; i++) { ",
+      "td = tr[i].getElementsByTagName('td')[0];",
+      "if (td) {",
+      "txtValue = td.innerText || td.innerHTML;",
+      "if (txtValue.toUpperCase().indexOf(input) > -1) {",
+      "tr[i].style.display = '';",
+      "} else {",
+      "tr[i].style.display = 'none';",
+      "}}}",
+      ";",
+      "return table",
+      "}, {maxWidth : 1200});",
+      "}"
+    )
+    ) %>% hideGroup("search")
 
   return(map)
 }
