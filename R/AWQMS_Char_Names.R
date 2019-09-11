@@ -10,6 +10,7 @@
 AWQMS_Char_Names <- function(parameters){
 
   if(is.null(parameters)){return(NULL)}
+  parameters <- tolower(parameters)
 
   #### Expand bacteria to include fecal and enterococcus ####
   if(any(parameters %in% c('Bacteria', 'bacteria'))) {
@@ -20,25 +21,19 @@ AWQMS_Char_Names <- function(parameters){
   #### Lookup table for parameters and their AWQMS database name ####
   parms.lookup <- data.frame(General = c("tss",
                                          "temperature",
-                                         "tp",
-                                         "total phosphorus",
+                                         "tp", "total phosphorus", "phosphorus",
                                          "ph",
                                          "fecal coliform",
-                                         "ecoli",
-                                         "e. coli",
-                                         "e.coli",
+                                         "ecoli", "e. coli", "e.coli",
                                          "enterococcus",
                                          "do",
                                          "dissolved oxygen"),
                              AWQMS.Name = c("Total suspended solids",
                                             "Temperature, water",
-                                            "Phosphate-phosphorus",
-                                            "Phosphate-phosphorus",
+                                            "Phosphate-phosphorus", "Phosphate-phosphorus", "Phosphate-phosphorus",
                                             "pH",
                                             "Fecal Coliform",
-                                            "Escherichia coli",
-                                            "Escherichia coli",
-                                            "Escherichia coli",
+                                            "Escherichia coli", "Escherichia coli", "Escherichia coli",
                                             "Enterococcus",
                                             "Dissolved oxygen (DO)",
                                             "Dissolved oxygen (DO)"),
