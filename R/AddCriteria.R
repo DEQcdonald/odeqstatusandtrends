@@ -8,6 +8,7 @@
 #' add_criteria(data = 'result-of-clean_data()')
 
 add_criteria <- function(data) {
+  options(scipen = 999)
   parameters <- unique(data$Char_Name)
 
   print("Checking spawn dates...")
