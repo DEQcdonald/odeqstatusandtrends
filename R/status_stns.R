@@ -13,7 +13,7 @@
 
 status_stns <- function(data, year_range = NULL, status_period = 4) {
 
-  data$year <- lubridate::year(data$sample_datetime)
+  data$year <- if_else(is.na(data$tp_year), lubridate::year(data$sample_datetime), data$tp_year)
 
   if(is.null(year_range)){
     year_range <- c(min(data$year, na.rm = TRUE), max(data$year, na.rm = TRUE))

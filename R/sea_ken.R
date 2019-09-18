@@ -8,8 +8,8 @@
 #' sea_ken(data = data.frame)
 
 sea_ken <- function(data){
-  data$Month <- lubridate::month(data$sample_datetime, label = TRUE, abbr = TRUE)
-  data$Year <- lubridate::year(data$sample_datetime)
+  data$Month <- if_else(is.na(data$tp_month), lubridate::month(data$sample_datetime, label = TRUE, abbr = TRUE), data$tp_month)
+  data$Year <- if_else(is.na(data$tp_year), lubridate::year(data$sample_datetime), data$tp_year)
 
   sea_ken_df <- data.frame()
   sample_size <- data.frame()

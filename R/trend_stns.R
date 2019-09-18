@@ -9,11 +9,11 @@
 #' @examples
 #' trend_stns(data = data.frame, trend_years = c(format(min(data$sample_datetime), "%Y"):format(Sys.Date(), "%Y")))
 
-trend_stns <- function(data, trend_years = c(format(min(data$sample_datetime), "%Y"):format(Sys.Date(), "%Y"))) {
+trend_stns <- function(data, trend_years = c(format(min(data$sample_datetime, na.rm = TRUE), "%Y"):format(Sys.Date(), "%Y"))) {
 
   if(length(trend_years) < 8){stop("Number of years should be less than or equal to 8")}
 
-  data$year <- lubridate::year(data$sample_datetime)
+  data$year <- if_else(is.na(data$tp_year), lubridate::year(data$sample_datetime), data$tp_year)
 
   if(any(unique(data$year) %in% trend_years)){
     trend_check <- data %>%
