@@ -13,7 +13,9 @@ trend_stns <- function(data, trend_years = c(format(min(data$sample_datetime, na
 
   if(length(trend_years) < 8){stop("Number of years should be less than or equal to 8")}
 
-  data$year <- if_else(is.na(data$tp_year), lubridate::year(data$sample_datetime), data$tp_year)
+  if("Phosphate-phosphorus" %in% unique(data$Char_Name)){
+    data$year <- if_else(is.na(data$tp_year), lubridate::year(data$sample_datetime), data$tp_year)
+  } else {data$year <- lubridate::year(data$sample_datetime)}
 
   if(any(unique(data$year) %in% trend_years)){
     trend_check <- data %>%

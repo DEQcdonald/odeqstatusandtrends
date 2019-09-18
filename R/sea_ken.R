@@ -8,8 +8,13 @@
 #' sea_ken(data = data.frame)
 
 sea_ken <- function(data){
-  data$Month <- if_else(is.na(data$tp_month), lubridate::month(data$sample_datetime, label = TRUE, abbr = TRUE), data$tp_month)
-  data$Year <- if_else(is.na(data$tp_year), lubridate::year(data$sample_datetime), data$tp_year)
+  if("Phosphate-phosphorus" %in% unique(data$Char_Name)){
+    data$Month <- if_else(is.na(data$tp_month), lubridate::month(data$sample_datetime, label = TRUE, abbr = TRUE), data$tp_month)
+    data$Year <- if_else(is.na(data$tp_year), lubridate::year(data$sample_datetime), data$tp_year)
+  } else {
+    data$Month <- lubridate::month(data$sample_datetime, label = TRUE, abbr = TRUE)
+    data$year <- lubridate::year(data$sample_datetime)
+  }
 
   sea_ken_df <- data.frame()
   sample_size <- data.frame()
