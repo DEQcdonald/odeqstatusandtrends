@@ -80,7 +80,7 @@ add_criteria <- function(data) {
     tp_targets <- tmdl_lookup %>% dplyr::filter(Parameter == "TP (mg/L)")
     data_tp <- data %>% dplyr::filter(Char_Name == "Phosphate-phosphorus")
     # %>% dplyr::select(-summer_target, -summer_start, -summer_end, -winter_target)
-    data_tp <- merge(data_tp, tp_targets[,c("Reach_codes", "summer_target", "summer_start", "summer_end", "winter_target")],
+    data_tp <- merge(data_tp, tp_targets[,c("Reach_codes", "summer_target", "summer_start", "summer_end", "winter_target", "stat.base")],
                       by.x = "Reachcode", by.y = "Reach_codes", all.x = TRUE, all.y = FALSE)
     data_tp$summer_start <- if_else(!is.na(data_tp$summer_start),
                                      paste0(data_tp$summer_start, "-", lubridate::year(data_tp$sample_datetime)),
@@ -90,6 +90,8 @@ add_criteria <- function(data) {
                                    paste0(data_tp$summer_end, "-", lubridate::year(data_tp$sample_datetime)),
                                    NA_character_)
     data_tp$summer_end <- as.POSIXct(data_tp$summer_end, format = "%d-%b-%Y")
+    data_tp$tp_summer <- if_else(data_tp$sample_datetime >= data_tp$summer_start & data_tp$sample_datetime < data_tp$summer_end,
+                                 1, 0)
     data_tp$TP_crit <- if_else(data_tp$sample_datetime >= data_tp$summer_start & data_tp$sample_datetime < data_tp$summer_end,
                                 data_tp$summer_target, data_tp$winter_target)
     data_tp <- data_tp %>% dplyr::select(-summer_target, -summer_start, -summer_end, -winter_target)

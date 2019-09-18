@@ -24,7 +24,7 @@ sea_ken <- function(data){
       print(i)
       subData_stn <- subData %>% filter(MLocID == i)
       tryCatch({
-        tmp_seaKen <- EnvStats::kendallSeasonalTrendTest(Result_Numeric ~ Month + Year, data = subData_stn)
+        tmp_seaKen <- EnvStats::kendallSeasonalTrendTest(Result_cen ~ Month + Year, data = subData_stn)
         tmp_sample_size <- as.data.frame(bind_rows(tmp_seaKen$sample.size))
         tmp_sample_size[, c("ID", "Char")] <- c(i, j)
         stn_seaKen <- data.frame(MLocID = i,
