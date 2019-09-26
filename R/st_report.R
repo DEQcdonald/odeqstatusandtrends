@@ -16,14 +16,20 @@
 st_report <- function(basin, param_summary, format = "html_document", file_name, out_path, complete_years, hucs){
   out_path <- gsub("\\\\", "/", out_path)
 
+  table_format <- if(format == "html_document" ){"html"} else {"markdown"}
+
   rmarkdown::render(input = "N:/Status_and_Trend_Reports/Report_Files/basin.Rmd",
                     params = list(
                       basin = basin,
                       param_sum = param_summary,
                       complete_years = complete_years,
-                      hucs = hucs),
+                      hucs = hucs,
+                      table_format = table_format),
                     output_format = format,
                     output_file = file_name,
+                    # output_dir = "C:/workspace/StatusAndTrends",
                     output_dir = out_path,
-                    envir = parent.frame())
+                    # intermediates_dir = "C:/workspace/StatusAndTrends",
+                    # intermediates_dir = out_path,
+                    envir = globalenv())
 }
