@@ -68,8 +68,8 @@ plot_temperature <- function(data, seaKen, station){
   }
 
   # plot data with excursion colors
-  p <- p + geom_point(aes(x=sample_datetime, y=Result_Numeric, color = excursion, linetype = excursion, shape = excursion)) +
-    ggtitle(paste(station, 'Temperature')) +
+  p <- p + geom_point(aes(x=sample_datetime, y=Result_cen, color = excursion, linetype = excursion, shape = excursion)) +
+    ggtitle(paste(station, 'Temperature'), subtitle = paste(unique(data$StationDes))) +
     ylab("Temperature (degrees C)") +
     xlab("Datetime")
 
@@ -89,6 +89,7 @@ plot_temperature <- function(data, seaKen, station){
     scale_fill_manual(name = "", values = c("Spawning Zone" = 'black')) +
     ylim(c(ymin, ymax)) +
     xlim(c(xmin, xmax)) +
+    scale_x_datetime(date_labels = "%b-%Y")+
     theme(legend.position="bottom", legend.direction = "horizontal", legend.box = "horizontal")
 
   return(p)

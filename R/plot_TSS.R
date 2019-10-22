@@ -59,6 +59,7 @@ plot_TSS <- function(data, seaKen, station){
                        values =    c('Excursion' = 16, 'Result' = 16, "Trend" = 32, "TSS Target" = 32)) +
     ylim(c(ymin, ymax)) +
     xlim(c(xmin, xmax)) +
+    scale_x_datetime(date_labels = "%b-%Y")+
     theme(legend.position="bottom", legend.direction = "horizontal", legend.box = "horizontal")
 
   return(p)

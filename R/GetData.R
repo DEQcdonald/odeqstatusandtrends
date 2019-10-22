@@ -22,7 +22,7 @@
 #' start.date = "2010-01-01", end.date = "2019-01-01",
 #' awqms.channel.name = "AWQMS")
 
-GetData <- function(parameters = NULL, stations_AWQMS, stations_WQP, start.date, end.date, huc8,
+GetData <- function(parameters = NULL, stations_AWQMS, stations_WQP = NULL, start.date, end.date, huc8,
                     query_nwis = FALSE, stations_NWIS, awqms.channel.name = "AWQMS") {
 
   # Convert characteristic names
