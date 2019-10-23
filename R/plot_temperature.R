@@ -13,15 +13,15 @@ plot_temperature <- function(data, seaKen, station){
   # obtain data range limits for plotting
   xmin <- min(data$sample_datetime, na.rm = TRUE)
   xmax <- max(data$sample_datetime, na.rm = TRUE)
-  ymin <- min(c(data$Result_Numeric, data$temp_crit), na.rm = TRUE)
-  ymax <- max(c(data$Result_Numeric, data$temp_crit), na.rm = TRUE)
+  ymin <- min(c(data$Result_cen, data$temp_crit), na.rm = TRUE)
+  ymax <- max(c(data$Result_cen, data$temp_crit), na.rm = TRUE)
   data$excursion <- if_else(data$excursion == 1, "Excursion", "Result") # change numeric value to descriptor
 
   # obtain plotting values for trend line if applicable
   if(station %in% seaKen$MLocID){
     slope <- seaKen[seaKen$MLocID == station & seaKen$Char_Name == "Temperature, water", "slope"]
     x_delta <- as.numeric((xmax-xmin)/2)
-    y_median <- median(data$Result_Numeric, na.rm = TRUE)
+    y_median <- median(data$Result_cen, na.rm = TRUE)
     sk_min <- y_median - x_delta*slope/365.25
     sk_max <- y_median + x_delta*slope/365.25
   }

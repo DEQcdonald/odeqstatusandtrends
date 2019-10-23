@@ -17,15 +17,15 @@ plot_bacteria <- function(data, seaKen, station){
   # obtain data range limits for plotting
   xmin <- min(data$sample_datetime, na.rm = TRUE)
   xmax <- max(data$sample_datetime, na.rm = TRUE)
-  ymin <- min(c(data$Result_Numeric, data$bact_crit_ss, data$bact_crit_geomean), na.rm = TRUE)
-  ymax <- max(c(data$Result_Numeric, data$bact_crit_ss, data$bact_crit_geomean), na.rm = TRUE)
+  ymin <- min(c(data$Result_cen, data$bact_crit_ss, data$bact_crit_geomean), na.rm = TRUE)
+  ymax <- max(c(data$Result_cen, data$bact_crit_ss, data$bact_crit_geomean), na.rm = TRUE)
   data$excursion <- if_else(data$excursion_cen == 1, "Excursion", "Result") # change numeric value to descriptor
 
   # obtain plotting values for trend line if applicable
   if(nrow(seaken_bact) > 0){
     slope <- seaken_bact[, "slope"]
     x_delta <- as.numeric((xmax-xmin)/2)
-    y_median <- median(data$Result_Numeric, na.rm = TRUE)
+    y_median <- median(data$Result_cen, na.rm = TRUE)
     sk_min <- y_median - x_delta*slope/365.25
     sk_max <- y_median + x_delta*slope/365.25
   }
@@ -42,7 +42,7 @@ plot_bacteria <- function(data, seaKen, station){
                               color = "Geomean Criteria", linetype = "Geomean Criteria", shape = "Geomean Criteria"))
   }
   # plot data with excursion colors
-  p <- p + geom_point(aes(x=sample_datetime, y=Result_Numeric, color = excursion, linetype = excursion, shape = excursion)) +
+  p <- p + geom_point(aes(x=sample_datetime, y=Result_cen, color = excursion, linetype = excursion, shape = excursion)) +
     ggtitle(paste(station, "Bacteria")) +
     ylab("Bacteria") +
     xlab("Datetime")
@@ -65,6 +65,7 @@ plot_bacteria <- function(data, seaKen, station){
                                      "Single Sample Criteria" = 32, "Geomean Criteria" = 32)) +
     ylim(c(ymin, ymax)) +
     xlim(c(xmin, xmax)) +
+    scale_x_datetime(date_labels = "%b-%Y")+
     theme(legend.position="bottom", legend.direction = "horizontal", legend.box = "horizontal")
 
   return(p)

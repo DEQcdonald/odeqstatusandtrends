@@ -18,15 +18,15 @@ plot_TSS <- function(data, seaKen, station){
   # obtain data range limits for plotting
   xmin <- min(data$sample_datetime, na.rm = TRUE)
   xmax <- max(data$sample_datetime, na.rm = TRUE)
-  ymin <- min(c(data$Result_Numeric, data$TSS_crit), na.rm = TRUE)
-  ymax <- max(c(data$Result_Numeric, data$TSS_crit), na.rm = TRUE)
+  ymin <- min(c(data$Result_cen, data$TSS_crit), na.rm = TRUE)
+  ymax <- max(c(data$Result_cen, data$TSS_crit), na.rm = TRUE)
   data$excursion <- if_else(data$excursion_cen == 1, "Excursion", "Result") # change numeric value to descriptor
 
   # obtain plotting values for trend line if applicable
   if(nrow(seaken_TSS) > 0){
     slope <- seaken_TSS[, "slope"]
     x_delta <- as.numeric((xmax-xmin)/2)
-    y_median <- median(data$Result_Numeric, na.rm = TRUE)
+    y_median <- median(data$Result_cen, na.rm = TRUE)
     sk_min <- y_median - x_delta*slope/365.25
     sk_max <- y_median + x_delta*slope/365.25
   }
@@ -39,9 +39,9 @@ plot_TSS <- function(data, seaKen, station){
                               color = "TSS Target", linetype = "TSS Target", shape = "TSS Target"))
   }
   # plot data with excursion colors
-  p <- p + geom_point(aes(x=sample_datetime, y=Result_Numeric, color = excursion, linetype = excursion, shape = excursion)) +
+  p <- p + geom_point(aes(x=sample_datetime, y=Result_cen, color = excursion, linetype = excursion, shape = excursion)) +
     ggtitle(paste(station, "TSS")) +
-    ylab("TSS") +
+    ylab("TSS (mg/L)") +
     xlab("Datetime")
 
   # plot the trend line if applicable

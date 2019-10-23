@@ -13,7 +13,7 @@ sea_ken <- function(data){
     data$Year <- if_else(is.na(data$tp_year), lubridate::year(data$sample_datetime), data$tp_year)
   } else {
     data$Month <- lubridate::month(data$sample_datetime, label = TRUE, abbr = TRUE)
-    data$year <- lubridate::year(data$sample_datetime)
+    data$Year <- lubridate::year(data$sample_datetime)
   }
 
   sea_ken_df <- data.frame()
