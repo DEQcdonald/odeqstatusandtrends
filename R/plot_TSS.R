@@ -40,7 +40,7 @@ plot_TSS <- function(data, seaKen, station){
   }
   # plot data with excursion colors
   p <- p + geom_point(aes(x=sample_datetime, y=Result_cen, color = excursion, linetype = excursion, shape = excursion)) +
-    ggtitle(paste(station, "TSS")) +
+    ggtitle(paste(station, "TSS"), subtitle = paste(unique(data$StationDes))) +
     ylab("TSS (mg/L)") +
     xlab("Datetime")
 

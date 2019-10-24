@@ -9,6 +9,7 @@
 #' @examples plot_pH(data = data.frame, seaKen, station)
 
 plot_bacteria <- function(data, seaKen, station){
+  parameter <- unique(data$Char_Name)
   # subset seaken table to parameter and significant trends
   seaken_bact <- seaKen %>% filter(Char_Name %in% AWQMS_Char_Names("bacteria"),
                                    significance != "No Significant Trend",
@@ -43,8 +44,8 @@ plot_bacteria <- function(data, seaKen, station){
   }
   # plot data with excursion colors
   p <- p + geom_point(aes(x=sample_datetime, y=Result_cen, color = excursion, linetype = excursion, shape = excursion)) +
-    ggtitle(paste(station, "Bacteria")) +
-    ylab("Bacteria") +
+    ggtitle(paste(station, "Bacteria"), subtitle = paste(unique(data$StationDes))) +
+    ylab(paste(parameter)) +
     xlab("Datetime")
 
   # plot the trend line if applicable
@@ -59,7 +60,7 @@ plot_bacteria <- function(data, seaKen, station){
                                      "Single Sample Criteria" = 'black', "Geomean Criteria" = 'black')) +
     scale_linetype_manual(name = "Legend",
                           values = c('Excursion' = 0, 'Result' = 0, "Trend" = 1,
-                                     "Single Sample Criteria" = 2, "Geomean Criteria" = 2)) +
+                                     "Single Sample Criteria" = 1, "Geomean Criteria" = 2)) +
     scale_shape_manual(name = "Legend",
                        values =    c('Excursion' = 16, 'Result' = 16, "Trend" = 32,
                                      "Single Sample Criteria" = 32, "Geomean Criteria" = 32)) +
