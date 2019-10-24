@@ -4,8 +4,8 @@
 \alias{GetData}
 \title{Get data for water quality status and trends analysis}
 \usage{
-GetData(parameters = NULL, stations_AWQMS, stations_WQP, start.date,
-  end.date, huc8, query_nwis = FALSE, stations_NWIS,
+GetData(parameters = NULL, stations_AWQMS, stations_WQP = NULL,
+  start.date, end.date, huc8, query_nwis = FALSE, stations_NWIS,
   awqms.channel.name = "AWQMS")
 }
 \arguments{

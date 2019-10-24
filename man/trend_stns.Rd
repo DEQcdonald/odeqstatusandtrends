@@ -4,8 +4,8 @@
 \alias{trend_stns}
 \title{Determine stations with sufficient data for trend analysis}
 \usage{
-trend_stns(data, trend_years = c(format(min(data$sample_datetime),
-  "\%Y"):format(Sys.Date(), "\%Y")))
+trend_stns(data, trend_years = c(format(min(data$sample_datetime, na.rm =
+  TRUE), "\%Y"):format(Sys.Date(), "\%Y")))
 }
 \arguments{
 \item{data}{Dataframe to determine stations for trend analysis}

@@ -4,12 +4,15 @@
 \alias{st_report}
 \title{Create Status and Trends Report}
 \usage{
-st_report(basin, param_summary, file_name, out_path, complete_years, hucs)
+st_report(basin, param_summary, format = "html_document", file_name,
+  out_path, complete_years, hucs)
 }
 \arguments{
 \item{basin}{The name of the basin for reporting}
 
 \item{param_summary}{A parameter summary table as returned from odeqstatusandtrends::parameter_summary().}
+
+\item{format}{The output format for the rmarkdown document}
 
 \item{file_name}{The name of the output .html file}
 
