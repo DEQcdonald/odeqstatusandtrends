@@ -9,8 +9,13 @@
 
 sea_ken <- function(data){
   if("Phosphate-phosphorus" %in% unique(data$Char_Name)){
-    data$Month <- if_else(is.na(data$tp_month), lubridate::month(data$sample_datetime, label = TRUE, abbr = TRUE), data$tp_month)
-    data$Year <- if_else(is.na(data$tp_year), lubridate::year(data$sample_datetime), data$tp_year)
+    if("tp_year" %in% colnames(data)){
+      data$Month <- if_else(is.na(data$tp_month), lubridate::month(data$sample_datetime, label = TRUE, abbr = TRUE), data$tp_month)
+      data$Year <- if_else(is.na(data$tp_year), lubridate::year(data$sample_datetime), data$tp_year)
+    } else {
+      data$Month <- lubridate::month(data$sample_datetime, label = TRUE, abbr = TRUE)
+      data$Year <- lubridate::year(data$sample_datetime)
+    }
   } else {
     data$Month <- lubridate::month(data$sample_datetime, label = TRUE, abbr = TRUE)
     data$Year <- lubridate::year(data$sample_datetime)

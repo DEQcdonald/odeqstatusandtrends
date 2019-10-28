@@ -61,6 +61,9 @@ add_criteria <- function(data) {
     data_tss <- data %>% dplyr::filter(Char_Name == "Total suspended solids")
     data_tss <- merge(data_tss, unique(tss_targets[,c("Reach_codes", "summer_target", "summer_start", "summer_end", "winter_target")]),
                       by.x = "Reachcode", by.y = "Reach_codes", all.x = TRUE, all.y = FALSE)
+    if(!"summer_target" %in% colnames(data_tss)){
+      data_tss <- data_tss %>% dplyr::mutate(summer_target = NaN, summer_start = NA_character_, summer_end = NA_character_, winter_target = NA_character_)
+    }
     data_tss$summer_start <- if_else(!is.na(data_tss$summer_start),
                                      paste0(data_tss$summer_start, "-", lubridate::year(data_tss$sample_datetime)),
                                      NA_character_)
@@ -79,9 +82,13 @@ add_criteria <- function(data) {
     print("Looking for TP target values...")
     tp_targets <- tmdl_lookup %>% dplyr::filter(Parameter == "TP (mg/L)")
     data_tp <- data %>% dplyr::filter(Char_Name == "Phosphate-phosphorus")
-    # %>% dplyr::select(-summer_target, -summer_start, -summer_end, -winter_target)
+
     data_tp <- merge(data_tp, unique(tp_targets[,c("Reach_codes", "summer_target", "summer_start", "summer_end", "winter_target", "stat.base")]),
                       by.x = "Reachcode", by.y = "Reach_codes", all.x = TRUE, all.y = FALSE)
+    if(!"summer_target" %in% colnames(data_tp)){
+      data_tp <- data_tp %>% dplyr::mutate(summer_target = NaN, summer_start = NA_character_, summer_end = NA_character_, winter_target = NA_character_)
+    }
+
     data_tp$summer_start <- if_else(!is.na(data_tp$summer_start),
                                      paste0(data_tp$summer_start, "-", lubridate::year(data_tp$sample_datetime)),
                                      NA_character_)

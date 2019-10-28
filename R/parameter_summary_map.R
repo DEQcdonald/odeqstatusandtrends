@@ -18,11 +18,11 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
   query <- paste0("SELECT * FROM AssessmentUnits_OR_Dissolve WHERE AU_ID IN ('",
                   paste(unique(param_summary$AU_ID), collapse = "', '"), "')")
 
-  # assessment_units <- sf::st_read(
-  #   dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/Assessment.gdb",
-  #   layer = "AssessmentUnits_OR_Dissolve",
-  #   query = query, stringsAsFactors = FALSE
-  # )
+  assessment_units <- sf::st_read(
+    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/Assessment_2018_2020.gdb",
+    layer = "AssessmentUnits_OR_Dissolve",
+    query = query, stringsAsFactors = FALSE
+  )
 
   agwqma <- sf::st_read(
     dsn = "//deqhq1/WQNPS/Status_and_Trend_Reports/GIS",
@@ -40,13 +40,13 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
   )
   wql_streams$Char_Name <- unlist(sapply(wql_streams$POLLUTANT, AWQMS_Char_Names, USE.NAMES = FALSE))
 
-  # assessment_units <- sf::st_zm(assessment_units, what = "ZM")
+  assessment_units <- sf::st_zm(assessment_units, what = "ZM")
   wql_streams <- sf::st_zm(wql_streams, what = "ZM")
   agwqma <- sf::st_zm(agwqma, what = "ZM")
 
-  # st_crs(assessment_units)
-  # assessment_units <- st_transform(assessment_units, 4326)
-  # assessment_units <- assessment_units[,c("AU_ID", "AU_Name")] %>% filter(AU_ID != "99")
+  st_crs(assessment_units)
+  assessment_units <- st_transform(assessment_units, 4326)
+  assessment_units <- assessment_units[,c("AU_ID", "AU_Name")] %>% filter(AU_ID != "99")
   st_crs(wql_streams)
   wql_streams <- st_transform(wql_streams, 4326)
   wql_streams <- filter(wql_streams[, c("STREAM_NAM", "SEGMENT_ID", "SEASON", "Char_Name", "LISTING_ST", "TMDL_INFO")], Char_Name %in% unique(param_summary$Char_Name))
@@ -64,7 +64,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
   p_stns <- st_as_sf(param_summary, coords = c("Long_DD", "Lat_DD"), crs = 4326)
   agwqma <- agwqma %>% dplyr::filter(lengths(st_intersects(., p_stns)) > 0)
 
-  # assessment_units <- assessment_units %>% group_by(AU_ID, AU_Name) %>% dplyr::summarise()
+  assessment_units <- assessment_units %>% group_by(AU_ID, AU_Name) %>% dplyr::summarise()
   wql_streams_data <- sf::st_drop_geometry(wql_streams)
   wql_streams_shp <- wql_streams %>% group_by(STREAM_NAM, SEGMENT_ID) %>% dplyr::summarise()
 
@@ -130,7 +130,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
     }
     if(!is.null(AU)){
       data <- dplyr::filter(data[, c(1, 4, 3, grep("status|trend", colnames(param_summary)))],
-                     AU_ID == AU, Parameter == param) %>%
+                            AU_ID == AU, Parameter == param) %>%
         dplyr::select(-AU_ID)
 
       colnames(data) <- gsub("(?<=[0-9])[^0-9]", "-", colnames(data), perl = TRUE)
@@ -149,6 +149,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
   au_table <- function(AU = NULL, param){
 
     data <- au_param_summary %>% dplyr::rename(Parameter = Char_Name)
+    data <- dplyr::filter(data, AU_ID == AU, Parameter == param)
 
     colnames(data) <- gsub("(?<=[0-9])[^0-9]", "-", colnames(data), perl = TRUE)
     colnames(data) <- gsub("_", " ", colnames(data), perl = TRUE)
@@ -158,8 +159,6 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                    table.attr = "id=\"mytable\"", row.names = FALSE) %>%
       kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
                     full_width = TRUE, font_size = 10)
-
-    data <- dplyr::filter(data, AU_ID == AU, Parameter == param)
 
     return(table)
   }
@@ -181,7 +180,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
   print("Creating Map...")
 
   map <- leaflet() %>% addTiles() %>%
-    htmlwidgets::appendContent(HTML(table)) %>%
+    # htmlwidgets::appendContent(HTML(table)) %>%
   #   htmlwidgets::onRender(
   #     "
   # function(el, x) {
@@ -202,9 +201,14 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                 group = "Hydrography",
                 options = WMSTileOptions(format = "image/png",
                                          transparent = TRUE),
-                layers = "0") %>%
-    addPolygons(data = agwqma, fill = TRUE, color = "black", fillColor = "black", opacity = 0.8, weight = 5,
-                group = "Ag WQ Management Areas", label = ~PlanName) %>%
+                layers = "0")
+  if(nrow(agwqma) > 0){
+    map <- map %>%
+      addPolygons(data = agwqma, fill = TRUE, color = "black", fillColor = "black", opacity = 0.8, weight = 5,
+                  group = "Ag WQ Management Areas", label = ~PlanName)
+    }
+
+  map <- map %>%
     addPolygons(data = area, fill = FALSE, group = "Assessment Area", opacity = 0.8, label = "Assessment Area") %>%
     addMarkers(data = unique(param_summary[,c("AU_ID", "MLocID", "StationDes", "Lat_DD", "Long_DD")]),
                label = ~paste0(MLocID, ": ", StationDes),
@@ -257,84 +261,84 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
     psum <- param_summary %>% dplyr::filter(Char_Name == i)
     psum$z_offset <- if_else(!(psum[[status_current]] %in% c("Unassessed", "Insufficient Data") & psum$trend %in% c("Insufficient Data", "No Significant Trend")),
                              100, 0)
-    # psum_AU <- psum[!(psum[[status_current]] %in% c("Unassessed", "Insufficient Data") & psum$trend == "Insufficient Data"),]
-    # au_data <- dplyr::filter(assessment_units[, c("AU_ID", "AU_Name")], AU_ID %in% unique(psum_AU$AU_ID))
-    # au_data <- merge(au_data, dplyr::filter(au_colors, Char_Name == i)[,c("AU_ID", "color")], by = "AU_ID")
-    au_data <- au_colors %>% dplyr::filter(Char_Name == i)
+    psum_AU <- psum[!(psum[[status_current]] %in% c("Unassessed", "Insufficient Data") & psum$trend == "Insufficient Data"),]
+    au_data <- dplyr::filter(assessment_units[, c("AU_ID", "AU_Name")], AU_ID %in% unique(psum_AU$AU_ID))
+    au_data <- merge(au_data, dplyr::filter(au_colors, Char_Name == i)[,c("AU_ID", "color")], by = "AU_ID")
+    # au_data <- au_colors %>% dplyr::filter(Char_Name == i)
     # wql_streams_tmp <- dplyr::filter(wql_streams, Char_Name == i)
-    green_ids <- au_data[au_data$color == "green", ]$AU_ID
+    # green_ids <- au_data[au_data$color == "green", ]$AU_ID
 
     if(nrow(au_data) > 0){
-    #   au_data <- rmapshaper::ms_simplify(au_data)
-    #
-    #   map <- map %>%
-    #     addPolylines(data = au_data,
-    #                  stroke = TRUE,
-    #                  opacity = 0.8,
-    #                  weight = 3,
-    #                  color = ~color,
-    #                  popup = ~paste0("<b>", AU_Name, "<br>",
-    #                                  # "<br><b>Parameter:</b> ", i, "<br>",
-    #                                  sapply(AU_ID, au_table, param = i, USE.NAMES = FALSE),
-    #                                  sapply(AU_ID, popupTable, station = NULL, param = i, USE.NAMES = FALSE)
-    #                  ),
-    #                  popupOptions = popupOptions(maxWidth = 1200),
-    #                  label = ~AU_ID,
-    #                  smoothFactor = 2,
-    #                  options = pathOptions(className = "assessmentUnits", interactive = TRUE),
-    #                  highlightOptions = highlightOptions(color = "black", weight = 8, opacity = 1),
-    #                  group = i
-    #     )
-    # }
-      for(j in c("lightgray", "green", "orange")){
-        au_ids <- au_data %>% dplyr::filter(color == j)
-        if(nrow(au_ids)>0){
-          for(k in au_ids$AU_ID){
-            map <- map %>%
-              addEsriFeatureLayer(url = "https://deq14.deq.state.or.us/arcgis/rest/services/WQ/WQ_2018_IR_V3/MapServer/14",
-                                  options = featureLayerOptions(
-                                    where = paste0("AU_ID IN ('", paste(k, collapse = "', '"), "')")
-                                    ),
-                                  highlightOptions = highlightOptions(color = "black", weight = 8, opacity = 1, bringToFront = TRUE),
-                                  color = j, fill = FALSE, group = i, opacity = 1, labelProperty = "AU_Name",
-                                  pathOptions = leaflet::pathOptions(className = "assessmentUnits", interactive = TRUE)
-                                  ,
-                                  popupProperty = JS(paste0(
-                                    "function(feature) {",
-                                    "var input, filter, table, tr, td, i, txtValue;",
-                                    "input = {AU_ID};",
-                                    "table = ", table, ";",
-                                    "tr = table.getElementsByTagName('tr');",
-                                    "for (i = 0; i < tr.length; i++) {
-                                    td = tr[i].getElementsByTagName('td')[0];
-                                    if (td) {
-                                    txtValue = td.textContent || td.innerText;
-                                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                                    tr[i].style.display = '';
-                                    } else {
-                                    tr[i].style.display = 'none';
-                                    }
-                                    }
-                                    }",
-                                    "  return L.Util.template(",
-                                    " '",
-                                    "<b>{AU_Name}<br>",
-                                    table,
-                                    # gsub("\\n", "",
-                                    #      sapply(k, au_table, param = i, USE.NAMES = FALSE)),
-                                    # gsub("\\n", "",
-                                    #      sapply(k, popupTable, station = NULL, param = i, USE.NAMES = FALSE)),
-                                    "   ' ,",
-                                    "    feature.properties",
-                                    "  );",
-                                    "}")
-                                  ),
-                                  popupOptions = leaflet::popupOptions(maxWidth = 1200),
-              )
-          }
-        }
-      }
+      au_data <- rmapshaper::ms_simplify(au_data)
+
+      map <- map %>%
+        addPolylines(data = au_data,
+                     stroke = TRUE,
+                     opacity = 0.8,
+                     weight = 3,
+                     color = ~color,
+                     popup = ~paste0("<b>", AU_Name, "<br>",
+                                     # "<br><b>Parameter:</b> ", i, "<br>",
+                                     sapply(AU_ID, au_table, param = i, USE.NAMES = FALSE),
+                                     sapply(AU_ID, popupTable, station = NULL, param = i, USE.NAMES = FALSE)
+                     ),
+                     popupOptions = popupOptions(maxWidth = 1200),
+                     label = ~AU_ID,
+                     smoothFactor = 2,
+                     options = pathOptions(className = "assessmentUnits", interactive = TRUE),
+                     highlightOptions = highlightOptions(color = "black", weight = 8, opacity = 1),
+                     group = i
+        )
     }
+    #   for(j in c("lightgray", "green", "orange")){
+    #     au_ids <- au_data %>% dplyr::filter(color == j)
+    #     if(nrow(au_ids)>0){
+    #       for(k in au_ids$AU_ID){
+    #         map <- map %>%
+    #           addEsriFeatureLayer(url = "https://deq14.deq.state.or.us/arcgis/rest/services/WQ/WQ_2018_IR_V3/MapServer/14",
+    #                               options = featureLayerOptions(
+    #                                 where = paste0("AU_ID IN ('", paste(k, collapse = "', '"), "')")
+    #                                 ),
+    #                               highlightOptions = highlightOptions(color = "black", weight = 8, opacity = 1, bringToFront = TRUE),
+    #                               color = j, fill = FALSE, group = i, opacity = 1, labelProperty = "AU_Name",
+    #                               pathOptions = leaflet::pathOptions(className = "assessmentUnits", interactive = TRUE)
+    #                               ,
+    #                               popupProperty = JS(paste0(
+    #                                 "function(feature) {",
+    #                                 "var input, filter, table, tr, td, i, txtValue;",
+    #                                 "input = {AU_ID};",
+    #                                 "table = ", table, ";",
+    #                                 "tr = table.getElementsByTagName('tr');",
+    #                                 "for (i = 0; i < tr.length; i++) {
+    #                                 td = tr[i].getElementsByTagName('td')[0];
+    #                                 if (td) {
+    #                                 txtValue = td.textContent || td.innerText;
+    #                                 if (txtValue.toUpperCase().indexOf(filter) > -1) {
+    #                                 tr[i].style.display = '';
+    #                                 } else {
+    #                                 tr[i].style.display = 'none';
+    #                                 }
+    #                                 }
+    #                                 }",
+    #                                 "  return L.Util.template(",
+    #                                 " '",
+    #                                 "<b>{AU_Name}<br>",
+    #                                 table,
+    #                                 # gsub("\\n", "",
+    #                                 #      sapply(k, au_table, param = i, USE.NAMES = FALSE)),
+    #                                 # gsub("\\n", "",
+    #                                 #      sapply(k, popupTable, station = NULL, param = i, USE.NAMES = FALSE)),
+    #                                 "   ' ,",
+    #                                 "    feature.properties",
+    #                                 "  );",
+    #                                 "}")
+    #                               ),
+    #                               popupOptions = leaflet::popupOptions(maxWidth = 1200),
+    #           )
+    #       }
+    #     }
+    #   }
+    # }
 
     map <- map %>%
       addAwesomeMarkers(data = psum,
@@ -476,6 +480,18 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                }"
       )
     )) %>%
+    # registerPlugin(htmlDependency(name = "leaflet-easyprint",
+    #                               version = "2.2.1",
+    #                               src = "https://rawgit.com/rowanwins/leaflet-easyPrint/gh-pages/dist/bundle.js",
+    #                               script = "bundle.js")) %>%
+    # onRender(jsCode = "function(el, x) {
+    #           L.easyPrint({
+    #               title: 'Download Map (CDL layer not available for download)',
+    #               position: 'topleft',
+    #               sizeModes: ['Current'],
+    #               exportOnly: true,
+    #               filename: 'map',
+    #           }).addTo(this);}") %>%
     leaflet.extras::addSearchFeatures(targetGroups = "search",
                                       options = searchFeaturesOptions(openPopup = TRUE, textPlaceholder = "Search Station IDs...")) %>%
     htmlwidgets::onRender(jsCode = "function(el, x){
@@ -501,51 +517,52 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
     return window.getComputedStyle(element, null).getPropertyValue('display') === 'none';
   }
                }") %>%
-    htmlwidgets::onRender(paste0(
-      "function(el, x) {",
-      "var assessmentUnits = L.esri.featureLayer({",
-      "url: 'https://deq14.deq.state.or.us/arcgis/rest/services/WQ/WQ_2018_IR_V3/MapServer/14',",
-      "where: ",
-      '"', "AU_ID IN ('", paste0("AU_ID IN ('", paste(k, collapse = "', '"), "')"), '",',
-      # "OR_LK_1709001203_02_100869','OR_SR_1709000110_02_104584','OR_SR_1709000204_02_103787','OR_SR_1709000301_02_103796')", '",',
-      "style: function (feature) {",
-      "var c;",
-      "switch (feature.properties.AU_ID) {",
-      'case "', paste0(au_data[au_data$color == "green", ]$AU_ID, collapse = ","), '"',
-      "c = '#179639';",
-      "break;",
-      'case "', paste0(au_data[au_data$color == "orange", ]$AU_ID, collapse = ","), '"',
-      "c = '#fc923a';",
-      "break;",
-      'case "', paste0(au_data[au_data$color == "lightgray", ]$AU_ID, collapse = ","), '"',
-      "c = '#a3a3a3';",
-      "break;",
-      "default: '#ff00f2';",
-      "}",
-      "return {color: c, opacity: 1, weight: 8};",
-      "}",
-      "}).addTo(this);",
-      "assessmentUnits.bindPopup(",
-      "function (layer) {",
-      "var input, table, tr, td, i, txtValue;",
-      "input = layer.feature.properties.AU_ID;",
-      "table = document.getElementById('mytable');",
-      "tr = table.getElementsByTagName('tr');",
-      "for (i = 0; i < tr.length; i++) { ",
-      "td = tr[i].getElementsByTagName('td')[0];",
-      "if (td) {",
-      "txtValue = td.innerText || td.innerHTML;",
-      "if (txtValue.toUpperCase().indexOf(input) > -1) {",
-      "tr[i].style.display = '';",
-      "} else {",
-      "tr[i].style.display = 'none';",
-      "}}}",
-      ";",
-      "return table",
-      "}, {maxWidth : 1200});",
-      "}"
-    )
-    ) %>% hideGroup("search")
+    # htmlwidgets::onRender(paste0(
+    #   "function(el, x) {",
+    #   "var assessmentUnits = L.esri.featureLayer({",
+    #   "url: 'https://deq14.deq.state.or.us/arcgis/rest/services/WQ/WQ_2018_IR_V3/MapServer/14',",
+    #   "where: ",
+    #   '"', "AU_ID IN ('", paste0("AU_ID IN ('", paste(k, collapse = "', '"), "')"), '",',
+    #   # "OR_LK_1709001203_02_100869','OR_SR_1709000110_02_104584','OR_SR_1709000204_02_103787','OR_SR_1709000301_02_103796')", '",',
+    #   "style: function (feature) {",
+    #   "var c;",
+    #   "switch (feature.properties.AU_ID) {",
+    #   'case "', paste0(au_data[au_data$color == "green", ]$AU_ID, collapse = ","), '"',
+    #   "c = '#179639';",
+    #   "break;",
+    #   'case "', paste0(au_data[au_data$color == "orange", ]$AU_ID, collapse = ","), '"',
+    #   "c = '#fc923a';",
+    #   "break;",
+    #   'case "', paste0(au_data[au_data$color == "lightgray", ]$AU_ID, collapse = ","), '"',
+    #   "c = '#a3a3a3';",
+    #   "break;",
+    #   "default: '#ff00f2';",
+    #   "}",
+    #   "return {color: c, opacity: 1, weight: 8};",
+    #   "}",
+    #   "}).addTo(this);",
+    #   "assessmentUnits.bindPopup(",
+    #   "function (layer) {",
+    #   "var input, table, tr, td, i, txtValue;",
+    #   "input = layer.feature.properties.AU_ID;",
+    #   "table = document.getElementById('mytable');",
+    #   "tr = table.getElementsByTagName('tr');",
+    #   "for (i = 0; i < tr.length; i++) { ",
+    #   "td = tr[i].getElementsByTagName('td')[0];",
+    #   "if (td) {",
+    #   "txtValue = td.innerText || td.innerHTML;",
+    #   "if (txtValue.toUpperCase().indexOf(input) > -1) {",
+    #   "tr[i].style.display = '';",
+    #   "} else {",
+    #   "tr[i].style.display = 'none';",
+    #   "}}}",
+    #   ";",
+    #   "return table",
+    #   "}, {maxWidth : 1200});",
+    #   "}"
+    # )
+    # ) %>%
+    hideGroup("search")
 
   return(map)
 }

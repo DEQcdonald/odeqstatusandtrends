@@ -14,7 +14,9 @@
 status_stns <- function(data, year_range = NULL, status_period = 4) {
 
   if("Phosphate-phosphorus" %in% unique(data$Char_Name)){
-    data$year <- if_else(is.na(data$tp_year), lubridate::year(data$sample_datetime), data$tp_year)
+    if("tp_year" %in% colnames(data)){
+      data$year <- if_else(is.na(data$tp_year), lubridate::year(data$sample_datetime), data$tp_year)
+    } else {data$year <- lubridate::year(data$sample_datetime)}
   } else {data$year <- lubridate::year(data$sample_datetime)}
 
   if(is.null(year_range)){
