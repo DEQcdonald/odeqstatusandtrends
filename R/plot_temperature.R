@@ -11,10 +11,12 @@
 
 plot_temperature <- function(data, seaKen, station){
   # obtain data range limits for plotting
+  result_max <- max(c(data$Result_cen, data$temp_crit), na.rm = TRUE)
   xmin <- min(data$sample_datetime, na.rm = TRUE)
   xmax <- max(data$sample_datetime, na.rm = TRUE)
-  ymin <- min(c(data$Result_cen, data$temp_crit), na.rm = TRUE)
-  ymax <- max(c(data$Result_cen, data$temp_crit), na.rm = TRUE)
+  ymin <- 0
+  ymax <- ifelse(result_max > 26, result_max, 26)
+
   data$excursion <- if_else(data$excursion == 1, "Excursion", "Result") # change numeric value to descriptor
 
   # obtain plotting values for trend line if applicable

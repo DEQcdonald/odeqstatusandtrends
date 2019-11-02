@@ -16,10 +16,11 @@ plot_TSS <- function(data, seaKen, station){
                                  MLocID == station)
 
   # obtain data range limits for plotting
+  result_max <- max(c(data$Result_cen, data$TSS_crit), na.rm = TRUE)
   xmin <- min(data$sample_datetime, na.rm = TRUE)
   xmax <- max(data$sample_datetime, na.rm = TRUE)
-  ymin <- min(c(data$Result_cen, data$TSS_crit), na.rm = TRUE)
-  ymax <- max(c(data$Result_cen, data$TSS_crit), na.rm = TRUE)
+  ymin <- 0
+  ymax <- ifelse(result_max > 100, result_max, 100)
   data$excursion <- if_else(data$excursion_cen == 1, "Excursion", "Result") # change numeric value to descriptor
 
   # obtain plotting values for trend line if applicable
