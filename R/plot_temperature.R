@@ -72,7 +72,7 @@ plot_temperature <- function(data, seaKen, station){
   # plot data with excursion colors
   p <- p + geom_point(aes(x=sample_datetime, y=Result_cen, color = excursion, linetype = excursion, shape = excursion)) +
     ggtitle(paste(station, 'Temperature'), subtitle = paste(unique(data$StationDes))) +
-    ylab("Temperature (degrees C)") +
+    ylab("7DADM Temperature (deg C)") +
     xlab("Datetime")
 
   # plot the trend line if applicable
