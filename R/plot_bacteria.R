@@ -52,7 +52,7 @@ plot_bacteria <- function(data, seaKen, station){
   # plot data with excursion colors
   p <- p + geom_point(aes(x=sample_datetime, y=Result_cen, color = excursion, linetype = excursion, shape = excursion)) +
     ggtitle(paste(station, "Bacteria"), subtitle = paste(unique(data$StationDes))) +
-    ylab(paste(parameter)) +
+    ylab(paste0(parameter, "/100ml")) +
     xlab("Datetime")
 
   # plot the trend line if applicable
