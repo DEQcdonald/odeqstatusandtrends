@@ -34,15 +34,15 @@ plot_TP <- function(data, seaKen, station){
 
   p <- ggplot(data)
 
-  # add TP target line
+  # add TMDL TP Target line
   if(any(!is.na(data$TP_crit))){
     p <- p + geom_segment(aes(x=xmin, xend=xmax, y=TP_crit, yend=TP_crit,
-                              color = "TP Target", linetype = "TP Target", shape = "TP Target"))
+                              color = "TMDL Target", linetype = "TMDL Target", shape = "TMDL Target"))
   }
   # plot data with excursion colors
   p <- p + geom_point(aes(x=sample_datetime, y=Result_cen, color = excursion, linetype = excursion, shape = excursion)) +
     ggtitle(paste(station, "TP"), subtitle = paste(unique(data$StationDes))) +
-    ylab("TP") +
+    ylab("Total Phosphorus (mg/l)") +
     xlab("Datetime")
 
   # plot the trend line if applicable
@@ -53,11 +53,11 @@ plot_TP <- function(data, seaKen, station){
   # apply color, shape, line types, and range limits
   p <- p +
     scale_color_manual(name = "Legend",
-                       values =    c('Excursion' = 'red', 'Result' = 'black', "Trend" = 'blue', "TP Target" = 'black')) +
+                       values =    c('Excursion' = 'red', 'Result' = 'black', "Trend" = 'blue', "TMDL Target" = 'black')) +
     scale_linetype_manual(name = "Legend",
-                          values = c('Excursion' = 0, 'Result' = 0, "Trend" = 1, "TP Target" = 2)) +
+                          values = c('Excursion' = 0, 'Result' = 0, "Trend" = 1, "TMDL Target" = 2)) +
     scale_shape_manual(name = "Legend",
-                       values =    c('Excursion' = 16, 'Result' = 16, "Trend" = 32, "TP Target" = 32)) +
+                       values =    c('Excursion' = 16, 'Result' = 16, "Trend" = 32, "TMDL Target" = 32)) +
     ylim(c(ymin, ymax)) +
     xlim(c(xmin, xmax)) +
     scale_x_datetime(date_labels = "%b-%Y")+
