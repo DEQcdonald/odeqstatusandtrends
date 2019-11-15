@@ -16,10 +16,17 @@ plot_bacteria <- function(data, seaKen, station){
                                    MLocID == station)
 
   # obtain data range limits for plotting
+  result_max <- max(c(data$Result_cen, data$bact_crit_ss, data$bact_crit_geomean), na.rm = TRUE)
+
+  uylim <- dplyr::case_when(parameter== "Escherichia coli" ~ as.numeric(1000),
+                            parameter== "Fecal Coliform" ~ as.numeric(600),
+                            parameter== "Enterococcus" ~ as.numeric(100),
+                            TRUE ~ as.numeric(100))
+
   xmin <- min(data$sample_datetime, na.rm = TRUE)
   xmax <- max(data$sample_datetime, na.rm = TRUE)
-  ymin <- min(c(data$Result_cen, data$bact_crit_ss, data$bact_crit_geomean), na.rm = TRUE)
-  ymax <- max(c(data$Result_cen, data$bact_crit_ss, data$bact_crit_geomean), na.rm = TRUE)
+  ymin <- 0
+  ymax <- ifelse(result_max > uylim, result_max, uylim)
   data$excursion <- if_else(data$excursion_cen == 1, "Excursion", "Result") # change numeric value to descriptor
 
   # obtain plotting values for trend line if applicable
@@ -45,7 +52,7 @@ plot_bacteria <- function(data, seaKen, station){
   # plot data with excursion colors
   p <- p + geom_point(aes(x=sample_datetime, y=Result_cen, color = excursion, linetype = excursion, shape = excursion)) +
     ggtitle(paste(station, "Bacteria"), subtitle = paste(unique(data$StationDes))) +
-    ylab(paste(parameter)) +
+    ylab(paste0(parameter, "/100ml")) +
     xlab("Datetime")
 
   # plot the trend line if applicable

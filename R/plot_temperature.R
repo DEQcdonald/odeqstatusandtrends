@@ -11,10 +11,12 @@
 
 plot_temperature <- function(data, seaKen, station){
   # obtain data range limits for plotting
+  result_max <- max(c(data$Result_cen, data$temp_crit), na.rm = TRUE)
   xmin <- min(data$sample_datetime, na.rm = TRUE)
   xmax <- max(data$sample_datetime, na.rm = TRUE)
-  ymin <- min(c(data$Result_cen, data$temp_crit), na.rm = TRUE)
-  ymax <- max(c(data$Result_cen, data$temp_crit), na.rm = TRUE)
+  ymin <- 0
+  ymax <- ifelse(result_max > 26, result_max, 26)
+
   data$excursion <- if_else(data$excursion == 1, "Excursion", "Result") # change numeric value to descriptor
 
   # obtain plotting values for trend line if applicable
@@ -33,44 +35,44 @@ plot_temperature <- function(data, seaKen, station){
     data$Start_spawn <- as.POSIXct(data$Start_spawn)
     data$End_spawn <- as.POSIXct(data$End_spawn)
 
-    # create dataframe of spawning start/end dates, and relevant values for spawning zones and criteria lines
+    # create dataframe of spawning start/end dates, and relevant values for spawning period and criteria lines
     spawn_zones <- unique(data[,c("Start_spawn", "End_spawn")])
     spawn_zones$next_start <- spawn_zones$Start_spawn + years(1)
     spawn_zones$ymin <- -Inf
     spawn_zones$ymax <- Inf
     spawn_zones$temp_crit <- unique(data$temp_crit)
     spawn_zones$spawn_crit <- 13
-    # adjust plot limits to allow for first and last spawning zones to plot
+    # adjust plot limits to allow for first and last spawning period to plot
     xmin <- min(xmin, min(spawn_zones$Start_spawn, na.rm = TRUE))
     xmax <- max(xmax, max(spawn_zones$End_spawn, na.rm = TRUE))
 
-    # plot the shaded spawning zones
+    # plot the shaded spawning period
     p <- p + geom_rect(data = spawn_zones, aes(xmin=Start_spawn, xmax=End_spawn, ymin=ymin, ymax=ymax,
-                       # linetype = 'Spawning Zone', shape = 'Spawning Zone', color = 'Spawning Zone',
-                       fill='Spawning Zone'),
+                       # linetype = 'Spawning Period', shape = 'Spawning Period', color = 'Spawning Period',
+                       fill='Spawning Period'),
                        color = NA, alpha=.15, show.legend = c(fill=TRUE, linetype=FALSE, shape=FALSE, color=FALSE))
 
-    # plot non-spawning criteria lines within non-spawning zones
+    # plot non-spawning criteria lines within non-spawning period
     p <- p + geom_segment(data = spawn_zones,
                           aes(x=End_spawn, xend=next_start, y=temp_crit, yend=temp_crit,
                               color="Non-Spawning", linetype="Non-Spawning", shape="Non-Spawning"),
                           size = 1)
 
-    # plot spawning criteria lines within spawning zones
+    # plot spawning criteria lines within spawning period
     p <- p + geom_segment(data = spawn_zones,
                           aes(x=Start_spawn, xend=End_spawn, y=spawn_crit, yend=spawn_crit,
                               color="Spawning", linetype="Spawning", shape="Spawning"),
                           size = 1)
 
   } else if(any(!is.na(data$temp_crit))){
-    # plot non-spawining line across data if no spawning zones apply
+    # plot non-spawining line across data if no spawning period apply
     p <- p + geom_line(aes(x=sample_datetime, y=temp_crit, color="Non-Spawning", linetype="Non-Spawning", shape="Non-Spawning"))
   }
 
   # plot data with excursion colors
   p <- p + geom_point(aes(x=sample_datetime, y=Result_cen, color = excursion, linetype = excursion, shape = excursion)) +
     ggtitle(paste(station, 'Temperature'), subtitle = paste(unique(data$StationDes))) +
-    ylab("Temperature (degrees C)") +
+    ylab("7DADM Temperature (deg C)") +
     xlab("Datetime")
 
   # plot the trend line if applicable
@@ -86,7 +88,7 @@ plot_temperature <- function(data, seaKen, station){
                           values = c('Excursion' = 0, 'Result' = 0, "Trend" = 1, "Spawning" = 2, "Non-Spawning" = 1)) +
     scale_shape_manual(name = "Legend",
                        values =    c('Excursion' = 16, 'Result' = 16, "Trend" = 32, "Spawning" = 32, "Non-Spawning" = 32)) +
-    scale_fill_manual(name = "", values = c("Spawning Zone" = 'black')) +
+    scale_fill_manual(name = "", values = c("Spawning Period" = 'black')) +
     ylim(c(ymin, ymax)) +
     xlim(c(xmin, xmax)) +
     scale_x_datetime(date_labels = "%b-%Y")+
