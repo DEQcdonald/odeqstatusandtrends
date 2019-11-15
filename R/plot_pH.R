@@ -43,7 +43,7 @@ plot_pH <- function(data, seaKen, station){
   # plot data with excursion colors
   p <- p + geom_point(aes(x=sample_datetime, y=Result_cen, color = excursion, linetype = excursion, shape = excursion)) +
     ggtitle(paste(station, "pH"), subtitle = paste(unique(data$StationDes))) +
-    ylab("pH") +
+    ylab("pH (s.u.)") +
     xlab("Datetime")
 
   # plot the trend line if applicable
