@@ -65,6 +65,19 @@ CleanData <- function(data)
   # # Remove field replicates
   # data <- data[!grepl("Quality Control", data$Activity_Type), ]
 
+  # Unit Standardization
+  # convert ug/l to mg/l and deg F to deg C
+  data <- data %>%
+    dplyr::mutate(Result_Numeric = dplyr::case_when(Result_Unit == 'ug/l' ~ Result_Numeric * 0.001,
+                                                    Result_Unit == 'deg F' ~ round((Result_Numeric - 32) * 5/9, 2),
+                                                    TRUE ~ Result_Numeric),
+                  Result = dplyr::case_when(Result_Unit == 'ug/l' ~ as.character(Result_Numeric),
+                                               Result_Unit == 'deg F' ~ as.character(Result_Numeric),
+                                               TRUE ~ Result),
+                  Result_Unit = dplyr::case_when(Result_Unit == 'ug/l' ~ 'mg/l',
+                                                 Result_Unit == 'deg F' ~ 'deg C',
+                                                 TRUE ~ Result_Unit))
+
   # Check for duplicate samples
   print("Creating sample IDs...")
   data$sample_id <- paste(data$MLocID, data$Char_Name, data$sample_datetime, data$Statistical_Base, data$Method_Code, data$act_depth_height, sep = " ")
