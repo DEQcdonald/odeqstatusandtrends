@@ -61,9 +61,6 @@ status_stns <- function(data, year_range = NULL, status_period = 4) {
        ungroup() %>% select(-samples) %>%
        spread(key = bin, value = status)
 
-     status_check <- merge(status_check, by = c("MLocID", "Char_Name"))
-
-
      if(any(data$year %in% years & data$BacteriaCode == 3 & data$Char_Name == "Fecal Coliform")){
        shell_status <- data %>%
          dplyr::filter(year %in% years,
