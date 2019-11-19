@@ -68,19 +68,19 @@ status_stns <- function(data, year_range = NULL, status_period = 4) {
                        Char_Name == "Fecal Coliform") %>%
          dplyr::group_by(MLocID, Char_Name, bin) %>%
          dplyr::summarise(samples = n(),
-                          median = if_else(num_samples >= 5, median(Result_cen), NaN),
+                          median = if_else(samples >= 5, median(Result_cen), NaN),
                           excursions = sum(perc_exceed),
-                          bact_crit_percent = first(bact_crit_percent),
-                          bact_crit_ss = first(bact_crit_ss),
+                          bact_crit_percent = first(bact_crit_percent), # 43 organisms per 100mL, requires 10% exceedance
+                          bact_crit_ss = first(bact_crit_ss), # 14 organisms per 100mL, median used to evaluate excursion
                           n_years = length(unique(year)),
                           excursion = if_else((!is.na(median) & median > bact_crit_ss),
                                               1,
-                                              if_else(num_samples >= 10 & num_exceed/num_samples > 0.10,
+                                              if_else(samples >= 10 & excursions/samples > 0.10,
                                                       1,
-                                                      if_else(num_samples >= 5 & num_samples <= 9 & num_exceed >= 1,
+                                                      if_else(samples >= 5 & samples <= 9 & excursions >= 1,
                                                               1, 0)
                                               )),
-                          status = if_else(num_samples < 1 | is.na(num_samples) | all(is.na(excursion)),
+                          status = if_else(samples < 1 | is.na(samples) | all(is.na(excursion)),
                                            "Unassessed",
                                            if_else(any(excursion == 1, na.rm = TRUE),
                                                    "Not Attaining",
