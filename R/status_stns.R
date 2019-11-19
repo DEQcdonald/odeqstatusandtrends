@@ -50,6 +50,7 @@ status_stns <- function(data, year_range = NULL, status_period = 4) {
        dplyr::group_by(MLocID, Char_Name, bin) %>%
        dplyr::summarise(samples = n(),
                         excursions = sum(excursion_cen, na.rm = TRUE),
+                        per_exceed = excursions/samples*100,
                         status = if_else(samples < 1 | is.na(samples) | all(is.na(excursion_cen)),
                                          "Unassessed",
                                                  if_else(any(excursion_cen == 1, na.rm = TRUE),
@@ -83,7 +84,8 @@ status_stns <- function(data, year_range = NULL, status_period = 4) {
                                            if_else(any(excursion == 1, na.rm = TRUE),
                                                    "Not Attaining",
                                                    "Attaining")
-                          )
+                          ),
+                          per_exceed = num_exceed/num_samples*100
 
          ) %>%
          ungroup() %>% select(MLocID, Char_Name, bin, status) %>% spread(key = bin, value = status)

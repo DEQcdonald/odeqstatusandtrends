@@ -175,6 +175,12 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
     return(table)
   }
 
+  charnames <- data.frame(awqms = c("Temperature, water", "Dissolved oxygen (DO)", "pH", "Total suspended solids", "Phosphate-phosphorus",
+                                       "Fecal Coliform", "Escherichia coli", "Enterococcus"),
+                             folder = c("Temperature", "DO", "pH", "TSS", "TP", "Fecal Coliform", "Escherichia coli", "Enterococcus"),
+                             file = c("temp", "DO", "pH", "TSS", "TP", "Fecal Coliform", "Escherichia coli", "Enterococcus"),
+                          stringsAsFactors = FALSE)
+
 # Create parameter summary map --------------------------------------------
 
   print("Creating Map...")
@@ -351,6 +357,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                         label = ~MLocID,
                         popup = ~paste0("<b>", StationDes, "<br>ID:</b> ", MLocID,
                                         "<br><b>AU ID:</b> ", AU_ID,
+                                        "<br>",
+                                        paste0("<img src='Plots/", HUC8_Name, "/", charnames[charnames$awqms == i, "folder"], "/",
+                                               charnames[charnames$awqms == i, "file"], "_", MLocID, ".jpeg' style='width:600px'>"),
                                         "<br>",
                                         sapply(MLocID, popupTable, AU = NULL, param = i, USE.NAMES = FALSE)),
                         popupOptions = popupOptions(maxWidth = 1200),
