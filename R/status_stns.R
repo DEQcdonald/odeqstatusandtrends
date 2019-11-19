@@ -61,18 +61,7 @@ status_stns <- function(data, year_range = NULL, status_period = 4) {
        ungroup() %>% select(-samples) %>%
        spread(key = bin, value = status)
 
-     per_exceed <- data %>%
-       filter(year %in% years,
-              !(BacteriaCode == 3 & Char_Name == "Fecal Coliform")) %>%
-       dplyr::group_by(MLocID, Char_Name, bin) %>%
-       dplyr::summarise(samples = n(),
-                        excursions = sum(excursion_cen, na.rm = TRUE),
-                        per_exceed = excursions/samples*100) %>%
-       ungroup() %>% select(-samples, -excursions) %>%
-       spread(key = bin, value = per_exceed, sep = "_")
-     colnames(per_exceed) <- gsub("bin_status", "per_exceed", colnames(per_exceed))
-
-     status_check <- merge(status_check, per_exceed, by = c("MLocID", "Char_Name"))
+     status_check <- merge(status_check, by = c("MLocID", "Char_Name"))
 
 
      if(any(data$year %in% years & data$BacteriaCode == 3 & data$Char_Name == "Fecal Coliform")){
@@ -135,7 +124,7 @@ status_stns <- function(data, year_range = NULL, status_period = 4) {
      }
 
     status_check[is.na(status_check)] <- "Unassessed"
-    cols <- c(colnames(per_exceed[,c(1,2, rev(3:length(colnames(per_exceed))))]), cols)
+    cols <- c("MLocID", "Char_Name", cols)
 
     for(i in cols[!cols %in% colnames(status_check)]){
       status_check[,i] <- "Unassessed"
