@@ -115,7 +115,7 @@ percent_exceedance <- function(data, year_range = NULL, status_period = 4) {
 
     }
     
-    cols <- c(colnames(per_exceed_df[,c(1,2, rev(3:length(colnames(per_exceed))))]))
+    cols <- c(colnames(per_exceed_df[,c(1,2, rev(3:length(colnames(per_exceed_df))))]))
     
     for(i in cols[!cols %in% colnames(per_exceed_df)]){
       per_exceed_df[,i] <- NaN
