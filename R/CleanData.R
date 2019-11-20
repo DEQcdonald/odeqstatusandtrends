@@ -67,6 +67,7 @@ CleanData <- function(data)
 
   # Unit Standardization
   # convert ug/l to mg/l and deg F to deg C
+  print("Converting units, ug/l -> mg/l and deg F -> deg C...")
   data <- data %>%
     dplyr::mutate(Result_Numeric = dplyr::case_when(Result_Unit == 'ug/l' ~ Result_Numeric * 0.001,
                                                     Result_Unit == 'deg F' ~ round((Result_Numeric - 32) * 5/9, 2),
