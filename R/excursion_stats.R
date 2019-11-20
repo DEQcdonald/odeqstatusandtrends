@@ -69,7 +69,7 @@ excursion_stats <- function(data, year_range = NULL) {
                        percent_excursion = round(excursions_n/results_n*100,0)) %>%
       dplyr::ungroup() %>%
       dplyr::left_join(by=c("MLocID", "Char_Name", "bin"), y=excursion_stat_df1) %>%
-      tidyr::pivot_wider(names_from=bin, values_from=c(percent_excursion, results_n, excursions_n, exursion_max, exursion_median, exursion_min))
+      tidyr::pivot_wider(names_from=bin, values_from=c(percent_excursion, results_n, excursions_n, excursion_max, excursion_median, excursion_min))
 
     if(any(data$year %in% years & data$BacteriaCode == 3 & data$Char_Name == "Fecal Coliform")){
       shell_per_excursion <- data %>%
