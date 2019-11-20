@@ -109,7 +109,7 @@ percent_exceedance <- function(data, year_range = NULL, status_period = 4) {
         ungroup() %>% select(-samples, -excursions) %>%
         spread(key = bin, value = per_exceed)
 
-      if(nrow(shell_status) >0){
+      if(nrow(shell_per_exceed) >0){
         per_exceed_df <- bind_rows(per_exceed_df, shell_per_exceed)
       }
 
