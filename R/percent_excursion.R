@@ -28,7 +28,6 @@ percent_excursion <- function(data, year_range = NULL, status_period = 4) {
   cols <- sapply(breaks, function(x){
     start <- x - status_period + 1
     return(paste0(
-      "percent_excursion_",
       start, "_", x))
   })
   bins <- lapply(breaks, function(x){
@@ -52,10 +51,10 @@ percent_excursion <- function(data, year_range = NULL, status_period = 4) {
       dplyr::group_by(MLocID, Char_Name, bin) %>%
       dplyr::summarise(results_n = n(),
                        excursions = sum(excursion_cen, na.rm = TRUE),
-                       per_excursion = round(excursions/results_n*100),0) %>%
+                       percent_excursion = round(excursions/results_n*100,0)) %>%
       dplyr::ungroup() %>%
       dplyr::select(-excursions) %>%
-      tidyr::pivot_wider(names_from=bin, values_from=c(per_excursion, results_n))
+      tidyr::pivot_wider(names_from=bin, values_from=c(percent_excursion, results_n))
 
     if(any(data$year %in% years & data$BacteriaCode == 3 & data$Char_Name == "Fecal Coliform")){
       shell_per_excursion <- data %>%
@@ -76,13 +75,13 @@ percent_excursion <- function(data, year_range = NULL, status_period = 4) {
                                                             if_else(results_n >= 5 & results_n <= 9 & excursions >= 1,
                                                                     1, 0)
                                                     )),
-                         per_excursion = ifelse(!is.na(excursion),
+                         percent_excursion = ifelse(!is.na(excursion),
                                                 if_else(excursion == 1, 100, 0),
                                                 NaN)
         ) %>%
         dplyr::ungroup() %>%
         dplyr::select(-excursions) %>%
-        tidyr::pivot_wider(names_from=bin, values_from=c(per_excursion, results_n))
+        tidyr::pivot_wider(names_from=bin, values_from=c(percent_excursion, results_n))
 
       if(nrow(shell_per_excursion) >0){
         per_excursion_df <- dplyr::bind_rows(per_excursion_df, shell_per_excursion)
