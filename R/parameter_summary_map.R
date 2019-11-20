@@ -122,10 +122,10 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
       colnames(data) <- gsub("_", " ", colnames(data), perl = TRUE)
       colnames(data) <- sapply(colnames(data), simpleCap, USE.NAMES = FALSE)
 
-      table <- kable(data,
-                     format = "html", row.names = FALSE) %>%
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
-                      full_width = TRUE, font_size = 10)
+      table <- knitr::kable(data,
+                            format = "html", row.names = FALSE) %>%
+        kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                             full_width = TRUE, font_size = 10)
 
     }
     if(!is.null(AU)){
@@ -137,9 +137,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
       colnames(data) <- gsub("_", " ", colnames(data), perl = TRUE)
       colnames(data) <- sapply(colnames(data), simpleCap, USE.NAMES = FALSE)
 
-      table <- kable(data,
+      table <- knitr::kable(data,
                      format = "html", row.names = FALSE) %>%
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+        kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
                       full_width = TRUE, font_size = 10)
 
     }
@@ -155,9 +155,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
     colnames(data) <- gsub("_", " ", colnames(data), perl = TRUE)
     colnames(data) <- sapply(colnames(data), simpleCap, USE.NAMES = FALSE)
 
-    table <- kable(data, format = "html",
+    table <- knitr::kable(data, format = "html",
                    table.attr = "id=\"mytable\"", row.names = FALSE) %>%
-      kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+      kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
                     full_width = TRUE, font_size = 10)
 
     return(table)
@@ -165,11 +165,11 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
 
   WQLpopupTable <- function(seg_ID = NULL, param = NULL){
     if(!is.null(seg_ID)){
-      table <- kable(
+      table <- knitr::kable(
         filter(wql_streams_data, SEGMENT_ID == seg_ID) %>%
           dplyr::select(Pollutant = Char_Name, Listing = LISTING_ST, Season = SEASON, TMDL = TMDL_INFO) %>% unique(),
                      format = "html", row.names = FALSE) %>%
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+        kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
                       full_width = TRUE, font_size = 10)
     }
     return(table)
