@@ -4,16 +4,16 @@
 #' Excursion statistics include number of excursions, percent excursion, and the max, median, and minimum for results
 #' that contributed to an excursion.
 #'
-#' @param data Dataframe to determine status from.
+#' @param data Dataframe of data to calculate excursion stats from.
 #' @param year_range Years from which to determine status. If null, the year range for data provided is used.
 #' The range of years in status years will be binned by this number
 #' @return Dataframe of stations
 #' @export
 #' @examples
-#' percent_excursion(data = data.frame, year_range = c(start_year, end_year))
+#' excursion_stats(data = data.frame, year_range = c(start_year, end_year))
 
 
-percent_excursion <- function(data, year_range = NULL) {
+excursion_stats <- function(data, year_range = NULL) {
 
   # This assumes a 20 year period
   status_period <- 4
