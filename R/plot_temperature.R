@@ -48,8 +48,8 @@ plot_temperature <- function(data, seaKen, station){
 
     # plot the shaded spawning period
     p <- p + geom_rect(data = spawn_zones, aes(xmin=Start_spawn, xmax=End_spawn, ymin=ymin, ymax=ymax,
-                       # linetype = 'Spawning Period', shape = 'Spawning Period', color = 'Spawning Period',
-                       fill='Spawning Period'),
+                                               # linetype = 'Spawning Zone', shape = 'Spawning Zone', color = 'Spawning Zone',
+                                               fill='Spawning Zone'),
                        color = NA, alpha=.15, show.legend = c(fill=TRUE, linetype=FALSE, shape=FALSE, color=FALSE))
 
     # plot non-spawning criteria lines within non-spawning period

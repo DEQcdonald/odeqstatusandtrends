@@ -134,7 +134,7 @@ get_stations_WQP <- function(polygon, start_date, end_date, huc8, exclude.tribal
 #' @examples
 #' get_stations_NWIS(polygon = "your-shapefile-here", exclude.tribal.lands = TRUE)
 
-get_stations_NWIS <- GetStations_AWQMS <- function(polygon, exclude.tribal.lands = TRUE) {
+get_stations_NWIS <- function(polygon, exclude.tribal.lands = TRUE) {
 
   # Get Stations within NWIS database
   print("Retrieving USGS station information for all of Oregon...")

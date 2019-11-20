@@ -16,7 +16,7 @@ plot_DO <- function(data, seaKen, station){
   xmax <- max(data$sample_datetime, na.rm = TRUE)
   ymin <- 0
   ymax <- ifelse(result_max > 25, result_max, 25)
-  data$excursion <- if_else(data$spwn_exc_inst ==1 | data$yr_exc_inst == 1, "Excursion", "Result") # change numeric value to descriptor
+  data$excursion <- if_else(((data$in_spawn == 1) & (data$spwn_exc_inst == 1)) | data$yr_exc_inst == 1, "Excursion", "Result") # change numeric value to descriptor
 
   # obtain plotting values for trend line if applicable
   if(station %in% seaKen$MLocID){
@@ -46,26 +46,28 @@ plot_DO <- function(data, seaKen, station){
     xmax <- max(xmax, max(spawn_zones$End_spawn, na.rm = TRUE))
 
     # plot the shaded Spawning Periods
-    p <- p + geom_rect(data = spawn_zones, aes(xmin=Start_spawn, xmax=End_spawn, ymin=ymin, ymax=ymax,
+    p <- p + geom_rect(data = spawn_zones, aes(xmin=Start_spawn - lubridate::seconds(1), xmax= End_spawn + lubridate::seconds(1), ymin=ymin, ymax=ymax,
                                                # linetype = 'Spawning Period', shape = 'Spawning Period', color = 'Spawning Period',
                                                fill='Spawning Period'),
                        color = NA, alpha=.15, show.legend = c(fill=TRUE, linetype=FALSE, shape=FALSE, color=FALSE))
 
     # plot non-spawning criteria lines within non-spawning periods
     p <- p + geom_segment(data = spawn_zones,
-                          aes(x=End_spawn, xend=next_start, y=Do_crit_instant, yend=Do_crit_instant,
+                          aes(x=End_spawn - lubridate::seconds(1), xend=next_start + lubridate::seconds(1), y=Do_crit_instant, yend=Do_crit_instant,
                               color="Non-Spawning", linetype="Non-Spawning", shape="Non-Spawning"),
                           size = 1)
 
     # plot spawning criteria lines within Spawning Periods
     p <- p + geom_segment(data = spawn_zones,
-                          aes(x=Start_spawn, xend=End_spawn, y=spawn_crit, yend=spawn_crit,
+                          aes(x=Start_spawn - lubridate::seconds(1), xend=End_spawn + lubridate::seconds(1), y = 11, yend = 11,
                               color="Spawning", linetype="Spawning", shape="Spawning"),
                           size = 1)
 
   } else if(any(!is.na(data$Do_crit_instant))){
     # plot non-spawining line across data if no Spawning Periods apply
-    p <- p + geom_line(aes(x=sample_datetime, y=Do_crit_instant, color="Non-Spawning", linetype="Non-Spawning", shape="Non-Spawning"))
+    p <- p + geom_segment(aes(x=min(sample_datetime) - lubridate::seconds(1), xend=max(sample_datetime) + lubridate::seconds(1),
+                              y=Do_crit_instant, yend=Do_crit_instant,
+                              color="Non-Spawning", linetype="Non-Spawning", shape="Non-Spawning"))
   }
 
   # plot data with excursion colors
@@ -90,7 +92,7 @@ plot_DO <- function(data, seaKen, station){
                        values =    c('Excursion' = 16, 'Result' = 16, "Trend" = 32, "Spawning" = 32, "Non-Spawning" = 32)) +
     scale_fill_manual(name = "", values = c("Spawning Period" = 'black')) +
     ylim(c(ymin, ymax)) +
-    xlim(c(xmin, xmax)) +
+    xlim(c(xmin - lubridate::seconds(1), xmax + lubridate::seconds(1))) +
     scale_x_datetime(date_labels = "%b-%Y")+
     theme(legend.position="bottom", legend.direction = "horizontal", legend.box = "horizontal")
 

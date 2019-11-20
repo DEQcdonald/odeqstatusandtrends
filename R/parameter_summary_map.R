@@ -122,10 +122,10 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
       colnames(data) <- gsub("_", " ", colnames(data), perl = TRUE)
       colnames(data) <- sapply(colnames(data), simpleCap, USE.NAMES = FALSE)
 
-      table <- kable(data,
-                     format = "html", row.names = FALSE) %>%
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
-                      full_width = TRUE, font_size = 10)
+      table <- knitr::kable(data,
+                            format = "html", row.names = FALSE) %>%
+        kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                             full_width = TRUE, font_size = 10)
 
     }
     if(!is.null(AU)){
@@ -137,9 +137,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
       colnames(data) <- gsub("_", " ", colnames(data), perl = TRUE)
       colnames(data) <- sapply(colnames(data), simpleCap, USE.NAMES = FALSE)
 
-      table <- kable(data,
+      table <- knitr::kable(data,
                      format = "html", row.names = FALSE) %>%
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+        kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
                       full_width = TRUE, font_size = 10)
 
     }
@@ -155,9 +155,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
     colnames(data) <- gsub("_", " ", colnames(data), perl = TRUE)
     colnames(data) <- sapply(colnames(data), simpleCap, USE.NAMES = FALSE)
 
-    table <- kable(data, format = "html",
+    table <- knitr::kable(data, format = "html",
                    table.attr = "id=\"mytable\"", row.names = FALSE) %>%
-      kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+      kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
                     full_width = TRUE, font_size = 10)
 
     return(table)
@@ -165,15 +165,21 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
 
   WQLpopupTable <- function(seg_ID = NULL, param = NULL){
     if(!is.null(seg_ID)){
-      table <- kable(
+      table <- knitr::kable(
         filter(wql_streams_data, SEGMENT_ID == seg_ID) %>%
           dplyr::select(Pollutant = Char_Name, Listing = LISTING_ST, Season = SEASON, TMDL = TMDL_INFO) %>% unique(),
                      format = "html", row.names = FALSE) %>%
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+        kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
                       full_width = TRUE, font_size = 10)
     }
     return(table)
   }
+
+  charnames <- data.frame(awqms = c("Temperature, water", "Dissolved oxygen (DO)", "pH", "Total suspended solids", "Phosphate-phosphorus",
+                                       "Fecal Coliform", "Escherichia coli", "Enterococcus"),
+                             folder = c("Temperature", "DO", "pH", "TSS", "TP", "Fecal Coliform", "Escherichia coli", "Enterococcus"),
+                             file = c("temp", "DO", "pH", "TSS", "TP", "Fecal Coliform", "Escherichia coli", "Enterococcus"),
+                          stringsAsFactors = FALSE)
 
 # Create parameter summary map --------------------------------------------
 
@@ -352,7 +358,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                         popup = ~paste0("<b>", StationDes, "<br>ID:</b> ", MLocID,
                                         "<br><b>AU ID:</b> ", AU_ID,
                                         "<br>",
-                                        sapply(MLocID, popupTable, AU = NULL, param = i, USE.NAMES = FALSE)),
+                                        sapply(MLocID, popupTable, AU = NULL, param = i, USE.NAMES = FALSE),
+                                        paste0("<img src='Plots/", HUC8_Name, "/", charnames[charnames$awqms == i, "folder"], "/",
+                                               charnames[charnames$awqms == i, "file"], "_", MLocID, ".jpeg' style='width:600px'>")),
                         popupOptions = popupOptions(maxWidth = 1200),
                         labelOptions = list(className = "stationLabels", noHide = T, permanent = T, interactive = T,
                                             offset = c(-10,-25), opacity = 0.9, textsize = "14px", sticky = TRUE),
