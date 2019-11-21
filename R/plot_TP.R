@@ -21,7 +21,9 @@ plot_TP <- function(data, seaKen, station){
   xmax <- max(data$sample_datetime, na.rm = TRUE)
   ymin <- 0
   ymax <- ifelse(result_max > 0.15, result_max, 0.15)
-  data$excursion <- if_else(data$excursion_cen == 1, "Excursion", "Result") # change numeric value to descriptor
+  data$excursion <- if_else(!is.na(data$excursion_cen),
+                            if_else(data$excursion_cen == 1, "Excursion", "Result"),
+                            "Result") # change numeric value to descriptor
 
   # obtain plotting values for trend line if applicable
   if(nrow(seaken_TP) > 0){

@@ -175,6 +175,49 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
     return(table)
   }
 
+  plot_html <- function(station, sub_name, param){
+    if(param == "Dissolved oxygen (DO)"){
+      paste(
+        "DO plots (link will fail if plot is unavailable)<br>",
+        # if(file.exists(paste0('Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+        #        charnames[charnames$awqms == param, "file"], "_", station, "_instantaneous.jpeg'))){
+          paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                 charnames[charnames$awqms == param, "file"], "_", station, "_instantaneous.jpeg' style='width:600px' target='_blank'>Instantaneous</a>")
+        # }
+    ,
+        # if(file.exists(paste0('Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+        #        charnames[charnames$awqms == param, "file"], "_", station, "_sdadmin.jpeg'))){
+        paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+               charnames[charnames$awqms == param, "file"], "_", station, "_sdadmin.jpeg' style='width:600px' target='_blank'>7DADMin</a>")
+        # }
+    ,
+        # if(file.exists(paste0('Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+        #        charnames[charnames$awqms == param, "file"], "_", station, "_30dadmean.jpeg'))){
+          paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                 charnames[charnames$awqms == param, "file"], "_", station, "_30dadmean.jpeg' style='width:600px' target='_blank'>30DADMean</a>")
+        # }
+    ,
+        # if(file.exists(paste0('Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+        #        charnames[charnames$awqms == param, "file"], "_", station, "_sdadmean.jpeg'))){
+          paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                 charnames[charnames$awqms == param, "file"], "_", station, "_sdadmean.jpeg' style='width:600px' target='_blank'>7DADMean</a>")
+        # }
+    ,
+        # if(file.exists(paste0('Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+        #        charnames[charnames$awqms == param, "file"], "_", station, "_minimum.jpeg'))){
+          paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                 charnames[charnames$awqms == param, "file"], "_", station, "_minimum.jpeg' style='width:600px' target='_blank'>Minimum</a>")
+        # }
+      )
+    } else {
+      # if(file.exists(paste0('Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+      #        charnames[charnames$awqms == param, "file"], "_", station, ".jpeg'))){
+        paste0("<img src='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+               charnames[charnames$awqms == param, "file"], "_", station, ".jpeg' style='width:600px'>")
+      # } else {paste0("No ", param, " data plotted for this station")}
+    }
+  }
+
   charnames <- data.frame(awqms = c("Temperature, water", "Dissolved oxygen (DO)", "pH", "Total suspended solids", "Phosphate-phosphorus",
                                        "Fecal Coliform", "Escherichia coli", "Enterococcus"),
                              folder = c("Temperature", "DO", "pH", "TSS", "TP", "Fecal Coliform", "Escherichia coli", "Enterococcus"),
@@ -270,6 +313,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
     psum_AU <- psum[!(psum[[status_current]] %in% c("Unassessed", "Insufficient Data") & psum$trend == "Insufficient Data"),]
     au_data <- dplyr::filter(assessment_units[, c("AU_ID", "AU_Name")], AU_ID %in% unique(psum_AU$AU_ID))
     au_data <- merge(au_data, dplyr::filter(au_colors, Char_Name == i)[,c("AU_ID", "color")], by = "AU_ID")
+
     # au_data <- au_colors %>% dplyr::filter(Char_Name == i)
     # wql_streams_tmp <- dplyr::filter(wql_streams, Char_Name == i)
     # green_ids <- au_data[au_data$color == "green", ]$AU_ID
@@ -359,8 +403,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                                         "<br><b>AU ID:</b> ", AU_ID,
                                         "<br>",
                                         sapply(MLocID, popupTable, AU = NULL, param = i, USE.NAMES = FALSE),
-                                        paste0("<img src='Plots/", HUC8_Name, "/", charnames[charnames$awqms == i, "folder"], "/",
-                                               charnames[charnames$awqms == i, "file"], "_", MLocID, ".jpeg' style='width:600px'>")),
+                                        mapply(plot_html, station = MLocID, sub_name = HUC8_Name, param = i, USE.NAMES = FALSE)
+                                        ),
                         popupOptions = popupOptions(maxWidth = 1200),
                         labelOptions = list(className = "stationLabels", noHide = T, permanent = T, interactive = T,
                                             offset = c(-10,-25), opacity = 0.9, textsize = "14px", sticky = TRUE),
