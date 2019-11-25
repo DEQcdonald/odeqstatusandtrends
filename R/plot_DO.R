@@ -88,8 +88,8 @@ plot_DO <- function(data, seaKen, station){
     # spawn_zones$Do_crit_instant <- unique(data$Do_crit_instant)
     spawn_zones$spawn_crit_inst <- 11
     # adjust plot limits to allow for first and last Spawning Periods to plot
-    xmin <- min(xmin, min(spawn_zones$Start_spawn, na.rm = TRUE))
-    xmax <- max(xmax, max(spawn_zones$End_spawn, na.rm = TRUE))
+    xmin <- min(xmin - lubridate::seconds(2), min(spawn_zones$Start_spawn, na.rm = TRUE) - lubridate::seconds(2))
+    xmax <- max(xmax + lubridate::seconds(2), max(spawn_zones$End_spawn, na.rm = TRUE) + lubridate::seconds(2))
 
     # plot the shaded Spawning Periods
     p <- p + geom_rect(data = spawn_zones, aes(xmin=Start_spawn - lubridate::seconds(1), xmax= End_spawn + lubridate::seconds(1), ymin=ymin, ymax=ymax,
@@ -235,7 +235,7 @@ plot_DO <- function(data, seaKen, station){
 
     legend <- get_legend(p_inst)
 
-    p_inst <- p_inst + theme(legend.position = "none")
+    # p_inst <- p_inst + theme(legend.position = "none")
 
     DO_plots[["instantaneous"]] <- p_inst
   }
@@ -246,8 +246,9 @@ plot_DO <- function(data, seaKen, station){
     )) +
       ggtitle(paste(station, '7DADMin Dissolved Oxygen')
               , subtitle = paste(unique(data$StationDes))
-              ) +
-      theme(legend.position = "none")
+              )
+    # +
+      # theme(legend.position = "none")
 
     DO_plots[["sdadmin"]] <- p_7dadmin
   }
@@ -258,8 +259,9 @@ plot_DO <- function(data, seaKen, station){
     )) +
       ggtitle(paste(station, '30DADMean Dissolved Oxygen')
               , subtitle = paste(unique(data$StationDes))
-              ) +
-      theme(legend.position = "none")
+              )
+    # +
+      # theme(legend.position = "none")
 
     DO_plots[["30dadmean"]] <- p_30dadmean
   }
@@ -270,8 +272,9 @@ plot_DO <- function(data, seaKen, station){
     )) +
       ggtitle(paste(station, '7DADMean Dissolved Oxygen')
               , subtitle = paste(unique(data$StationDes))
-              ) +
-      theme(legend.position = "none")
+              )
+    # +
+      # theme(legend.position = "none")
 
     DO_plots[["sdadmean"]] <- p_7dadmean
   }
@@ -282,8 +285,9 @@ plot_DO <- function(data, seaKen, station){
     )) +
       ggtitle(paste(station, 'Daily Minimum Dissolved Oxygen')
               , subtitle = paste(unique(data$StationDes))
-              ) +
-      theme(legend.position = "none")
+              )
+    # +
+      # theme(legend.position = "none")
 
     DO_plots[["minimum"]] <- p_min
   }
