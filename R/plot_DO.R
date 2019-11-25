@@ -54,7 +54,6 @@ plot_DO <- function(data, seaKen, station){
     scale_fill_manual(name = "", values = c("Spawning Period" = 'black')) +
     ylim(c(ymin, ymax)) +
     ylab("DO (mg/L)") +
-    scale_x_datetime(date_labels = "%b-%Y", limits = c(xmin - lubridate::seconds(1), xmax + lubridate::seconds(1))) +
     theme(legend.position="bottom", legend.direction = "horizontal", legend.box = "horizontal")
 
   # plot the trend line if applicable
@@ -96,7 +95,8 @@ plot_DO <- function(data, seaKen, station){
     p <- p + geom_rect(data = spawn_zones, aes(xmin=Start_spawn - lubridate::seconds(1), xmax= End_spawn + lubridate::seconds(1), ymin=ymin, ymax=ymax,
                                                # linetype = 'Spawning Period', shape = 'Spawning Period', color = 'Spawning Period',
                                                fill='Spawning Period'),
-                       color = NA, alpha=.15, show.legend = c(fill=TRUE, linetype=FALSE, shape=FALSE, color=FALSE))
+                       color = NA, alpha=.15, show.legend = c(fill=TRUE, linetype=FALSE, shape=FALSE, color=FALSE)) +
+      scale_x_datetime(date_labels = "%b-%Y", limits = c(xmin - lubridate::seconds(1), xmax + lubridate::seconds(1)))
 
     if(nrow(DO_inst) > 0){
       # plot instantaneous non-spawning criteria lines within non-spawning periods
@@ -175,6 +175,8 @@ plot_DO <- function(data, seaKen, station){
     DO_30DADMean$excursion <- if_else(DO_30DADMean$yr_exc_30DADMean == 1, "Excursion", "Result")
     DO_7DADMean$excursion <- if_else(DO_7DADMean$in_spawn == 1 & DO_7DADMean$spwn_exc_7DADMean == 1, "Excursion", "Result")
     DO_Min$excursion <- if_else(((DO_Min$in_spawn == 1) & (DO_Min$spwn_exc_min == 1)) | DO_Min$yr_exc_min == 1, "Excursion", "Result")
+
+    p <- p + scale_x_datetime(date_labels = "%b-%Y", limits = c(xmin - lubridate::seconds(1), xmax + lubridate::seconds(1)))
 
     if(nrow(DO_inst) > 0){
       # plot instantaneous non-spawning criteria lines within non-spawning periods
