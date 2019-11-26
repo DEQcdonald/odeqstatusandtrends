@@ -13,6 +13,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
   status_current <- as.symbol(colnames(param_summary)[grep("trend", colnames(param_summary)) - 1])
   au_param_summary <- au_param_summary %>% filter(AU_ID != "")
 
+  lgnd <- base64enc::base64encode("//deqhq1/WQNPS/Status_and_Trend_Reports/Figures/map_legend.png")
+
 # Set up shapefiles for map -----------------------------------------------
   print("Processing shapefiles...")
   query <- paste0("SELECT * FROM AssessmentUnits_OR_Dissolve WHERE AU_ID IN ('",
@@ -419,6 +421,10 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                      overlayGroups = c("Assessment Area", "WQ Listed Streams", "Ag WQ Management Areas",
                                        "World Imagery", "Hydrography", "Land Cover (NLCD 2016)")) %>%
     hideGroup(c("World Imagery", "Hydrography", "Ag WQ Management Areas", "Land Cover (NLCD 2016)", "WQ Listed Streams")) %>%
+    addControl(position = "bottomleft", className = "legend",
+               html = sprintf('<html><body><div style="opacity:0.8">
+                                        <img width="350" height="175" src="data:image/png;base64,%s">
+                            </div></body></html>', lgnd)) %>%
     addEasyButton(easyButton(
       icon = "fa-globe",
       title = "Zoom to assessment area",
@@ -509,6 +515,35 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
       title = "Toggle Station ID labels",
       onClick = JS("function(btn, map){
     var elements = document.getElementsByClassName('stationLabels');
+    var index;
+
+    elements = elements.length ? elements : [elements];
+  for (index = 0; index < elements.length; index++) {
+    element = elements[index];
+
+    if (isElementHidden(element)) {
+      element.style.display = '';
+
+      // If the element is still hidden after removing the inline display
+      if (isElementHidden(element)) {
+        element.style.display = 'block';
+      }
+    } else {
+      element.style.display = 'none';
+    }
+  }
+  function isElementHidden (element) {
+    return window.getComputedStyle(element, null).getPropertyValue('display') === 'none';
+  }
+               }"
+      )
+    )) %>%
+    addEasyButton(easyButton(
+      position = "bottomleft",
+      icon = "fa-info-circle",
+      title = "Toggle Legend",
+      onClick = JS("function(btn, map){
+    var elements = document.getElementsByClassName('legend');
     var index;
 
     elements = elements.length ? elements : [elements];
