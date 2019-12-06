@@ -83,8 +83,8 @@ plot_DO <- function(data, seaKen, station){
     # create dataframe of spawning start/end dates, and relevant values for Spawning Periods and criteria lines
     spawn_zones <- unique(data[,c("Start_spawn", "End_spawn", "Do_crit_30D", "Do_crit_7Mi", "DO_crit_min", "Do_crit_instant")])
     spawn_zones$next_start <- spawn_zones$Start_spawn + years(1)
-    spawn_zones$ymin <- -Inf
-    spawn_zones$ymax <- Inf
+    spawn_zones$y1 <- -Inf
+    spawn_zones$y2 <- Inf
     # spawn_zones$Do_crit_instant <- unique(data$Do_crit_instant)
     spawn_zones$spawn_crit_inst <- 11
     # adjust plot limits to allow for first and last Spawning Periods to plot

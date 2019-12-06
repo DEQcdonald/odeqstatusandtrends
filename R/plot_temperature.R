@@ -38,8 +38,8 @@ plot_temperature <- function(data, seaKen, station){
     # create dataframe of spawning start/end dates, and relevant values for spawning period and criteria lines
     spawn_zones <- unique(data[,c("Start_spawn", "End_spawn")])
     spawn_zones$next_start <- spawn_zones$Start_spawn + years(1)
-    spawn_zones$ymin <- -Inf
-    spawn_zones$ymax <- Inf
+    spawn_zones$y1 <- -Inf
+    spawn_zones$y2 <- Inf
     spawn_zones$temp_crit <- unique(data$temp_crit)
     spawn_zones$spawn_crit <- 13
     # adjust plot limits to allow for first and last spawning period to plot
@@ -49,8 +49,8 @@ plot_temperature <- function(data, seaKen, station){
     # plot the shaded spawning period
     p <- p + geom_rect(data = spawn_zones, aes(xmin=Start_spawn, xmax=End_spawn, ymin=ymin, ymax=ymax,
                                                # linetype = 'Spawning Zone', shape = 'Spawning Zone', color = 'Spawning Zone',
-                                               fill='Spawning Zone'),
-                       color = NA, alpha=.15, show.legend = c(fill=TRUE, linetype=FALSE, shape=FALSE, color=FALSE))
+                                               fill='Spawning Period'),
+                       color = NA, alpha=.2, show.legend = c(fill=TRUE, linetype=FALSE, shape=FALSE, color=FALSE))
 
     # plot non-spawning criteria lines within non-spawning period
     p <- p + geom_segment(data = spawn_zones,
