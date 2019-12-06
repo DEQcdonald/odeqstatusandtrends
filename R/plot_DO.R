@@ -162,7 +162,7 @@ plot_DO <- function(data, seaKen, station){
                                     size = 1)
     }
 
-  } else if(any(!is.na(data$Do_crit_instant))){
+  } else {
 
     DO_inst <- data %>% dplyr::filter(is.na(Statistical_Base))
     DO_7DADMin <- data %>% dplyr::filter(Statistical_Base == "7DADMin")
@@ -187,11 +187,11 @@ plot_DO <- function(data, seaKen, station){
                                  size = 1)
 
       # plot instantaneous spawning criteria lines within Spawning Periods
-      p_inst <- p_inst + geom_segment(aes(x=min(sample_datetime) - lubridate::seconds(1), xend=max(sample_datetime) + lubridate::seconds(1), y = 11, yend = 11,
-                                          color="Spawning", linetype="Spawning"
-                                          , shape="Spawning"
-                                      ),
-                                      size = 1)
+      # p_inst <- p_inst + geom_segment(aes(x=min(sample_datetime) - lubridate::seconds(1), xend=max(sample_datetime) + lubridate::seconds(1), y = 11, yend = 11,
+      #                                     color="Spawning", linetype="Spawning"
+      #                                     , shape="Spawning"
+      #                                 ),
+      #                                 size = 1)
     }
 
     if(nrow(DO_7DADMin) > 0){
@@ -214,11 +214,10 @@ plot_DO <- function(data, seaKen, station){
 
     if(nrow(DO_Min) > 0){
       # plot DO min spawning criteria lines within Spawning Periods
-      p_min <- p_min + geom_segment(aes(x=min(sample_datetime) - lubridate::seconds(1), xend=max(sample_datetime) + lubridate::seconds(1), y = 11, yend = 11,
-                                        color="Spawning", linetype="Spawning"
-                                        , shape="Spawning"
-                                    ),
-                                    size = 1)
+      p_min <- p + geom_segment(aes(x=min(sample_datetime) - lubridate::seconds(1), xend=max(sample_datetime) + lubridate::seconds(1), y=DO_crit_min, yend=DO_crit_min,
+                                    color="Non-Spawning", linetype="Non-Spawning"
+                                    , shape="Non-Spawning"),
+                                size = 1)
     }
 
   }
