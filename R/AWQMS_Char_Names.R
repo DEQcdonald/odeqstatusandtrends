@@ -49,3 +49,27 @@ AWQMS_Char_Names <- function(parameters){
 
   return(AWQMS.parms)
 }
+
+#' Convert AWQMS Characteristic Names to standard language
+#'
+#' Converts AWQMS Characteristic Names to standard language
+#' @param AWQMS_params A list of parameters to convert.
+#' @return A list of relevant parameters converted to standard language
+#' @export
+#' @examples
+#' AWQMS_to_standard(parameters = c("Temperature, water", "Dissolved oxygen (DO)", "Phosphate-phosphorus"))
+
+AWQMS_to_standard <- function(AWQMS_params){
+
+  if(is.null(AWQMS_params)){return(NULL)}
+  standard_parms <- tolower(AWQMS_params)
+
+  #### Capitalize Escherichia coli ####
+  standard_parms <- gsub("escherichia coli", "Escherichia coli", standard_parms)
+  standard_parms <- gsub("\\bph\\b", "pH", standard_parms)
+  standard_parms <- gsub("dissolved oxygen \\(do\\)", "dissolved oxygen", standard_parms)
+  standard_parms <- gsub("phosphate-phosphorus", "total phosphorus", standard_parms)
+  standard_parms <- gsub("temperature, water", "temperature", standard_parms)
+
+  return(standard_parms)
+}
