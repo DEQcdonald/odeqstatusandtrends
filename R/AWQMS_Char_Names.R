@@ -73,3 +73,18 @@ AWQMS_to_standard <- function(AWQMS_params){
 
   return(standard_parms)
 }
+
+#' Capitalize the first letter of every word in a string
+#'
+#' Takes a given string and capitalizes the first letter of every word
+#' @param string A character string to capitalize
+#' @return A capitalized string
+#' @export
+#' @examples
+#' simpleCap(string = "total suspended solids")
+
+simpleCap <- function(string) {
+  s <- strsplit(string, " ")[[1]]
+  paste(toupper(substring(s, 1,1)), substring(s, 2),
+        sep="", collapse=" ")
+}

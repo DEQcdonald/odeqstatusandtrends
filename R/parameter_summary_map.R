@@ -102,12 +102,6 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                                }
                                )
 
-  simpleCap <- function(x) {
-    s <- strsplit(x, " ")[[1]]
-    paste(toupper(substring(s, 1,1)), substring(s, 2),
-          sep="", collapse=" ")
-  }
-
   # function to pull the selected parameter's status and trend and create a popup table for the station.
   # This function is called on the click of a station marker in the parameter summary map.
   popupTable <- function(station = NULL, AU = NULL, param){
