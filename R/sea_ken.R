@@ -36,16 +36,16 @@ sea_ken <- function(data){
       # }
       subData_stn <- data %>% filter(Char_Name == j, MLocID == i)
       if(j == "Dissolved oxygen (DO)"){
-        subData_stn <- filter(subData_stn, Statistical_Base %in% c(""))
+        subData_stn <- filter(subData_stn, !Statistical_Base %in% c(""))
       }
       tryCatch({
-        tmp_seaKen <- EnvStats::kendallSeasonalTrendTest(Result_cen ~ Month + Year, data = subData_stn)
+        tmp_seaKen <- EnvStats::kendallSeasonalTrendTest(y = subData_stn$Result_cen, season = subData_stn$Month, year = subData_stn$Year, ci.slope = FALSE)
         tmp_sample_size <- as.data.frame(bind_rows(tmp_seaKen$sample.size))
         tmp_sample_size[, c("ID", "Char")] <- c(i, j)
         stn_seaKen <- data.frame(MLocID = i,
                                  Char_Name = j,
                                  p_value = tmp_seaKen$p.value[1],
-                                 confidence = tmp_seaKen$interval$conf.level,
+                                 # confidence = tmp_seaKen$interval$conf.level,
                                  slope = tmp_seaKen$estimate[2],
                                  intercept = tmp_seaKen$estimate[3])
 
