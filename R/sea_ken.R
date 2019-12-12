@@ -29,14 +29,14 @@ sea_ken <- function(data){
     parm_stations <- unique(data[data$Char_Name == j,]$MLocID)
     count <- 1
     for(i in parm_stations){
-      print(paste(i, ":", count, "in", length(parm_stations)))
+      print(paste(i, "(", count, "of", length(parm_stations), ")"))
       # subData <- filter(data, Char_Name == j)
       # if(j == "Dissolved oxygen (DO)"){
       #   subData <- filter(subData, !Statistical_Base %in% c(""))
       # }
       subData_stn <- data %>% filter(Char_Name == j, MLocID == i)
       if(j == "Dissolved oxygen (DO)"){
-        subData_stn <- filter(subData_stn, !Statistical_Base %in% c(""))
+        subData_stn <- filter(subData_stn, Statistical_Base %in% c(""))
       }
       tryCatch({
         tmp_seaKen <- EnvStats::kendallSeasonalTrendTest(Result_cen ~ Month + Year, data = subData_stn)
