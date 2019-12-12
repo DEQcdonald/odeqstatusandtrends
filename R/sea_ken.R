@@ -26,13 +26,18 @@ sea_ken <- function(data){
 
   for(j in unique(data$Char_Name)){
     print(j)
-    subData <- filter(data, Char_Name == j)
-    if(j == "Dissolved oxygen (DO)"){
-      subData <- filter(subData, !Statistical_Base %in% c(""))
-    }
-    for(i in unique(subData$MLocID)){
-      print(i)
-      subData_stn <- subData %>% filter(MLocID == i)
+    parm_stations <- unique(data[data$Char_Name == j,]$MLocID)
+    count <- 1
+    for(i in parm_stations){
+      print(paste(i, ":", count, "in", length(parm_stations)))
+      # subData <- filter(data, Char_Name == j)
+      # if(j == "Dissolved oxygen (DO)"){
+      #   subData <- filter(subData, !Statistical_Base %in% c(""))
+      # }
+      subData_stn <- data %>% filter(Char_Name == j, MLocID == i)
+      if(j == "Dissolved oxygen (DO)"){
+        subData_stn <- filter(subData_stn, !Statistical_Base %in% c(""))
+      }
       tryCatch({
         tmp_seaKen <- EnvStats::kendallSeasonalTrendTest(Result_cen ~ Month + Year, data = subData_stn)
         tmp_sample_size <- as.data.frame(bind_rows(tmp_seaKen$sample.size))
@@ -47,6 +52,7 @@ sea_ken <- function(data){
         sample_size <- bind_rows(sample_size, tmp_sample_size)
         sea_ken_df <- bind_rows(sea_ken_df, stn_seaKen)
         }, error = function(e){cat("ERROR :", conditionMessage(e),"\n")})
+      count <- count + 1
     }
   }
 
