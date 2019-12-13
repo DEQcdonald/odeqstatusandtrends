@@ -46,15 +46,16 @@ plot_DO <- function(data, seaKen, station){
   p <- ggplot(data) +
     xlab(element_blank()) +
     scale_color_manual(name = "Legend",
-                       values =    c('Excursion' = 'red', 'Result' = 'black', "Trend" = 'blue', "Spawning" = 'black', "Non-Spawning" = 'black')) +
+                       values =    c('Excursion' = 'red', 'Result' = 'black', "Trend" = 'blue', "Spawning" = 'black', "Year-Round" = 'black')) +
     scale_linetype_manual(name = "Legend",
-                          values = c('Excursion' = 0, 'Result' = 0, "Trend" = 1, "Spawning" = 2, "Non-Spawning" = 1)) +
+                          values = c('Excursion' = 0, 'Result' = 0, "Trend" = 2, "Spawning" = 1, "Year-Round" = 1)) +
     scale_shape_manual(name = "Legend",
-                       values =    c('Excursion' = 16, 'Result' = 16, "Trend" = 32, "Spawning" = 32, "Non-Spawning" = 32)) +
+                       values =    c('Excursion' = 16, 'Result' = 16, "Trend" = 32, "Spawning" = 32, "Year-Round" = 32)) +
     scale_fill_manual(name = "", values = c("Spawning Period" = 'black')) +
     ylim(c(ymin, ymax)) +
     ylab("DO (mg/L)") +
-    theme(legend.position="bottom", legend.direction = "horizontal", legend.box = "horizontal")
+    theme(legend.position="bottom", legend.direction = "horizontal", legend.box = "horizontal",
+          panel.background = element_blank())
 
   # plot the trend line if applicable
   if(station %in% seaKen$MLocID){
@@ -99,11 +100,11 @@ plot_DO <- function(data, seaKen, station){
       scale_x_datetime(date_labels = "%b-%Y", limits = c(xmin - lubridate::seconds(1), xmax + lubridate::seconds(1)))
 
     if(nrow(DO_inst) > 0){
-      # plot instantaneous non-spawning criteria lines within non-spawning periods
+      # plot instantaneous Year-Round criteria lines within Year-Round periods
       p_inst <- p + geom_segment(data = spawn_zones,
-                                 aes(x=End_spawn - lubridate::seconds(1), xend=next_start + lubridate::seconds(1), y=Do_crit_instant, yend=Do_crit_instant,
-                                     color="Non-Spawning", linetype="Non-Spawning"
-                                     , shape="Non-Spawning"
+                                 aes(x=xmin, xend=xmax, y=Do_crit_instant, yend=Do_crit_instant,
+                                     color="Year-Round", linetype="Year-Round"
+                                     , shape="Year-Round"
                                  ),
                                  size = 1)
 
@@ -118,18 +119,18 @@ plot_DO <- function(data, seaKen, station){
 
     if(nrow(DO_7DADMin) > 0){
       # plot 7DADmin year round criteria line
-      p_7dadmin <- p + geom_segment(aes(x=min(sample_datetime) - lubridate::seconds(1), xend=max(sample_datetime) + lubridate::seconds(1), y=Do_crit_7Mi, yend=Do_crit_7Mi,
-                                        color="Non-Spawning", linetype="Non-Spawning"
-                                        , shape="Non-Spawning"
+      p_7dadmin <- p + geom_segment(aes(x=xmin, xend=xmax, y=Do_crit_7Mi, yend=Do_crit_7Mi,
+                                        color="Year-Round", linetype="Year-Round"
+                                        , shape="Year-Round"
       ),
       size = 1)
     }
 
     if(nrow(DO_30DADMean) > 0){
       # plot 30DADmean year round criteria line
-      p_30dadmean <- p + geom_segment(aes(x=min(sample_datetime) - lubridate::seconds(1), xend=max(sample_datetime) + lubridate::seconds(1), y=Do_crit_30D, yend=Do_crit_30D,
-                                          color="Non-Spawning", linetype="Non-Spawning"
-                                          , shape="Non-Spawning"
+      p_30dadmean <- p + geom_segment(aes(x=xmin, xend=xmax, y=Do_crit_30D, yend=Do_crit_30D,
+                                          color="Year-Round", linetype="Year-Round"
+                                          , shape="Year-Round"
       ),
       size = 1)
     }
@@ -145,11 +146,11 @@ plot_DO <- function(data, seaKen, station){
     }
 
     if(nrow(DO_Min) > 0){
-      # plot DO min non-spawning criteria lines within non-spawning periods
+      # plot DO min Year-Round criteria lines within Year-Round periods
       p_min <- p + geom_segment(data = spawn_zones,
-                                aes(x=End_spawn - lubridate::seconds(1), xend=next_start + lubridate::seconds(1), y=DO_crit_min, yend=DO_crit_min,
-                                    color="Non-Spawning", linetype="Non-Spawning"
-                                    , shape="Non-Spawning"
+                                aes(x=xmin, xend=xmax, y=DO_crit_min, yend=DO_crit_min,
+                                    color="Year-Round", linetype="Year-Round"
+                                    , shape="Year-Round"
                                 ),
                                 size = 1)
 
@@ -179,10 +180,10 @@ plot_DO <- function(data, seaKen, station){
     p <- p + scale_x_datetime(date_labels = "%b-%Y", limits = c(xmin - lubridate::seconds(1), xmax + lubridate::seconds(1)))
 
     if(nrow(DO_inst) > 0){
-      # plot instantaneous non-spawning criteria lines within non-spawning periods
+      # plot instantaneous Year-Round criteria lines within Year-Round periods
       p_inst <- p + geom_segment(aes(x=min(sample_datetime) - lubridate::seconds(1), xend=max(sample_datetime) + lubridate::seconds(1), y=Do_crit_instant, yend=Do_crit_instant,
-                                     color="Non-Spawning", linetype="Non-Spawning"
-                                     , shape="Non-Spawning"
+                                     color="Year-Round", linetype="Year-Round"
+                                     , shape="Year-Round"
                                  ),
                                  size = 1)
 
@@ -197,8 +198,8 @@ plot_DO <- function(data, seaKen, station){
     if(nrow(DO_7DADMin) > 0){
       # plot 7DADmin year round criteria line
       p_7dadmin <- p + geom_segment(aes(x=min(sample_datetime) - lubridate::seconds(1), xend=max(sample_datetime) + lubridate::seconds(1), y=Do_crit_7Mi, yend=Do_crit_7Mi,
-                                        color="Non-Spawning", linetype="Non-Spawning"
-                                        , shape="Non-Spawning"
+                                        color="Year-Round", linetype="Year-Round"
+                                        , shape="Year-Round"
       ),
       size = 1)
     }
@@ -206,8 +207,8 @@ plot_DO <- function(data, seaKen, station){
     if(nrow(DO_30DADMean) > 0){
       # plot 30DADmean year round criteria line
       p_30dadmean <- p + geom_segment(aes(x=min(sample_datetime) - lubridate::seconds(1), xend=max(sample_datetime) + lubridate::seconds(1), y=Do_crit_30D, yend=Do_crit_30D,
-                                          color="Non-Spawning", linetype="Non-Spawning"
-                                          , shape="Non-Spawning"
+                                          color="Year-Round", linetype="Year-Round"
+                                          , shape="Year-Round"
       ),
       size = 1)
     }
@@ -215,8 +216,8 @@ plot_DO <- function(data, seaKen, station){
     if(nrow(DO_Min) > 0){
       # plot DO min spawning criteria lines within Spawning Periods
       p_min <- p + geom_segment(aes(x=min(sample_datetime) - lubridate::seconds(1), xend=max(sample_datetime) + lubridate::seconds(1), y=DO_crit_min, yend=DO_crit_min,
-                                    color="Non-Spawning", linetype="Non-Spawning"
-                                    , shape="Non-Spawning"),
+                                    color="Year-Round", linetype="Year-Round"
+                                    , shape="Year-Round"),
                                 size = 1)
     }
 
@@ -303,11 +304,11 @@ plot_DO <- function(data, seaKen, station){
   # apply color, shape, line types, and range limits
   # p <- p +
   #   scale_color_manual(name = "Legend",
-  #                      values =    c('Excursion' = 'red', 'Result' = 'black', "Trend" = 'blue', "Spawning" = 'black', "Non-Spawning" = 'black')) +
+  #                      values =    c('Excursion' = 'red', 'Result' = 'black', "Trend" = 'blue', "Spawning" = 'black', "Year-Round" = 'black')) +
   #   scale_linetype_manual(name = "Legend",
-  #                         values = c('Excursion' = 0, 'Result' = 0, "Trend" = 1, "Spawning" = 2, "Non-Spawning" = 1)) +
+  #                         values = c('Excursion' = 0, 'Result' = 0, "Trend" = 1, "Spawning" = 2, "Year-Round" = 1)) +
   #   scale_shape_manual(name = "Legend",
-  #                      values =    c('Excursion' = 16, 'Result' = 16, "Trend" = 32, "Spawning" = 32, "Non-Spawning" = 32)) +
+  #                      values =    c('Excursion' = 16, 'Result' = 16, "Trend" = 32, "Spawning" = 32, "Year-Round" = 32)) +
   #   scale_fill_manual(name = "", values = c("Spawning Period" = 'black')) +
   #   ylim(c(ymin, ymax)) +
   #   xlim(c(xmin - lubridate::seconds(1), xmax + lubridate::seconds(1))) +
