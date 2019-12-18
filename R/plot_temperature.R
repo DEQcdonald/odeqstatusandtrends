@@ -82,16 +82,17 @@ plot_temperature <- function(data, seaKen, station){
 
   # apply color, shape, line types, and range limits
   p <- p +
-    scale_color_manual(name = "Legend",
+    scale_color_manual(name = "",
                        values =    c('Excursion' = 'red', 'Result' = 'black', "Trend" = 'blue', "Spawning" = 'black', "Non-Spawning" = 'black')) +
-    scale_linetype_manual(name = "Legend",
-                          values = c('Excursion' = 0, 'Result' = 0, "Trend" = 1, "Spawning" = 2, "Non-Spawning" = 1)) +
-    scale_shape_manual(name = "Legend",
+    scale_linetype_manual(name = "",
+                          values = c('Excursion' = 0, 'Result' = 0, "Trend" = 2, "Spawning" = 1, "Non-Spawning" = 1)) +
+    scale_shape_manual(name = "",
                        values =    c('Excursion' = 16, 'Result' = 16, "Trend" = 32, "Spawning" = 32, "Non-Spawning" = 32)) +
     scale_fill_manual(name = "", values = c("Spawning Period" = 'black')) +
     ylim(c(ymin, ymax)) +
     xlim(c(xmin, xmax)) +
     scale_x_datetime(date_labels = "%b-%Y")+
+    theme_bw() +
     theme(legend.position="bottom", legend.direction = "horizontal", legend.box = "horizontal")
 
   return(p)

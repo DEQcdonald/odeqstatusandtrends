@@ -45,17 +45,17 @@ plot_DO <- function(data, seaKen, station){
 
   p <- ggplot(data) +
     xlab(element_blank()) +
-    scale_color_manual(name = "Legend",
+    scale_color_manual(name = "",
                        values =    c('Excursion' = 'red', 'Result' = 'black', "Trend" = 'blue', "Spawning" = 'black', "Year-Round" = 'black')) +
-    scale_linetype_manual(name = "Legend",
+    scale_linetype_manual(name = "",
                           values = c('Excursion' = 0, 'Result' = 0, "Trend" = 2, "Spawning" = 1, "Year-Round" = 1)) +
-    scale_shape_manual(name = "Legend",
+    scale_shape_manual(name = "",
                        values =    c('Excursion' = 16, 'Result' = 16, "Trend" = 32, "Spawning" = 32, "Year-Round" = 32)) +
     scale_fill_manual(name = "", values = c("Spawning Period" = 'black')) +
     ylim(c(ymin, ymax)) +
     ylab("DO (mg/L)") +
-    theme(legend.position="bottom", legend.direction = "horizontal", legend.box = "horizontal",
-          panel.background = element_blank())
+    theme_bw() +
+    theme(legend.position="bottom", legend.direction = "horizontal", legend.box = "horizontal")
 
   # plot the trend line if applicable
   if(station %in% seaKen$MLocID){
