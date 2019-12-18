@@ -18,6 +18,9 @@ plot_temperature <- function(data, seaKen, station){
   ymax <- ifelse(result_max > 26, result_max, 26)
 
   data$excursion <- if_else(data$excursion_cen == 1, "Excursion", "Result") # change numeric value to descriptor
+  if(all(is.na(data$excursion))){
+    data$excursion <- "Result"
+  }
 
   # obtain plotting values for trend line if applicable
   if(station %in% seaKen$MLocID){
