@@ -13,6 +13,15 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
   status_current <- as.symbol(colnames(param_summary)[grep("trend", colnames(param_summary)) - 1])
   au_param_summary <- au_param_summary %>% filter(AU_ID != "")
 
+  print("Clipping summary table to shapefile...")
+  param_shp <- st_as_sf(param_summary, dim = "XY", coords = c("Long_DD", "Lat_DD"))
+  area_sf <- st_as_sf(area)
+  param_shp <- st_set_crs(param_shp, 4326)
+  area_sf <- st_transform(area_sf, 4326)
+  param_shp <- param_shp[lengths(st_within(param_shp, area_sf)) == 1,]
+  param_summary <- param_summary %>% filter(MLocID %in% param_shp$MLocID)
+  rm(list = c("param_shp", "area_sf"))
+
   lgnd <- base64enc::base64encode("//deqhq1/WQNPS/Status_and_Trend_Reports/Figures/map_legend.png")
 
 # Set up shapefiles for map -----------------------------------------------
