@@ -45,7 +45,7 @@ sea_ken <- function(data){
         tmp_sample_size[, c("ID", "Char")] <- c(i, j)
         stn_seaKen <- data.frame(MLocID = i,
                                  Char_Name = j,
-                                 p_value = tmp_seaKen$p.value[1],
+                                 p_value = tmp_seaKen$p.value[2],
                                  # confidence = tmp_seaKen$interval$conf.level,
                                  slope = tmp_seaKen$estimate[2],
                                  intercept = tmp_seaKen$estimate[3])
@@ -57,7 +57,7 @@ sea_ken <- function(data){
     }
   }
 
-  sea_ken_df$significance <- if_else(sea_ken_df$p_value <= .05 & !is.na(sea_ken_df$p_value), "Significant", "No Significant Trend")
+  sea_ken_df$significance <- if_else(sea_ken_df$p_value <= 0.2 & !is.na(sea_ken_df$p_value), "Significant", "No Significant Trend")
 
   sea_ken_df$trend <- if_else(sea_ken_df$significance == "Significant",
                               if_else(sea_ken_df$Char_Name %in% c("Dissolved oxygen (DO)"),
