@@ -12,11 +12,11 @@
 #' out_path = "N:/Status_and_Trend_Reports/2019/Statewide Report")
 
 st_report <- function(format = "word_document", table_format = "pandoc", file_name = "Oregon_SandT_report",
-                      out_path = "N:/Status_and_Trend_Reports/2019/Statewide Report"){
+                      out_dir = "N:/Status_and_Trend_Reports/2019/Statewide Report"){
 
   rmarkdown::render(input = "N:/Status_and_Trend_Reports/Report_Files/st_report_files/state_summary.Rmd",
                     output_format = format,
                     output_file = file_name,
-                    output_dir = out_path,
+                    output_dir = out_dir,
                     envir = globalenv())
 }
