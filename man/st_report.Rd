@@ -4,30 +4,26 @@
 \alias{st_report}
 \title{Create Status and Trends Report}
 \usage{
-st_report(basin, param_summary, format = "html_document", file_name,
-  out_path, complete_years, hucs)
+st_report(format = "word_document", table_format = "pandoc",
+  file_name = "Oregon_SandT_report",
+  out_path = "N:/Status_and_Trend_Reports/2019/Statewide Report")
 }
 \arguments{
-\item{basin}{The name of the basin for reporting}
-
-\item{param_summary}{A parameter summary table as returned from odeqstatusandtrends::parameter_summary().}
-
 \item{format}{The output format for the rmarkdown document}
+
+\item{table_format}{The format for kable tables. "pandoc" is the default. See knitr::kable() for more options}
 
 \item{file_name}{The name of the output .html file}
 
 \item{out_path}{The output path}
-
-\item{complete_years}{A list of complete years within analysis}
-
-\item{hucs}{A list of huc8s within analysis area}
 }
 \value{
-An html report located in the output path
+A report located in the out_path
 }
 \description{
 Creates a Status and Trends Report with the given parameter summary table, Basin name, and output directory.
 }
 \examples{
-st_report(basin = "Willamette", param_summary = param_sum_Willamette, out_path = ".../your-output-path")
+st_report(format = "word_document", table_format = "pandoc", file_name = "Oregon_SandT_report",
+out_path = "N:/Status_and_Trend_Reports/2019/Statewide Report")
 }
