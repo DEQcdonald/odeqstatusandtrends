@@ -11,7 +11,7 @@
 
 trend_stns <- function(data, trend_years = c(format(min(data$sample_datetime, na.rm = TRUE), "%Y"):format(Sys.Date(), "%Y"))) {
 
-  if(length(trend_years) < 8){stop("Number of years should be less than or equal to 8")}
+  if(length(trend_years) < 8){stop("Number of years should be more than or equal to 8")}
 
   if("Phosphate-phosphorus" %in% unique(data$Char_Name)){
     if("tp_year" %in% colnames(data)){
