@@ -21,7 +21,7 @@ CleanData <- function(data)
   # Removing DQL values lower than C and rejected results
   print("Removing DQL values below 'C' and 'rejected' results...")
   data <- filter(data,
-                 QualifierAbbr %in% c("DQL=A", "DQL=B", "DQL=C") | is.na(QualifierAbbr),
+                 QualifierAbbr %in% c("DQL=A", "DQL=B") | is.na(QualifierAbbr),
                  Result_status != "Rejected")
 
   # Removing unnecessary columns
