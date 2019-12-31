@@ -11,7 +11,7 @@
 parameter_summary_map <- function(param_summary, au_param_summary, area){
 
   status_current <- as.symbol(colnames(param_summary)[grep("trend", colnames(param_summary)) - 1])
-  au_param_summary <- au_param_summary %>% filter(AU_ID != "")
+  au_param_summary <- au_param_summary %>% dplyr::filter(AU_ID != "")
 
   print("Clipping summary table to shapefile...")
   param_shp <- st_as_sf(param_summary, dim = "XY", coords = c("Long_DD", "Lat_DD"))
@@ -19,7 +19,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
   param_shp <- st_set_crs(param_shp, 4326)
   area_sf <- st_transform(area_sf, 4326)
   param_shp <- param_shp[lengths(st_within(param_shp, area_sf)) == 1,]
-  param_summary <- param_summary %>% filter(MLocID %in% param_shp$MLocID)
+  param_summary <- param_summary %>% dplyr::filter(MLocID %in% param_shp$MLocID)
   rm(list = c("param_shp", "area_sf"))
 
   lgnd <- base64enc::base64encode("//deqhq1/WQNPS/Status_and_Trend_Reports/Figures/map_legend.png")
@@ -57,10 +57,10 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
 
   st_crs(assessment_units)
   assessment_units <- st_transform(assessment_units, 4326)
-  assessment_units <- assessment_units[,c("AU_ID", "AU_Name")] %>% filter(AU_ID != "99")
+  assessment_units <- assessment_units[,c("AU_ID", "AU_Name")] %>% dplyr::filter(AU_ID != "99")
   st_crs(wql_streams)
   wql_streams <- st_transform(wql_streams, 4326)
-  wql_streams <- filter(wql_streams[, c("STREAM_NAM", "SEGMENT_ID", "SEASON", "Char_Name", "LISTING_ST", "TMDL_INFO")], Char_Name %in% unique(param_summary$Char_Name))
+  wql_streams <- dplyr::filter(wql_streams[, c("STREAM_NAM", "SEGMENT_ID", "SEASON", "Char_Name", "LISTING_ST", "TMDL_INFO")], Char_Name %in% unique(param_summary$Char_Name))
   wql_streams <- wql_streams[lapply(wql_streams$`_ogr_geometry_`, length) != 0,]
   wql_streams$TMDL_INFO <- vapply(strsplit(wql_streams$TMDL_INFO, "<a"), `[`, 1, FUN.VALUE=character(1))
   st_crs(agwqma)
@@ -118,7 +118,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
     data <- param_summary %>% dplyr::rename(Parameter = Char_Name, Station_ID = MLocID, Station_Description = StationDes)
 
     if(!is.null(station)){
-      data <- filter(data[, c(4, 3, grep("status|trend", colnames(param_summary)))],
+      data <- dplyr::filter(data[, c(4, 3, grep("status|trend", colnames(param_summary)))],
                      Station_ID == station, Parameter == param)
       # %>%
         # dplyr::select(-Parameter, -Station_ID)
@@ -171,7 +171,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
   WQLpopupTable <- function(seg_ID = NULL, param = NULL){
     if(!is.null(seg_ID)){
       table <- knitr::kable(
-        filter(wql_streams_data, SEGMENT_ID == seg_ID) %>%
+        dplyr::filter(wql_streams_data, SEGMENT_ID == seg_ID) %>%
           dplyr::select(Pollutant = Char_Name, Listing = LISTING_ST, Season = SEASON, TMDL = TMDL_INFO) %>% unique(),
                      format = "html", row.names = FALSE) %>%
         kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
