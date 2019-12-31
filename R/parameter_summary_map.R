@@ -118,7 +118,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
     data <- param_summary %>% dplyr::rename(Parameter = Char_Name, Station_ID = MLocID, Station_Description = StationDes)
 
     if(!is.null(station)){
-      data <- dplyr::filter(data[, c(4, 3, grep("status|trend", colnames(param_summary)))],
+      data <- dplyr::filter(data[, c(2, 1, grep("status|trend", colnames(param_summary)))],
                      Station_ID == station, Parameter == param)
       # %>%
         # dplyr::select(-Parameter, -Station_ID)
@@ -134,7 +134,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
 
     }
     if(!is.null(AU)){
-      data <- dplyr::filter(data[, c(1, 4, 3, grep("status|trend", colnames(param_summary)))],
+      data <- dplyr::filter(data[, c(2, 1, 3, grep("status|trend", colnames(param_summary)))],
                             AU_ID == AU, Parameter == param) %>%
         dplyr::select(-AU_ID)
 
