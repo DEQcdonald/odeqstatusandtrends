@@ -225,8 +225,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
 
   charnames <- data.frame(awqms = c("Temperature, water", "Dissolved oxygen (DO)", "pH", "Total suspended solids", "Phosphate-phosphorus",
                                        "Fecal Coliform", "Escherichia coli", "Enterococcus"),
-                             folder = c("Temperature", "DO", "pH", "TSS", "TP", "Fecal Coliform", "Escherichia coli", "Enterococcus"),
-                             file = c("temp", "DO", "pH", "TSS", "TP", "Fecal Coliform", "Escherichia coli", "Enterococcus"),
+                             folder = c("Temperature", "DO", "pH", "TSS", "TP", "Fecal_Coliform", "Ecoli", "Enterococcus"),
+                             file = c("temp", "DO", "pH", "TSS", "TP", "FeColi", "Ecoli", "Enterococcus"),
                           stringsAsFactors = FALSE)
 
 # Create parameter summary map --------------------------------------------
