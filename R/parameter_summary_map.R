@@ -285,14 +285,14 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                    popup = ~paste0("<b>", STREAM_NAM,
                                    # "<br>Parameter:</b> ", Char_Name,
                                    "<br></b><br>",
-                                   sapply(SEGMENT_ID, WQLpopupTable, param = i, USE.NAMES = FALSE)),
+                                   sapply(SEGMENT_ID, WQLpopupTable, USE.NAMES = FALSE)),
                    popupOptions = popupOptions(maxWidth = 1200),
                    highlightOptions = highlightOptions(color = "red", weight = 8, opacity = 1),
                    label = ~STREAM_NAM,
                    smoothFactor = 1.5,
                    group = "WQ Listed Streams"
       )
-  } else {print(paste("No water quality limited streams for", i))}
+  } else {print(paste("No water quality limited streams found for the selected area."))}
 
     # if(nrow(wql_streams_data) > 0){
       # map <- map %>%
