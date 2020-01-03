@@ -6,7 +6,8 @@
 \usage{
 st_report(format = "word_document", table_format = "pandoc",
   file_name = "Oregon_SandT_report",
-  out_path = "N:/Status_and_Trend_Reports/2019/Statewide Report")
+  rmd_dir = "N:/Status_and_Trend_Reports/Report_Files/st_report_files",
+  out_dir = "N:/Status_and_Trend_Reports/2019/Statewide Report")
 }
 \arguments{
 \item{format}{The output format for the rmarkdown document}
@@ -14,6 +15,8 @@ st_report(format = "word_document", table_format = "pandoc",
 \item{table_format}{The format for kable tables. "pandoc" is the default. See knitr::kable() for more options}
 
 \item{file_name}{The name of the output .html file}
+
+\item{rmd_dir}{The path to the directory where the status and trend Rmarkdown files are saved.}
 
 \item{out_path}{The output path}
 }
