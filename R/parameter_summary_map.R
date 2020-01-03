@@ -23,6 +23,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
   rm(list = c("param_shp", "area_sf"))
 
   lgnd <- base64enc::base64encode("//deqhq1/WQNPS/Status_and_Trend_Reports/Figures/map_legend.png")
+  logo <- base64enc::base64encode("//deqhq1/WQNPS/Status_and_Trend_Reports/Figures/DEQ-logo-color-non-transp71x107.png")
 
 # Set up shapefiles for map -----------------------------------------------
   print("Processing shapefiles...")
@@ -428,6 +429,10 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                html = sprintf('<html><body><div style="opacity:0.8">
                                         <img width="350" height="175" src="data:image/png;base64,%s">
                             </div></body></html>', lgnd)) %>%
+    addControl(position = "bottomright", className = "logo",
+               html = sprintf('<html><body><div style="opacity:1">
+                                        <img width="60" src="data:image/png;base64,%s">
+                            </div></body></html>', logo)) %>%
     addEasyButton(easyButton(
       icon = "fa-globe",
       title = "Zoom to assessment area",
