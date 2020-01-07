@@ -259,12 +259,12 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                 layers = "0")
   if(nrow(agwqma) > 0){
     map <- map %>%
-      addPolygons(data = agwqma, fill = TRUE, color = "black", fillColor = "black", opacity = 0.8, weight = 5,
+      addPolygons(data = agwqma, fill = TRUE, color = "blue", fillColor = "blue", opacity = 0.8, weight = 5,
                   group = "Ag WQ Management Areas", label = ~PlanName)
     }
 
   map <- map %>%
-    addPolygons(data = area, fill = FALSE, group = "Assessment Area", opacity = 0.8, label = "Assessment Area") %>%
+    addPolygons(data = area, color = "black", fill = FALSE, group = "Assessment Area", opacity = 0.8, label = "Assessment Area") %>%
     addMarkers(data = unique(param_summary[,c("AU_ID", "MLocID", "StationDes", "Lat_DD", "Long_DD")]),
                label = ~paste0(MLocID, ": ", StationDes),
                popup = ~paste0("<b>", MLocID, "</b>: ", StationDes, "<br>",
@@ -431,8 +431,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                             </div></body></html>', lgnd)) %>%
     addControl(position = "bottomright", className = "logo",
                html = sprintf('<html><body><div style="opacity:1">
+               <a href="https://www.oregon.gov/deq/wq/programs/Pages/wqstatustrends.aspx">
                                         <img width="60" src="data:image/png;base64,%s">
-                            </div></body></html>', logo)) %>%
+                            </a></div></body></html>', logo)) %>%
     addEasyButton(easyButton(
       icon = "fa-globe",
       title = "Zoom to assessment area",
@@ -657,7 +658,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
     #   "}"
     # )
     # ) %>%
-    hideGroup("search")
+    hideGroup("search") %>%
+    htmlwidgets::appendContent(tags$head(tags$meta(name="viewport", content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no")))
 
   return(map)
 }
