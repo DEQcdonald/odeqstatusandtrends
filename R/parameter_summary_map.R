@@ -287,7 +287,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                                    # "<br>Parameter:</b> ", Char_Name,
                                    "<br></b><br>",
                                    sapply(SEGMENT_ID, WQLpopupTable, USE.NAMES = FALSE)),
-                   popupOptions = popupOptions(maxWidth = 1200),
+                   popupOptions = popupOptions(maxWidth = 'auto'),
                    highlightOptions = highlightOptions(color = "red", weight = 8, opacity = 1),
                    label = ~STREAM_NAM,
                    smoothFactor = 1.5,
@@ -338,7 +338,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                                      sapply(AU_ID, au_table, param = i, USE.NAMES = FALSE),
                                      sapply(AU_ID, popupTable, station = NULL, param = i, USE.NAMES = FALSE)
                      ),
-                     popupOptions = popupOptions(maxWidth = 1200),
+                     popupOptions = popupOptions(maxWidth = 'auto'),
                      label = ~AU_ID,
                      smoothFactor = 2,
                      options = pathOptions(className = "assessmentUnits", interactive = TRUE),
@@ -411,7 +411,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                                         sapply(MLocID, popupTable, AU = NULL, param = i, USE.NAMES = FALSE),
                                         mapply(plot_html, station = MLocID, sub_name = HUC8_Name, param = i, USE.NAMES = FALSE)
                                         ),
-                        popupOptions = popupOptions(maxWidth = 1200),
+                        popupOptions = popupOptions(maxWidth = 'auto'),
                         labelOptions = list(className = "stationLabels", noHide = T, permanent = T, interactive = T,
                                             offset = c(-10,-25), opacity = 0.9, textsize = "14px", sticky = TRUE),
                         options = ~markerOptions(zIndexOffset = z_offset, riseOnHover = TRUE),

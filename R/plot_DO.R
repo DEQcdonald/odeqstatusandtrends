@@ -76,6 +76,7 @@ plot_DO <- function(data, seaKen, station){
     DO_Min <- data %>% filter(Statistical_Base == "Minimum")
 
     DO_inst$excursion <- if_else(((DO_inst$in_spawn == 1) & (DO_inst$spwn_exc_inst == 1)) | DO_inst$yr_exc_inst == 1, "Excursion", "Result") # change numeric value to descriptor
+    DO_inst$excursion <- if_else(is.na(DO_inst$excursion), "Result", Do_inst$excursion)
     DO_7DADMin$excursion <- if_else(DO_7DADMin$yr_exc_7DADMin == 1, "Excursion", "Result")
     DO_30DADMean$excursion <- if_else(DO_30DADMean$yr_exc_30DADMean == 1, "Excursion", "Result")
     DO_7DADMean$excursion <- if_else(DO_7DADMean$in_spawn == 1 & DO_7DADMean$spwn_exc_7DADMean == 1, "Excursion", "Result")
