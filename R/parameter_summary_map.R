@@ -423,11 +423,12 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
   map <- map %>%
     addLayersControl(baseGroups = c("Escherichia coli", sort(unique(param_summary[param_summary$Char_Name != "Escherichia coli",]$Char_Name))),
                      overlayGroups = c("Assessment Area", "WQ Listed Streams", "Ag WQ Management Areas",
-                                       "World Imagery", "Hydrography", "Land Cover (NLCD 2016)")) %>%
+                                       "World Imagery", "Hydrography", "Land Cover (NLCD 2016)"),
+                     options = layersControlOptions(collapsed = FALSE)) %>%
     hideGroup(c("World Imagery", "Hydrography", "Ag WQ Management Areas", "Land Cover (NLCD 2016)", "WQ Listed Streams")) %>%
     addControl(position = "bottomleft", className = "legend",
-               html = sprintf('<html><body><div style="opacity:0.8">
-                                        <img width="350" height="175" src="data:image/png;base64,%s">
+               html = sprintf('<html><body><div style="opacity:0.9">
+                                        <img width="375" height="180" src="data:image/png;base64,%s">
                             </div></body></html>', lgnd)) %>%
     addControl(position = "bottomright", className = "logo",
                html = sprintf('<html><body><div style="opacity:1">
