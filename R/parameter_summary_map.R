@@ -225,9 +225,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                "    ",
                "<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
                charnames[charnames$awqms == param, "file"], "_", station, ".jpeg' download>Download plot</a>",
-               "<br>",
+               "<br><br>",
                "<img src='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
-               charnames[charnames$awqms == param, "file"], "_", station, ".jpeg' style='height:250px'>")
+               charnames[charnames$awqms == param, "file"], "_", station, ".jpeg' style='height:300px'>")
       # } else {paste0("No ", param, " data plotted for this station")}
     }
   }
@@ -295,7 +295,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                                    # "<br>Parameter:</b> ", Char_Name,
                                    "<br></b><br>",
                                    sapply(SEGMENT_ID, WQLpopupTable, USE.NAMES = FALSE)),
-                   popupOptions = popupOptions(maxWidth = 600, maxHeight = 250),
+                   popupOptions = popupOptions(maxWidth = 600, maxHeight = 300),
                    highlightOptions = highlightOptions(color = "red", weight = 8, opacity = 1),
                    label = ~STREAM_NAM,
                    smoothFactor = 1.5,
@@ -348,7 +348,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                                      sapply(AU_ID, au_table, param = i, USE.NAMES = FALSE),
                                      sapply(AU_ID, popupTable, station = NULL, param = i, USE.NAMES = FALSE)
                      ),
-                     popupOptions = popupOptions(maxWidth = 600, maxHeight = 250),
+                     popupOptions = popupOptions(maxWidth = 600, maxHeight = 300),
                      label = ~AU_ID,
                      smoothFactor = 2,
                      options = pathOptions(className = "assessmentUnits", interactive = TRUE),
@@ -421,7 +421,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                                         sapply(MLocID, popupTable, AU = NULL, param = i, USE.NAMES = FALSE),
                                         mapply(plot_html, station = MLocID, sub_name = HUC8_Name, param = i, USE.NAMES = FALSE)
                                         ),
-                        popupOptions = popupOptions(maxWidth = 600, maxHeight = 250),
+                        popupOptions = popupOptions(maxWidth = 600, maxHeight = 300),
                         labelOptions = list(className = "stationLabels", noHide = T, permanent = T, interactive = T,
                                             offset = c(-10,-25), opacity = 0.9, textsize = "14px", sticky = TRUE),
                         options = ~markerOptions(zIndexOffset = z_offset, riseOnHover = TRUE),
@@ -657,9 +657,6 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
   var layerToggle = document.getElementsByClassName('leaflet-bar easy-button-container leaflet-control')[4];
   layerToggle.style.float = 'none';
   layerToggle.style.backgroundColor = 'white';
-
-  var popupTable = document.getElementsByClassName('table table-striped table-hover table-condensed');
-  popupTable.style.overflow = 'scroll';
                }") %>%
     # htmlwidgets::onRender(paste0(
     #   "function(el, x) {",
