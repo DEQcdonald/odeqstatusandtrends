@@ -56,7 +56,7 @@ excursion_stats <- function(data, year_range = NULL) {
       dplyr::filter(excursion_cen==1) %>%
       dplyr::group_by(MLocID, Char_Name, bin) %>%
       dplyr::summarise(excursion_max = max(Result_Numeric, na.rm = TRUE),
-                       excursion_median = min(Result_Numeric, na.rm = TRUE),
+                       excursion_median = median(Result_Numeric, na.rm = TRUE),
                        excursion_min = min(Result_Numeric, na.rm = TRUE)) %>%
       dplyr::ungroup()
 
