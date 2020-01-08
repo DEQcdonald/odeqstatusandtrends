@@ -156,6 +156,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
 
     data <- au_param_summary %>% dplyr::rename(Parameter = Char_Name)
     data <- dplyr::filter(data, AU_ID == AU, Parameter == param)
+    data <- data %>% select(-AU_Name, -HUC8_Name, -HUC8, -Stations, -Organizations)
+    data <- data[, c("AU_ID", colnames(data)[colnames(data) != "AU_ID"])]
 
     colnames(data) <- gsub("(?<=[0-9])[^0-9]", "-", colnames(data), perl = TRUE)
     colnames(data) <- gsub("_", " ", colnames(data), perl = TRUE)
@@ -218,8 +220,14 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
     } else {
       # if(file.exists(paste0('Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
       #        charnames[charnames$awqms == param, "file"], "_", station, ".jpeg'))){
-        paste0("<img src='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
-               charnames[charnames$awqms == param, "file"], "_", station, ".jpeg' style='width:600px'>")
+        paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+               charnames[charnames$awqms == param, "file"], "_", station, ".jpeg' style='width:600px' target='_blank'>Enlarge plot in new window</a>",
+               "    ",
+               "<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+               charnames[charnames$awqms == param, "file"], "_", station, ".jpeg' download>Download plot</a>",
+               "<br>",
+               "<img src='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+               charnames[charnames$awqms == param, "file"], "_", station, ".jpeg' style='height:250px'>")
       # } else {paste0("No ", param, " data plotted for this station")}
     }
   }
@@ -287,7 +295,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                                    # "<br>Parameter:</b> ", Char_Name,
                                    "<br></b><br>",
                                    sapply(SEGMENT_ID, WQLpopupTable, USE.NAMES = FALSE)),
-                   popupOptions = popupOptions(maxWidth = 'auto'),
+                   popupOptions = popupOptions(maxWidth = 600, maxHeight = 250),
                    highlightOptions = highlightOptions(color = "red", weight = 8, opacity = 1),
                    label = ~STREAM_NAM,
                    smoothFactor = 1.5,
@@ -334,11 +342,13 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                      weight = 3,
                      color = ~color,
                      popup = ~paste0("<b>", AU_Name, "<br>",
+                                     "<b>HUC8: </b>", au_param_summary[au_param_summary$AU_ID == AU_ID,]$HUC8_Name, " (",
+                                     au_param_summary[au_param_summary$AU_ID == AU_ID,]$HUC8, ")<br>",
                                      # "<br><b>Parameter:</b> ", i, "<br>",
                                      sapply(AU_ID, au_table, param = i, USE.NAMES = FALSE),
                                      sapply(AU_ID, popupTable, station = NULL, param = i, USE.NAMES = FALSE)
                      ),
-                     popupOptions = popupOptions(maxWidth = 'auto'),
+                     popupOptions = popupOptions(maxWidth = 600, maxHeight = 250),
                      label = ~AU_ID,
                      smoothFactor = 2,
                      options = pathOptions(className = "assessmentUnits", interactive = TRUE),
@@ -411,7 +421,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                                         sapply(MLocID, popupTable, AU = NULL, param = i, USE.NAMES = FALSE),
                                         mapply(plot_html, station = MLocID, sub_name = HUC8_Name, param = i, USE.NAMES = FALSE)
                                         ),
-                        popupOptions = popupOptions(maxWidth = 'auto'),
+                        popupOptions = popupOptions(maxWidth = 600, maxHeight = 250),
                         labelOptions = list(className = "stationLabels", noHide = T, permanent = T, interactive = T,
                                             offset = c(-10,-25), opacity = 0.9, textsize = "14px", sticky = TRUE),
                         options = ~markerOptions(zIndexOffset = z_offset, riseOnHover = TRUE),
@@ -421,13 +431,43 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
   }
 
   map <- map %>%
+    addEasyButton(easyButton(
+      position = "topright",
+      icon = "fa-align-justify",
+      title = "Toggle Layers Control",
+      id = 'layerToggle',
+      onClick = JS("function(btn, map){
+    var elements = document.getElementsByClassName('leaflet-control-layers leaflet-control-layers-expanded leaflet-control');
+    var index;
+
+    elements = elements.length ? elements : [elements];
+  for (index = 0; index < elements.length; index++) {
+    element = elements[index];
+
+    if (isElementHidden(element)) {
+      element.style.display = '';
+
+      // If the element is still hidden after removing the inline display
+      if (isElementHidden(element)) {
+        element.style.display = 'block';
+      }
+    } else {
+      element.style.display = 'none';
+    }
+  }
+  function isElementHidden (element) {
+    return window.getComputedStyle(element, null).getPropertyValue('display') === 'none';
+  }
+               }"
+      )
+    )) %>%
     addLayersControl(baseGroups = c("Escherichia coli", sort(unique(param_summary[param_summary$Char_Name != "Escherichia coli",]$Char_Name))),
                      overlayGroups = c("Assessment Area", "WQ Listed Streams", "Ag WQ Management Areas",
                                        "World Imagery", "Hydrography", "Land Cover (NLCD 2016)"),
                      options = layersControlOptions(collapsed = FALSE)) %>%
     hideGroup(c("World Imagery", "Hydrography", "Ag WQ Management Areas", "Land Cover (NLCD 2016)", "WQ Listed Streams")) %>%
     addControl(position = "bottomleft", className = "legend",
-               html = sprintf('<html><body><div style="opacity:0.9">
+               html = sprintf('<html><body><div style="opacity:0.95">
                                         <img width="375" height="180" src="data:image/png;base64,%s">
                             </div></body></html>', lgnd)) %>%
     addControl(position = "bottomright", className = "logo",
@@ -613,6 +653,13 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
   function isElementHidden (element) {
     return window.getComputedStyle(element, null).getPropertyValue('display') === 'none';
   }
+
+  var layerToggle = document.getElementsByClassName('leaflet-bar easy-button-container leaflet-control')[4];
+  layerToggle.style.float = 'none';
+  layerToggle.style.backgroundColor = 'white';
+
+  var popupTable = document.getElementsByClassName('table table-striped table-hover table-condensed');
+  popupTable.style.overflow = 'scroll';
                }") %>%
     # htmlwidgets::onRender(paste0(
     #   "function(el, x) {",
