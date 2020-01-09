@@ -2,138 +2,106 @@
 #'
 #' Creates a dataframe with stations, the number of years with data within
 #' the status years, and whether or not there were any exceedances.
-#' @param data Dataframe to determine status from.
-#' @param year_range Years from which to determine status. If null, the year range for data provided is used.
-#' @param status_period Number of whole years to include in a status analysis.
-#' The range of years in status years will be binned by this number
+#' @param data_assessed Dataframe returned from an assessment fucntion in odeqassessment package.
+#'  data_assessed must include a grouping column called 'status_period' which can be created by running odeqstatusandtrends::status_period().
 #' @return Dataframe of stations with sufficient data
 #' @export
 #' @examples
-#' status_stns(data = data.frame, year_range = c(start_year, end_year), status_period = 5)
+#' status_stns(data_assessed = data_assessed)
 
-status_stns <- function(data, year_range = NULL, status_period = 4) {
+status_stns <- function(data_assessed) {
 
-  if("Phosphate-phosphorus" %in% unique(data$Char_Name)){
-    if("tp_year" %in% colnames(data)){
-      data$year <- if_else(is.na(data$tp_year), lubridate::year(data$sample_datetime), data$tp_year)
-    } else {data$year <- lubridate::year(data$sample_datetime)}
-  } else {data$year <- lubridate::year(data$sample_datetime)}
-
-  if(is.null(year_range)){
-    year_range <- c(min(data$year, na.rm = TRUE), max(data$year, na.rm = TRUE))
-  }
-
-  years <- year_range[2]:year_range[1]
-  breaks <- seq(year_range[2], year_range[1], by = -4)
-  cols <- sapply(breaks, function(x){
-    start <- x - status_period + 1
-    return(paste0(
-      "status_",
-      start, "_", x))
-  })
-  bins <- lapply(breaks, function(x){
-    start <- x - status_period + 1
-    return(c(start:x))
-  })
-  names(bins) <- cols
-  data$bin <- sapply(data$year, function(x){
-      i <- sapply(bins, function(y){
-        return(x %in% y)
-      })
-      return(names(bins[i]))
-    })
-
-
-   if(any(unique(data$year) %in% years)){
-
-     status_check <- data %>%
-       filter(year %in% years,
-              !(BacteriaCode == 3 & Char_Name == "Fecal Coliform")) %>%
-       dplyr::group_by(MLocID, Char_Name, bin) %>%
-       dplyr::summarise(samples = n(),
-                        status = if_else(samples < 1 | is.na(samples) | all(is.na(excursion_cen)),
-                                         "Unassessed",
-                                                 if_else(any(excursion_cen == 1, na.rm = TRUE),
-                                                         "Not Attaining",
-                                                         "Attaining")
-                        )
-       ) %>%
-       ungroup() %>% select(-samples) %>%
-       spread(key = bin, value = status)
-
-     if(any(data$year %in% years & data$BacteriaCode == 3 & data$Char_Name == "Fecal Coliform")){
-       shell_status <- data %>%
-         dplyr::filter(year %in% years,
-                       BacteriaCode == 3,
-                       Char_Name == "Fecal Coliform") %>%
-         dplyr::group_by(MLocID, Char_Name, bin) %>%
-         dplyr::summarise(samples = n(),
-                          median = if_else(samples >= 5, median(Result_cen), NaN),
-                          excursions = sum(perc_exceed),
-                          bact_crit_percent = first(bact_crit_percent), # 43 organisms per 100mL, requires 10% exceedance
-                          bact_crit_ss = first(bact_crit_ss), # 14 organisms per 100mL, median used to evaluate excursion
-                          n_years = length(unique(year)),
-                          excursion = if_else((!is.na(median) & median > bact_crit_ss),
-                                              1,
-                                              if_else(samples >= 10 & excursions/samples > 0.10,
-                                                      1,
-                                                      if_else(samples >= 5 & samples <= 9 & excursions >= 1,
-                                                              1, 0)
-                                              )),
-                          status = if_else(samples < 1 | is.na(samples) | all(is.na(excursion)),
-                                           "Unassessed",
-                                           if_else(any(excursion == 1, na.rm = TRUE),
-                                                   "Not Attaining",
-                                                   "Attaining")
-                          )
-         ) %>%
-         ungroup() %>% select(MLocID, Char_Name, bin, status) %>% spread(key = bin, value = status)
-
-       # shell_per_exceed <- data %>%
-       #   filter(year %in% years,
-       #          BacteriaCode == 3,
-       #          Char_Name == "Fecal Coliform") %>%
-       #   dplyr::group_by(MLocID, Char_Name, bin) %>%
-       #   dplyr::summarise(samples = n(),
-       #                    median = if_else(num_samples >= 5, median(Result_cen), NaN),
-       #                    per_excursions = sum(perc_exceed),
-       #                    bact_crit_percent = first(bact_crit_percent),
-       #                    bact_crit_ss = first(bact_crit_ss),
-       #                    n_years = length(unique(year)),
-       #                    excursion = if_else((!is.na(median) & median > bact_crit_ss),
-       #                                        1,
-       #                                        if_else(num_samples >= 10 & num_exceed/num_samples > 0.10,
-       #                                                1,
-       #                                                if_else(num_samples >= 5 & num_samples <= 9 & num_exceed >= 1,
-       #                                                        1, 0)
-       #                                        ))
-       #                    ) %>%
-       #   ungroup() %>% select(-samples, -excursions) %>%
-       #   spread(key = bin, value = per_exceed, sep = "_")
-       # colnames(shell_per_exceed) <- gsub("bin_status", "per_exceed", colnames(shell_per_exceed))
-       #
-       # shell_status_wExc <- merge(shell_status, shell_per_exceed, by = c("MLocID", "Char_Name"))
-
-       if(nrow(shell_status) >0){
-         status_check <- bind_rows(status_check, shell_status)
-       }
-
-     }
-
-    status_check[is.na(status_check)] <- "Unassessed"
-    cols <- c("MLocID", "Char_Name", cols)
-
-    for(i in cols[!cols %in% colnames(status_check)]){
-      status_check[,i] <- "Unassessed"
-    }
-
-    status_check <- status_check[,cols]
-
-    print(paste("Data should be sufficient for", NROW(status_check), "different statuses to be determined."))
-
-  } else {
-    status_check <- "No stations meet Status criteria"
+  if(is.null(data_assessed)) {
+    warning("There are no results in data_assessed.")
+    status_check <- "No stations meet criteria"
     return(status_check)
   }
+
+  if(!"status_period" %in% colnames(data_assessed)) {
+    stop("There is no 'status_period' column defined in data_assessed. Run odeqstatusandtrends::status_period().")
+  }
+
+  if(any(is.na(data_assessed$status_period))) {
+    warning("NA's present in 'status_period' column.")
+  }
+
+  if(!"MLocID" %in% colnames(data_assessed)) {
+    stop("There is no 'MLocID' column defined in data_assessed.")
+  }
+
+  if(!"Char_Name" %in% colnames(data_assessed)) {
+    stop("There is no 'Char_Name' column defined in data_assessed.")
+  }
+
+  if(!"Result_Numeric" %in% colnames(data_assessed)) {
+    stop("There is no 'Result_Numeric' column defined in data_assessed.")
+  }
+
+  if(!"excursion_cen" %in% colnames(data_assessed)) {
+    stop("There is no 'excursion_cen' column defined in data_assessed.")
+  }
+
+  if(!"BacteriaCode" %in% colnames(data_assessed)) {
+    stop("There is no 'BacteriaCode' column defined in data_assessed.")
+  }
+
+  status_check <- data_assessed %>%
+    dplyr::filter(!(BacteriaCode == 3 & Char_Name == "Fecal Coliform")) %>%
+    dplyr::group_by(MLocID, Char_Name, status_period) %>%
+    dplyr::summarise(samples = n(),
+                     status = dplyr::if_else(samples < 1 | is.na(samples) | all(is.na(excursion_cen)),
+                                             "Unassessed",
+                                             dplyr::if_else(any(excursion_cen == 1, na.rm = TRUE),
+                                                            "Not Attaining",
+                                                            "Attaining")
+                     )
+    ) %>%
+    dplyr::ungroup() %>% select(-samples) %>%
+    tidyr::spread(key = status_period, value = status)
+
+  if(any(data_assessed$BacteriaCode == 3 & data_assessed$Char_Name == "Fecal Coliform")){
+    shell_status <- data_assessed %>%
+      dplyr::filter(BacteriaCode == 3,
+                    Char_Name == "Fecal Coliform") %>%
+      dplyr::group_by(MLocID, Char_Name, status_period) %>%
+      dplyr::summarise(samples = n(),
+                       median = dplyr::if_else(samples >= 5, median(Result_cen, na.rm = TRUE), NaN),
+                       excursions = sum(perc_exceed),
+                       bact_crit_percent = dplyr::first(bact_crit_percent), # 43 organisms per 100mL, requires 10% exceedance
+                       bact_crit_ss = dplyr::first(bact_crit_ss), # 14 organisms per 100mL, median used to evaluate excursion
+                       n_years = length(unique(year)),
+                       excursion = dplyr::if_else((!is.na(median) & median > bact_crit_ss),
+                                                  1,
+                                                  dplyr::if_else(samples >= 10 & excursions/samples > 0.10,
+                                                                 1,
+                                                                 dplyr::if_else(samples >= 5 & samples <= 9 & excursions >= 1,
+                                                                                1, 0)
+                                                  )),
+                       status = dplyr::if_else(samples < 1 | is.na(samples) | all(is.na(excursion)),
+                                               "Unassessed",
+                                               dplyr::if_else(any(excursion == 1, na.rm = TRUE),
+                                                              "Not Attaining",
+                                                              "Attaining")
+                       )
+      ) %>%
+      dplyr::ungroup() %>% dplyr::select(MLocID, Char_Name, status_period, status) %>% tidyr::pivot_wider(names_from=status_period, values_from=status)
+
+    if(nrow(shell_status) >0){
+      status_check <- dplyr::bind_rows(status_check, shell_status)
+    }
+
+  }
+
+  status_check[is.na(status_check)] <- "Unassessed"
+  cols <- c("MLocID", "Char_Name", cols)
+
+  for(i in cols[!cols %in% colnames(status_check)]){
+    status_check[,i] <- "Unassessed"
+  }
+
+  status_check <- status_check[,cols]
+
+  print(paste("Data should be sufficient for", NROW(status_check), "different statuses to be determined."))
+
   return(status_check[,c(1,2,rev(3:length(colnames(status_check))))])
 }
