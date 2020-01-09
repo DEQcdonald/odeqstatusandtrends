@@ -7,27 +7,43 @@
 #' @return Dataframe of stations with sufficient years of data
 #' @export
 #' @examples
-#' trend_stns(data = data.frame, trend_years = c(format(min(data$sample_datetime), "%Y"):format(Sys.Date(), "%Y")))
+#' trend_stns(df = data_assessed, trend_years = c(format(min(data$sample_datetime), "%Y"):format(Sys.Date(), "%Y")))
 
-trend_stns <- function(data, trend_years = c(format(min(data$sample_datetime, na.rm = TRUE), "%Y"):format(Sys.Date(), "%Y"))) {
+trend_stns <- function(df, trend_years=NULL) {
+
+  if(!"sample_datetime" %in% colnames(df)) {
+    stop("There is no 'sample_datetime' column defined in df.")
+  }
+
+  if(!"MLocID" %in% colnames(df)) {
+    stop("There is no 'MLocID' column defined in df.")
+  }
+
+  if(!"Char_Name" %in% colnames(df)) {
+    stop("There is no 'Char_Name' column defined in df.")
+  }
+
+  if(!"Statistical_Base" %in% colnames(df)) {
+    stop("There is no 'Statistical_Base' column defined in df.")
+  }
+
+  if(is.null(trend_years)){
+  trend_years <- c(format(min(df$sample_datetime, na.rm = TRUE), "%Y"):format(Sys.Date(), "%Y"))
+  }
 
   if(length(trend_years) < 8){stop("Number of years should be more than or equal to 8")}
 
-  if("Phosphate-phosphorus" %in% unique(data$Char_Name)){
-    if("tp_year" %in% colnames(data)){
-      data$year <- if_else(is.na(data$tp_year), lubridate::year(data$sample_datetime), data$tp_year)
-    } else {data$year <- lubridate::year(data$sample_datetime)}
-  } else {data$year <- lubridate::year(data$sample_datetime)}
+  df$year <- lubridate::year(df$sample_datetime)
 
-  if(any(unique(data$year) %in% trend_years)){
-    trend_check <- data %>%
-      filter(year %in% trend_years) %>%
+  if(any(unique(df$year) %in% trend_years)){
+    trend_check <- df %>%
+      dplyr::filter(year %in% trend_years) %>%
       dplyr::group_by(MLocID, Char_Name, Statistical_Base) %>%
       dplyr::summarise(n_years = length(unique(year)),
-                       avg_obs = n()/n_years,
+                       avg_obs = dplyr::n()/n_years,
                        min_year = min(year),
                        max_year = max(year)) %>%
-      filter(n_years>=8)
+      dplyr::filter(n_years>=8)
 
     print(paste("Data may be sufficient for", NROW(trend_check), "different trends to be determined."))
 
