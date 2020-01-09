@@ -27,7 +27,9 @@ plot_TP <- function(data, seaKen, station){
 
   # obtain plotting values for trend line if applicable
   if(nrow(seaken_TP) > 0){
-    slope <- seaken_TP[, "slope"]
+    slope <- round(seaken_TP[, "slope"], digits=3)
+    trend <- seaken_TP[, "trend"]
+    p_val <- round(seaken_TP[, "p_value"], digits=3)
     x_delta <- as.numeric((xmax-xmin)/2)
     y_median <- median(data$Result_cen, na.rm = TRUE)
     sk_min <- y_median - x_delta*slope/365.25
@@ -41,15 +43,20 @@ plot_TP <- function(data, seaKen, station){
     p <- p + geom_segment(aes(x=xmin, xend=xmax, y=TP_crit, yend=TP_crit,
                               color = "TMDL Target", linetype = "TMDL Target", shape = "TMDL Target"))
   }
+
+  title <- paste(station, unique(data$StationDes))
+  subtitle <- paste0("Assessment Unit: ", unique(data$AU_ID), " ", unique(data$AU_Name))
+
   # plot data with excursion colors
   p <- p + geom_point(aes(x=sample_datetime, y=Result_cen, color = excursion, linetype = excursion, shape = excursion)) +
-    ggtitle(paste(station, "TP"), subtitle = paste(unique(data$StationDes))) +
-    ylab("Total Phosphorus (mg/l)") +
+    ggtitle(title, subtitle = subtitle) +
+    ylab("Total Phosphorus (mg/L)") +
     xlab("Datetime")
 
   # plot the trend line if applicable
   if(nrow(seaken_TP) > 0){
-    p <- p + geom_segment(aes(x=xmin, xend=xmax, y=sk_min, yend=sk_max, color = "Trend", linetype = "Trend", shape = "Trend"))
+    p <- p + geom_segment(aes(x=xmin, xend=xmax, y=sk_min, yend=sk_max, color = "Trend", linetype = "Trend", shape = "Trend")) +
+      annotate("text", x = xmin, y = ymax, label = paste0("Trend Results: ", trend, ",  Z-Stat: ", p_val, ",  Slope: ", slope), hjust = 0.125, vjust = -1)
   }
 
   # apply color, shape, line types, and range limits
@@ -57,9 +64,9 @@ plot_TP <- function(data, seaKen, station){
     scale_color_manual(name = "",
                        values =    c('Excursion' = 'red', 'Result' = 'black', "Trend" = 'blue', "TMDL Target" = 'black')) +
     scale_linetype_manual(name = "",
-                          values = c('Excursion' = 0, 'Result' = 0, "Trend" = 1, "TMDL Target" = 2)) +
+                          values = c('Excursion' = 0, 'Result' = 0, "Trend" = 2, "TMDL Target" = 1)) +
     scale_shape_manual(name = "",
-                       values =    c('Excursion' = 16, 'Result' = 16, "Trend" = 32, "TMDL Target" = 32)) +
+                       values =    c('Excursion' = 4, 'Result' = 16, "Trend" = 32, "TMDL Target" = 32)) +
     ylim(c(ymin, ymax)) +
     xlim(c(xmin, xmax)) +
     scale_x_datetime(date_labels = "%b-%Y")+
