@@ -22,7 +22,9 @@ plot_DO <- function(data, seaKen, station){
 
   # obtain plotting values for trend line if applicable
   if(station %in% seaKen$MLocID){
-    slope <- seaKen[seaKen$MLocID == station & seaKen$Char_Name == "Dissolved oxygen (DO)", "slope"]
+    slope <- round(seaKen[seaKen$MLocID == station & seaKen$Char_Name == "Dissolved oxygen (DO)", "slope"], digits=3)
+    trend <- seaKen[seaKen$MLocID == station & seaKen$Char_Name == "Dissolved oxygen (DO)", "trend"]
+    p_val <- round(seaKen[seaKen$MLocID == station & seaKen$Char_Name == "Dissolved oxygen (DO)", "p_value"], digits=3)
     x_delta <- as.numeric((xmax-xmin)/2)
     y_median <- median(data$Result_cen, na.rm = TRUE)
     sk_min <- y_median - x_delta*slope/365.25
@@ -44,24 +46,24 @@ plot_DO <- function(data, seaKen, station){
   DO_plots <- list()
 
   p <- ggplot(data) +
-    xlab(element_blank()) +
     scale_color_manual(name = "",
                        values =    c('Excursion' = 'red', 'Result' = 'black', "Trend" = 'blue', "Spawning" = 'black', "Year-Round" = 'black')) +
     scale_linetype_manual(name = "",
                           values = c('Excursion' = 0, 'Result' = 0, "Trend" = 2, "Spawning" = 1, "Year-Round" = 1)) +
     scale_shape_manual(name = "",
-                       values =    c('Excursion' = 16, 'Result' = 16, "Trend" = 32, "Spawning" = 32, "Year-Round" = 32)) +
+                       values =    c('Excursion' = 4, 'Result' = 16, "Trend" = 32, "Spawning" = 32, "Year-Round" = 32)) +
     scale_fill_manual(name = "", values = c("Spawning Period" = 'black')) +
     ylim(c(ymin, ymax)) +
-    ylab("DO (mg/L)") +
     theme_bw() +
+    labs(x = "Datetime") +
     theme(legend.position="bottom", legend.direction = "horizontal", legend.box = "horizontal")
 
   # plot the trend line if applicable
   if(station %in% seaKen$MLocID){
     p <- p + geom_segment(aes(x=xmin, xend=xmax, y=sk_min, yend=sk_max, color = "Trend", linetype = "Trend"
                               , shape = "Trend"
-                              ))
+                              )) +
+      annotate("text", x = xmin, y = ymax, label = paste0("Trend Results: ", trend, ",  Z-Stat: ", p_val, ",  Slope: ", slope), hjust = 0.125, vjust = -1)
   }
 
   if(any(data$in_spawn == 1)){
@@ -98,7 +100,9 @@ plot_DO <- function(data, seaKen, station){
                                                # linetype = 'Spawning Period', shape = 'Spawning Period', color = 'Spawning Period',
                                                fill='Spawning Period'),
                        color = NA, alpha=.15, show.legend = c(fill=TRUE, linetype=FALSE, shape=FALSE, color=FALSE)) +
-      scale_x_datetime(date_labels = "%b-%Y", limits = c(xmin - lubridate::seconds(1), xmax + lubridate::seconds(1)))
+      scale_x_datetime(date_labels = "%b-%Y", limits = c(xmin - lubridate::seconds(1), xmax + lubridate::seconds(1))
+                       # , expand = expand_scale(mult = 0.01)
+                       )
 
     if(nrow(DO_inst) > 0){
       # plot instantaneous Year-Round criteria lines within Year-Round periods
@@ -178,7 +182,9 @@ plot_DO <- function(data, seaKen, station){
     DO_7DADMean$excursion <- if_else(DO_7DADMean$in_spawn == 1 & DO_7DADMean$spwn_exc_7DADMean == 1, "Excursion", "Result")
     DO_Min$excursion <- if_else(((DO_Min$in_spawn == 1) & (DO_Min$spwn_exc_min == 1)) | DO_Min$yr_exc_min == 1, "Excursion", "Result")
 
-    p <- p + scale_x_datetime(date_labels = "%b-%Y", limits = c(xmin - lubridate::seconds(1), xmax + lubridate::seconds(1)))
+    p <- p + scale_x_datetime(date_labels = "%b-%Y", limits = c(xmin - lubridate::seconds(1), xmax + lubridate::seconds(1))
+                              # , expand = expand_scale(mult = 0.01)
+                              )
 
     if(nrow(DO_inst) > 0){
       # plot instantaneous Year-Round criteria lines within Year-Round periods
@@ -224,15 +230,17 @@ plot_DO <- function(data, seaKen, station){
 
   }
 
+  title <- paste(station, unique(data$StationDes))
+  subtitle <- paste0("Assessment Unit: ", unique(data$AU_ID), " ", unique(data$AU_Name))
+
   # plot data with excursion colors
   if(!is.null(p_inst)){
     p_inst <- p_inst + geom_point(data = DO_inst, aes(x=sample_datetime, y=Result_cen, color = excursion, shape = excursion
                                                       , linetype = excursion
     )) +
       # geom_point(aes(x=sample_datetime, y=DO_sat, linetype = excursion), color = "black", shape = 6) +
-      ggtitle(paste(station, 'Instantaneous Dissolved Oxygen')
-              , subtitle = paste(unique(data$StationDes))
-              )
+      ggtitle(label = title, subtitle = subtitle) +
+      ylab("Instantaneous Dissolved Oxygen (mg/L)")
 
     legend <- get_legend(p_inst)
 
@@ -245,9 +253,8 @@ plot_DO <- function(data, seaKen, station){
     p_7dadmin <- p_7dadmin + geom_point(data = DO_7DADMin, aes(x=sample_datetime, y=Result_cen, color = excursion, shape = excursion
                                                                , linetype = excursion
     )) +
-      ggtitle(paste(station, '7DADMin Dissolved Oxygen')
-              , subtitle = paste(unique(data$StationDes))
-              )
+      ggtitle(label = title, subtitle = subtitle) +
+      ylab("7DADMin Dissolved Oxygen (mg/L)")
     # +
       # theme(legend.position = "none")
 
@@ -258,9 +265,8 @@ plot_DO <- function(data, seaKen, station){
     p_30dadmean <- p_30dadmean + geom_point(data = DO_30DADMean, aes(x=sample_datetime, y=Result_cen, color = excursion, shape = excursion
                                                                      , linetype = excursion
     )) +
-      ggtitle(paste(station, '30DADMean Dissolved Oxygen')
-              , subtitle = paste(unique(data$StationDes))
-              )
+      ggtitle(label = title, subtitle = subtitle) +
+      ylab("30DADMean Dissolved Oxygen (mg/L)")
     # +
       # theme(legend.position = "none")
 
@@ -271,9 +277,8 @@ plot_DO <- function(data, seaKen, station){
     p_7dadmean <- p_7dadmean + geom_point(data = DO_7DADMean, aes(x=sample_datetime, y=Result_cen, color = excursion, shape = excursion
                                                                   , linetype = excursion
     )) +
-      ggtitle(paste(station, '7DADMean Dissolved Oxygen')
-              , subtitle = paste(unique(data$StationDes))
-              )
+      ggtitle(label = title, subtitle = subtitle) +
+      ylab("7DADMean Dissolved Oxygen (mg/L)")
     # +
       # theme(legend.position = "none")
 
@@ -284,9 +289,8 @@ plot_DO <- function(data, seaKen, station){
     p_min <- p_min + geom_point(data = DO_Min, aes(x=sample_datetime, y=Result_cen, color = excursion, shape = excursion
                                                    , linetype = excursion
     )) +
-      ggtitle(paste(station, 'Daily Minimum Dissolved Oxygen')
-              , subtitle = paste(unique(data$StationDes))
-              )
+      ggtitle(label = title, subtitle = subtitle) +
+      ylab("Daily Minimum Dissolved Oxygen (mg/L)")
     # +
       # theme(legend.position = "none")
 
