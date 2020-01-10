@@ -4,51 +4,50 @@
 #' Excursion statistics include number of excursions, percent excursion, and the max, median, and minimum for results
 #' that contributed to an excursion.
 #'
-#' @param data_assessed Dataframe returned from an assessment fucntion in odeqassessment package.
-#'  data_assessed must include a grouping column called 'status_period' which can be created by running odeqstatusandtrends::status_period().
+#' @param df Dataframe returned from an assessment fucntion in odeqassessment package.
+#'  df must include a grouping column called 'status_period' which can be created by running odeqstatusandtrends::status_period().
 #' @return Dataframe of station excursion information
 #' @export
 #' @examples
-#' excursion_stats(data_assessed=data_assessed)
+#' excursion_stats(df=data_assessed)
 
-excursion_stats <- function(data_assessed) {
+excursion_stats <- function(df) {
 
-  if(is.null(data_assessed)) {
-    warning("There are no results in data_assessed.")
+  if(is.null(df)) {
+    warning("There are no results in df.")
     excursion_stat_df2 <- "No stations meet criteria"
     return(excursion_stat_df2)
   }
 
-  if(!"status_period" %in% colnames(data_assessed)) {
-    stop("There is no 'status_period' column defined in data_assessed. Run odeqstatusandtrends::status_period().")
+  if(!"status_period" %in% colnames(df)) {
+    stop("There is no 'status_period' column defined in df. Run odeqstatusandtrends::status_period().")
   }
 
-  if(any(is.na(data_assessed$status_period))) {
+  if(any(is.na(df$status_period))) {
     warning("NA's present in 'status_period' column.")
   }
 
-  if(!"MLocID" %in% colnames(data_assessed)) {
-    stop("There is no 'MLocID' column defined in data_assessed.")
+  if(!"MLocID" %in% colnames(df)) {
+    stop("There is no 'MLocID' column defined in df.")
   }
 
-  if(!"Char_Name" %in% colnames(data_assessed)) {
-    stop("There is no 'Char_Name' column defined in data_assessed.")
+  if(!"Char_Name" %in% colnames(df)) {
+    stop("There is no 'Char_Name' column defined in df.")
   }
 
-  if(!"Result_Numeric" %in% colnames(data_assessed)) {
-    stop("There is no 'Result_Numeric' column defined in data_assessed.")
+  if(!"Result_Numeric" %in% colnames(df)) {
+    stop("There is no 'Result_Numeric' column defined in df.")
   }
 
-  if(!"excursion_cen" %in% colnames(data_assessed)) {
-    stop("There is no 'excursion_cen' column defined in data_assessed.")
+  if(!"excursion_cen" %in% colnames(df)) {
+    stop("There is no 'excursion_cen' column defined in df.")
   }
 
-  if(!"BacteriaCode" %in% colnames(data_assessed)) {
-    stop("There is no 'BacteriaCode' column defined in data_assessed.")
+  if(!"BacteriaCode" %in% colnames(df)) {
+    stop("There is no 'BacteriaCode' column defined in df.")
   }
 
-
-  excursion_stat_df1 <- data_assessed %>%
+  excursion_stat_df1 <- df %>%
     dplyr::filter(!(BacteriaCode == 3 & Char_Name == "Fecal Coliform")) %>%
     dplyr::filter(excursion_cen==1) %>%
     dplyr::group_by(MLocID, Char_Name, status_period) %>%
@@ -57,7 +56,7 @@ excursion_stats <- function(data_assessed) {
                      excursion_min = min(Result_Numeric, na.rm = TRUE)) %>%
     dplyr::ungroup()
 
-  excursion_stat_df2 <- data_assessed %>%
+  excursion_stat_df2 <- df %>%
     dplyr::filter(!(BacteriaCode == 3 & Char_Name == "Fecal Coliform")) %>%
     dplyr::group_by(MLocID, Char_Name, status_period) %>%
     dplyr::summarise(results_n = n(),
@@ -67,25 +66,25 @@ excursion_stats <- function(data_assessed) {
     dplyr::left_join(by=c("MLocID", "Char_Name", "status_period"), y=excursion_stat_df1) %>%
     tidyr::pivot_wider(names_from=status_period, values_from=c(percent_excursion, results_n, excursions_n, excursion_max, excursion_median, excursion_min))
 
-  if(any(data_assessed$BacteriaCode == 3 & data_assessed$Char_Name == "Fecal Coliform")){
+  if(any(df$BacteriaCode == 3 & df$Char_Name == "Fecal Coliform")){
 
-    if(!"Result_cen" %in% colnames(data_assessed)) {
-      stop("There is no 'Result_cen' column defined in data_assessed.")
+    if(!"Result_cen" %in% colnames(df)) {
+      stop("There is no 'Result_cen' column defined in df.")
     }
 
-    if(!"perc_exceed" %in% colnames(data_assessed)) {
-      stop("There is no 'perc_exceed' column defined in data_assessed.")
+    if(!"perc_exceed" %in% colnames(df)) {
+      stop("There is no 'perc_exceed' column defined in df.")
     }
 
-    if(!"bact_crit_percent" %in% colnames(data_assessed)) {
-      stop("There is no 'bact_crit_percent' column defined in data_assessed.")
+    if(!"bact_crit_percent" %in% colnames(df)) {
+      stop("There is no 'bact_crit_percent' column defined in df.")
     }
 
-    if(!"bact_crit_ss" %in% colnames(data_assessed)) {
-      stop("There is no 'bact_crit_ss' column defined in data_assessed.")
+    if(!"bact_crit_ss" %in% colnames(df)) {
+      stop("There is no 'bact_crit_ss' column defined in df.")
     }
 
-    shell_per_excursion <- data_assessed %>%
+    shell_per_excursion <- df %>%
       dplyr::filter(BacteriaCode == 3,
                     Char_Name == "Fecal Coliform") %>%
       dplyr::group_by(MLocID, Char_Name, status_period) %>%

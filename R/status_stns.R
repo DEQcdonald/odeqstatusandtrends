@@ -2,50 +2,50 @@
 #'
 #' Creates a dataframe with stations, the number of years with data within
 #' the status years, and whether or not there were any exceedances.
-#' @param data_assessed Dataframe returned from an assessment fucntion in odeqassessment package.
-#'  data_assessed must include a grouping column called 'status_period' which can be created by running odeqstatusandtrends::status_period().
+#' @param df Dataframe returned from an assessment function in odeqassessment package.
+#'  df must include a grouping column called 'status_period' which can be created by running odeqstatusandtrends::status_period().
 #' @return Dataframe of stations with sufficient data
 #' @export
 #' @examples
-#' status_stns(data_assessed = data_assessed)
+#' status_stns(df = data_assessed)
 
-status_stns <- function(data_assessed) {
+status_stns <- function(df) {
 
-  if(is.null(data_assessed)) {
-    warning("There are no results in data_assessed.")
+  if(is.null(df)) {
+    warning("There are no results in df.")
     status_check <- "No stations meet criteria"
     return(status_check)
   }
 
-  if(!"status_period" %in% colnames(data_assessed)) {
-    stop("There is no 'status_period' column defined in data_assessed. Run odeqstatusandtrends::status_period().")
+  if(!"status_period" %in% colnames(df)) {
+    stop("There is no 'status_period' column defined in df. Run odeqstatusandtrends::status_period().")
   }
 
-  if(any(is.na(data_assessed$status_period))) {
+  if(any(is.na(df$status_period))) {
     warning("NA's present in 'status_period' column.")
   }
 
-  if(!"MLocID" %in% colnames(data_assessed)) {
-    stop("There is no 'MLocID' column defined in data_assessed.")
+  if(!"MLocID" %in% colnames(df)) {
+    stop("There is no 'MLocID' column defined in df.")
   }
 
-  if(!"Char_Name" %in% colnames(data_assessed)) {
-    stop("There is no 'Char_Name' column defined in data_assessed.")
+  if(!"Char_Name" %in% colnames(df)) {
+    stop("There is no 'Char_Name' column defined in df.")
   }
 
-  if(!"Result_Numeric" %in% colnames(data_assessed)) {
-    stop("There is no 'Result_Numeric' column defined in data_assessed.")
+  if(!"Result_Numeric" %in% colnames(df)) {
+    stop("There is no 'Result_Numeric' column defined in df.")
   }
 
-  if(!"excursion_cen" %in% colnames(data_assessed)) {
-    stop("There is no 'excursion_cen' column defined in data_assessed.")
+  if(!"excursion_cen" %in% colnames(df)) {
+    stop("There is no 'excursion_cen' column defined in df.")
   }
 
-  if(!"BacteriaCode" %in% colnames(data_assessed)) {
-    stop("There is no 'BacteriaCode' column defined in data_assessed.")
+  if(!"BacteriaCode" %in% colnames(df)) {
+    stop("There is no 'BacteriaCode' column defined in df.")
   }
 
-  status_check <- data_assessed %>%
+  status_check <- df %>%
     dplyr::filter(!(BacteriaCode == 3 & Char_Name == "Fecal Coliform")) %>%
     dplyr::group_by(MLocID, Char_Name, status_period) %>%
     dplyr::summarise(samples = n(),
@@ -59,8 +59,8 @@ status_stns <- function(data_assessed) {
     dplyr::ungroup() %>% select(-samples) %>%
     tidyr::spread(key = status_period, value = status)
 
-  if(any(data_assessed$BacteriaCode == 3 & data_assessed$Char_Name == "Fecal Coliform")){
-    shell_status <- data_assessed %>%
+  if(any(df$BacteriaCode == 3 & df$Char_Name == "Fecal Coliform")){
+    shell_status <- df %>%
       dplyr::filter(BacteriaCode == 3,
                     Char_Name == "Fecal Coliform") %>%
       dplyr::group_by(MLocID, Char_Name, status_period) %>%
