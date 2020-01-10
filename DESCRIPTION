@@ -1,6 +1,6 @@
 Package: odeqstatusandtrends
 Title: Analyze and Report on Water Quality Status and Trends
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: person(given = "Colin", family = "Donald", email = "Donald.Colin@deq.state.or.us", role = c("aut", "cre"))
 Description: What the package does (one paragraph).
 Depends: R (>= 3.5.1)
