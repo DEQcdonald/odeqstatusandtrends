@@ -13,13 +13,13 @@
 #' @examples
 #' status_periods(datetime = data_assessed$sample_datetime, periods=4, year_range = c(start_year:end_year))
 #'
-status_periods <- function(datetime, periods=4, year_range=NULL, bins_only=FALSE) {
+status_periods <- function(datetime=NULL, periods=4, year_range=NULL, bins_only=FALSE) {
 
   #datetime <- data_assessed$sample_datetime
   #year_range <- c(1998,2018)
   #periods <- 4
 
-  if(!lubridate::is.POSIXct(datetime)) {
+  if(!(bins_only) & !(lubridate::is.POSIXct(datetime))) {
     stop("datetime not in POSIXct")
   }
 
