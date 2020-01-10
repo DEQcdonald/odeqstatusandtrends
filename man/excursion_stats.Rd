@@ -2,24 +2,22 @@
 % Please edit documentation in R/excursion_stats.R
 \name{excursion_stats}
 \alias{excursion_stats}
-\title{Calculate excursion statistics for status years}
+\title{Calculate excursion statistics for status periods}
 \usage{
-excursion_stats(data, year_range = NULL)
+excursion_stats(df)
 }
 \arguments{
-\item{data}{Dataframe of data to calculate excursion stats from.}
-
-\item{year_range}{Years from which to determine status. If null, the year range for data provided is used.
-The range of years in status years will be binned by this number}
+\item{df}{Dataframe returned from an assessment fucntion in odeqassessment package.
+df must include a grouping column called 'status_period' which can be created by running odeqstatusandtrends::status_period().}
 }
 \value{
-Dataframe of stations
+Dataframe of station excursion information
 }
 \description{
-Creates a dataframe with excursion statistics by station, parmameter, and status year bin.
+Creates a dataframe with excursion statistics by station, parmameter, and status period.
 Excursion statistics include number of excursions, percent excursion, and the max, median, and minimum for results
 that contributed to an excursion.
 }
 \examples{
-excursion_stats(data = data.frame, year_range = c(start_year, end_year))
+excursion_stats(df=data_assessed)
 }

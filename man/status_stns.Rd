@@ -4,15 +4,11 @@
 \alias{status_stns}
 \title{Determine stations with sufficient data for status analysis}
 \usage{
-status_stns(data, year_range = NULL, status_period = 4)
+status_stns(df)
 }
 \arguments{
-\item{data}{Dataframe to determine status from.}
-
-\item{year_range}{Years from which to determine status. If null, the year range for data provided is used.}
-
-\item{status_period}{Number of whole years to include in a status analysis.
-The range of years in status years will be binned by this number}
+\item{df}{Dataframe returned from an assessment function in odeqassessment package.
+df must include a grouping column called 'status_period' which can be created by running odeqstatusandtrends::status_period().}
 }
 \value{
 Dataframe of stations with sufficient data
@@ -22,5 +18,5 @@ Creates a dataframe with stations, the number of years with data within
 the status years, and whether or not there were any exceedances.
 }
 \examples{
-status_stns(data = data.frame, year_range = c(start_year, end_year), status_period = 5)
+status_stns(df = data_assessed)
 }

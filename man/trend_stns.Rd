@@ -4,8 +4,7 @@
 \alias{trend_stns}
 \title{Determine stations with sufficient data for trend analysis}
 \usage{
-trend_stns(data, trend_years = c(format(min(data$sample_datetime, na.rm =
-  TRUE), "\%Y"):format(Sys.Date(), "\%Y")))
+trend_stns(df, trend_years = NULL)
 }
 \arguments{
 \item{data}{Dataframe to determine stations for trend analysis}
@@ -20,5 +19,5 @@ Creates a dataframe with stations and the number of years with data. Stations wi
 are not sufficient for trend analysis via the status and trends methods.
 }
 \examples{
-trend_stns(data = data.frame, trend_years = c(format(min(data$sample_datetime), "\%Y"):format(Sys.Date(), "\%Y")))
+trend_stns(df = data_assessed, trend_years = c(format(min(data$sample_datetime), "\%Y"):format(Sys.Date(), "\%Y")))
 }
