@@ -19,12 +19,23 @@ status_periods <- function(datetime=NULL, periods=4, year_range=NULL, bins_only=
   #year_range <- c(1998,2018)
   #periods <- 4
 
-  if(!(bins_only) & !(lubridate::is.POSIXct(datetime))) {
-    stop("datetime not in POSIXct")
+  if(!bins_only) {
+    
+    if(is.null(datetime)) {
+      stop("datetime is NULL")
+    }
+    
+    if(!lubridate::is.POSIXct(datetime)) {
+      stop("datetime not in POSIXct")
+    }
+    
+    data_years <- lubridate::year(datetime)
   }
 
-  data_years <- lubridate::year(datetime)
-
+  if(is.null(periods)) {
+    stop("periods is NULL")
+  }
+  
   if(is.null(year_range)){
     year_range <- c(min(data_years, na.rm = TRUE), max(data_years, na.rm = TRUE))
   }
