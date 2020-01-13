@@ -32,6 +32,8 @@ plot_bacteria <- function(data, seaKen, station){
   # obtain plotting values for trend line if applicable
   if(nrow(seaken_bact) > 0){
     slope <- seaken_bact[, "slope"]
+    trend <- seaken_bact[, "trend"]
+    p_val <- round(seaken_bact[, "p_value"], digits=3)
     x_delta <- as.numeric((xmax-xmin)/2)
     y_median <- median(data$Result_cen, na.rm = TRUE)
     sk_min <- y_median - x_delta*slope/365.25
@@ -49,15 +51,20 @@ plot_bacteria <- function(data, seaKen, station){
     p <- p + geom_segment(aes(x=xmin, xend=xmax, y=bact_crit_geomean, yend=bact_crit_geomean,
                               color = "Geomean Criteria", linetype = "Geomean Criteria", shape = "Geomean Criteria"))
   }
+
+  title <- paste(station, unique(data$StationDes))
+  subtitle <- paste0("Assessment Unit: ", unique(data$AU_ID), " ", unique(data$AU_Name))
+
   # plot data with excursion colors
   p <- p + geom_point(aes(x=sample_datetime, y=Result_cen, color = excursion, linetype = excursion, shape = excursion)) +
-    ggtitle(paste(station, "Bacteria"), subtitle = paste(unique(data$StationDes))) +
+    ggtitle(title, subtitle = subtitle) +
     ylab(paste0(parameter, "/100ml")) +
     xlab("Datetime")
 
   # plot the trend line if applicable
   if(nrow(seaken_bact) > 0){
-    p <- p + geom_segment(aes(x=xmin, xend=xmax, y=sk_min, yend=sk_max, color = "Trend", linetype = "Trend", shape = "Trend"))
+    p <- p + geom_segment(aes(x=xmin, xend=xmax, y=sk_min, yend=sk_max, color = "Trend", linetype = "Trend", shape = "Trend")) +
+      annotate("text", x = xmin, y = ymax, label = paste0("Trend Results: ", trend, ",  Z-Stat: ", p_val, ",  Slope: ", slope), hjust = 0.125, vjust = -1)
   }
 
   # apply color, shape, line types, and range limits
@@ -66,10 +73,10 @@ plot_bacteria <- function(data, seaKen, station){
                        values =    c('Excursion' = 'red', 'Result' = 'black', "Trend" = 'blue',
                                      "Single Sample Criteria" = 'black', "Geomean Criteria" = 'black')) +
     scale_linetype_manual(name = "",
-                          values = c('Excursion' = 0, 'Result' = 0, "Trend" = 1,
+                          values = c('Excursion' = 0, 'Result' = 0, "Trend" = 2,
                                      "Single Sample Criteria" = 1, "Geomean Criteria" = 2)) +
     scale_shape_manual(name = "",
-                       values =    c('Excursion' = 16, 'Result' = 16, "Trend" = 32,
+                       values =    c('Excursion' = 4, 'Result' = 16, "Trend" = 32,
                                      "Single Sample Criteria" = 32, "Geomean Criteria" = 32)) +
     ylim(c(ymin, ymax)) +
     xlim(c(xmin, xmax)) +
