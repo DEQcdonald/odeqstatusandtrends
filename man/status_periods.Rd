@@ -4,7 +4,7 @@
 \alias{status_periods}
 \title{Define status assessment periods}
 \usage{
-status_periods(datetime, periods = 4, year_range = NULL,
+status_periods(datetime = NULL, periods = 4, year_range = NULL,
   bins_only = FALSE)
 }
 \arguments{
