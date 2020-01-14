@@ -60,9 +60,7 @@ plot_DO <- function(data, seaKen, station){
 
   # plot the trend line if applicable
   if(station %in% seaKen$MLocID){
-    p <- p + geom_segment(aes(x=xmin, xend=xmax, y=sk_min, yend=sk_max, color = "Trend", linetype = "Trend"
-                              , shape = "Trend"
-                              )) +
+    p <- p + geom_segment(aes(x=xmin, xend=xmax, y=sk_min, yend=sk_max, color = "Trend", linetype = "Trend", shape = "Trend"), lwd = 1) +
       annotate("text", x = xmin, y = ymax, label = paste0("Trend Results: ", trend, ",  Z-Stat: ", p_val, ",  Slope: ", slope), hjust = 0, vjust = 0)
   }
 
