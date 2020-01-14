@@ -35,6 +35,10 @@ excursion_stats <- function(df) {
     stop("There is no 'Char_Name' column defined in df.")
   }
 
+  if(!"Spawn_type" %in% colnames(df)) {
+    stop("There is no Spawn_type' column defined in df.")
+  }
+
   if(!"Result_Numeric" %in% colnames(df)) {
     stop("There is no 'Result_Numeric' column defined in df.")
   }
@@ -50,20 +54,23 @@ excursion_stats <- function(df) {
   excursion_stat_df1 <- df %>%
     dplyr::filter(!(BacteriaCode == 3 & Char_Name == "Fecal Coliform")) %>%
     dplyr::filter(excursion_cen==1) %>%
-    dplyr::group_by(MLocID, Char_Name, status_period) %>%
+    dplyr::group_by(MLocID, Char_Name, Spawn_type, status_period) %>%
     dplyr::summarise(excursion_max = max(Result_Numeric, na.rm = TRUE),
                      excursion_median = median(Result_Numeric, na.rm = TRUE),
                      excursion_min = min(Result_Numeric, na.rm = TRUE)) %>%
-    dplyr::ungroup()
+    dplyr::ungroup() %>%
+    dplyr::mutate(excursion_min=ifelse(grepl("Temperature|Dissolved oxygen", Char_Name), round(excursion_min, 1), excursion_min),
+                  excursion_median=ifelse(grepl("Temperature|Dissolved oxygen", Char_Name), round(excursion_median, 1), excursion_median),
+                  excursion_max=ifelse(grepl("Temperature|Dissolved oxygen", Char_Name), round(excursion_max, 1), excursion_max))
 
   excursion_stat_df2 <- df %>%
     dplyr::filter(!(BacteriaCode == 3 & Char_Name == "Fecal Coliform")) %>%
-    dplyr::group_by(MLocID, Char_Name, status_period) %>%
+    dplyr::group_by(MLocID, Char_Name, Spawn_type, status_period) %>%
     dplyr::summarise(results_n = n(),
                      excursions_n = sum(excursion_cen, na.rm = TRUE),
                      percent_excursion = round(excursions_n/results_n*100,0)) %>%
     dplyr::ungroup() %>%
-    dplyr::left_join(by=c("MLocID", "Char_Name", "status_period"), y=excursion_stat_df1) %>%
+    dplyr::left_join(by=c("MLocID", "Char_Name", "Spawn_type", "status_period"), y=excursion_stat_df1) %>%
     tidyr::pivot_wider(names_from=status_period, values_from=c(percent_excursion, results_n, excursions_n, excursion_max, excursion_median, excursion_min))
 
   if(any(df$BacteriaCode == 3 & df$Char_Name == "Fecal Coliform")){
@@ -87,7 +94,7 @@ excursion_stats <- function(df) {
     shell_per_excursion <- df %>%
       dplyr::filter(BacteriaCode == 3,
                     Char_Name == "Fecal Coliform") %>%
-      dplyr::group_by(MLocID, Char_Name, status_period) %>%
+      dplyr::group_by(MLocID, Char_Name, Spawn_type, status_period) %>%
       dplyr::summarise(results_n = n(),
                        median = if_else(results_n >= 5, median(Result_cen, na.rm = TRUE), NaN),
                        excursions_n = sum(perc_exceed),
