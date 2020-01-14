@@ -64,7 +64,7 @@ plot_bacteria <- function(data, seaKen, station){
   # plot the trend line if applicable
   if(nrow(seaken_bact) > 0){
     p <- p + geom_segment(aes(x=xmin, xend=xmax, y=sk_min, yend=sk_max, color = "Trend", linetype = "Trend", shape = "Trend")) +
-      annotate("text", x = xmin, y = ymax, label = paste0("Trend Results: ", trend, ",  Z-Stat: ", p_val, ",  Slope: ", slope), hjust = 0.5)
+      annotate("text", x = xmin, y = ymax, label = paste0("Trend Results: ", trend, ",  Z-Stat: ", p_val, ",  Slope: ", slope), hjust = 0, vjust = 0)
   }
 
   # apply color, shape, line types, and range limits
@@ -74,7 +74,7 @@ plot_bacteria <- function(data, seaKen, station){
                                      "Single Sample Criteria" = 'black', "Geomean Criteria" = 'black')) +
     scale_linetype_manual(name = "",
                           values = c('Excursion' = 0, 'Result' = 0, "Trend" = 2,
-                                     "Single Sample Criteria" = 1, "Geomean Criteria" = 2)) +
+                                     "Single Sample Criteria" = 1, "Geomean Criteria" = 6)) +
     scale_shape_manual(name = "",
                        values =    c('Excursion' = 4, 'Result' = 16, "Trend" = 32,
                                      "Single Sample Criteria" = 32, "Geomean Criteria" = 32)) +
