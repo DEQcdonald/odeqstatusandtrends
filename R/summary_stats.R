@@ -53,10 +53,10 @@ summary_stats <- function(df) {
                      median = median(Result_Numeric, na.rm = TRUE),
                      min = min(Result_Numeric, na.rm = TRUE)) %>%
     dplyr::ungroup() %>%
-    dplyr::mutate(min=ifelse(grepl("Temperature|Dissolved oxygen", Char_Name), round(min, 1), min),
-                  median=ifelse(grepl("Temperature|Dissolved oxygen", Char_Name), round(median, 1), median),
-                  max=ifelse(grepl("Temperature|Dissolved oxygen", Char_Name), round(max, 1), max))
-    tidyr::pivot_wider(names_from=status_period, values_from=c(max, median, min)) %>%
+    dplyr::mutate(min=if_else(grepl("Temperature|Dissolved oxygen", Char_Name), round(min, 1), min),
+                  median=if_else(grepl("Temperature|Dissolved oxygen", Char_Name), round(median, 1), median),
+                  max=if_else(grepl("Temperature|Dissolved oxygen", Char_Name), round(max, 1), max)) %>%
+    tidyr::pivot_wider(names_from=status_period, values_from=c(max, median, min))
 
   if(any(df$BacteriaCode == 3 & df$Char_Name == "Fecal Coliform")){
 
