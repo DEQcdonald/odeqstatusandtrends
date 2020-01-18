@@ -100,7 +100,6 @@ excursion_stats <- function(df) {
                        excursions_n = sum(perc_exceed),
                        bact_crit_percent = first(bact_crit_percent),
                        bact_crit_ss = first(bact_crit_ss),
-                       n_years = length(unique(year)),
                        excursion = dplyr::if_else((!is.na(median) & median > bact_crit_ss),
                                                   1,
                                                   dplyr::if_else(results_n >= 10 & excursions_n/results_n > 0.10,
