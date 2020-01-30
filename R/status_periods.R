@@ -20,29 +20,29 @@ status_periods <- function(datetime=NULL, periods=4, year_range=NULL, bins_only=
   #periods <- 4
 
   if(!bins_only) {
-    
+
     if(is.null(datetime)) {
       stop("datetime is NULL")
     }
-    
+
     if(!lubridate::is.POSIXct(datetime)) {
       stop("datetime not in POSIXct")
     }
-    
+
     data_years <- lubridate::year(datetime)
   }
 
   if(is.null(periods)) {
     stop("periods is NULL")
   }
-  
+
   if(is.null(year_range)){
     year_range <- c(min(data_years, na.rm = TRUE), max(data_years, na.rm = TRUE))
   }
 
   years <- year_range[2]:year_range[1]
   breaks <- seq(year_range[2], year_range[1], by =(-1*periods))
-  cols <- sapply(breaks, function(x){
+  cols <<- sapply(breaks, function(x){
     start <- x - periods + 1
     return(paste0(
       start, "_", x))
