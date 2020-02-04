@@ -64,7 +64,7 @@ plot_DO <- function(data, seaKen, station){
       annotate("text", x = xmin, y = ymax, label = paste0("Trend Results: ", trend, ",  Z-Stat: ", p_val, ",  Slope: ", slope), hjust = 0, vjust = 0)
   }
 
-  if(any(data$in_spawn == 1)){
+  if(any(data$Spawn_type == "Spawn", na.rm = TRUE)){
     # Convert spawning dates to datetimes
     data$Start_spawn <- as.POSIXct(data$Start_spawn)
     data$End_spawn <- as.POSIXct(data$End_spawn)
