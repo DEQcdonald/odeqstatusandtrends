@@ -15,18 +15,7 @@ add_criteria <- function(data) {
   data$spawn_start <- LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnStart"]
   data$spawn_end <- LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnEnd"]
 
-  tmdl_lookup <- read.csv("//deqhq1/wqnps/Status_and_Trend_Reports/Lookups_Statewide/TMDL_targets.csv")
-  # tmdl_lookup$Reach_codes <- as.character(tmdl_lookup$Reach_codes)
-  # data$spawn_start_numeric <- as.numeric(lubridate::month(as.Date(LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnStart"], format="%m/%d")))*100 +
-  #   as.numeric(lubridate::day(as.Date(LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnStart"], format="%m/%d")))
-  # data$spawn_end_numeric <- as.numeric(lubridate::month(as.Date(LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnEnd"], format="%m/%d")))*100 +
-  #   as.numeric(lubridate::day(as.Date(LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnEnd"], format="%m/%d")))
-  # data$sample_mon_year <- as.numeric(lubridate::month(data$sample_datetime))*100 + as.numeric(lubridate::day(data$sample_datetime))
-  # data$spawning <- ifelse(is.na(data$spawn_start_numeric), "Non-Spawning",
-  #                         ifelse(data$spawn_start_numeric < data$spawn_end_numeric & (data$sample_mon_year > data$spawn_start_numeric & data$sample_mon_year < data$spawn_end_numeric), "Spawning",
-  #                                ifelse(data$spawn_start_numeric > data$spawn_end_numeric & (data$sample_mon_year > data$spawn_start_numeric | data$sample_mon_year < data$spawn_end_numeric), "Spawning", "Non-Spawning")
-  #                         )
-  # )
+  tmdl_lookup <- odeqstatusandtrends::tmdl_targets
 
   if(any("Temperature, water" %in% parameters)) {
     print("Adding temperature criteria values...")
