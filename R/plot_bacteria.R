@@ -79,6 +79,8 @@ plot_bacteria <- function(data, seaKen, station){
                               color = "Single Sample Criteria", linetype = "Single Sample Criteria", shape = "Single Sample Criteria"))
   }
 
+  bact_plots[["ss"]] <- p_ss
+
   # plot geomean data with excursion colors
   if(any(!is.na(data$geomean))){
     title_geo <- paste(station, unique(data$StationDes), "Geomean")
@@ -92,7 +94,9 @@ plot_bacteria <- function(data, seaKen, station){
       p_geomean <- p_geomean + geom_segment(aes(x=xmin, xend=xmax, y=bact_crit_geomean, yend=bact_crit_geomean,
                                                 color = "Geomean Criteria", linetype = "Geomean Criteria", shape = "Geomean Criteria"))
     }
+
+    bact_plots[["geomean"]] <- p_geomean
   }
 
-  return(p)
+  return(bact_plots)
 }

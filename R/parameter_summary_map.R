@@ -217,6 +217,21 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                  charnames[charnames$awqms == param, "file"], "_", station, "_minimum.jpeg' style='width:600px' target='_blank'>Minimum</a>")
         # }
       )
+    } else if(param %in% odeqstatusandtrends::AWQMS_Char_Names('bacteria')){
+      paste(
+        "Bacteria plots (link will fail if plot is unavailable)<br>",
+        # if(file.exists(paste0('Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+        #        charnames[charnames$awqms == param, "file"], "_", station, "_instantaneous.jpeg'))){
+        paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+               charnames[charnames$awqms == param, "file"], "_", station, "_ss.jpeg' style='width:600px' target='_blank'>Single Sample</a>")
+        # }
+        ,
+        # if(file.exists(paste0('Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+        #        charnames[charnames$awqms == param, "file"], "_", station, "_sdadmin.jpeg'))){
+        paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+               charnames[charnames$awqms == param, "file"], "_", station, "_geomean.jpeg' style='width:600px' target='_blank'>Geomean</a>")
+        # }
+      )
     } else {
       # if(file.exists(paste0('Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
       #        charnames[charnames$awqms == param, "file"], "_", station, ".jpeg'))){
