@@ -64,6 +64,6 @@ status_periods <- function(datetime=NULL, periods=4, year_range=NULL, bins_only=
     return(names(bins[i]))
   })
 
-  return(paste0("status_", data_bins))
+  return(data_bins)
 
  }
