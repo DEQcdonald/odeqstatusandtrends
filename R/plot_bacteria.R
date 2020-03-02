@@ -42,31 +42,14 @@ plot_bacteria <- function(data, seaKen, station){
 
   p <- ggplot(data)
 
-  # add geomean and ss criteria lines
-  if(any(!is.na(data$bact_crit_ss))){
-    p <- p + geom_segment(aes(x=xmin, xend=xmax, y=bact_crit_ss, yend=bact_crit_ss,
-                              color = "Single Sample Criteria", linetype = "Single Sample Criteria", shape = "Single Sample Criteria"))
-  }
-  if(any(!is.na(data$bact_crit_geomean))){
-    p <- p + geom_segment(aes(x=xmin, xend=xmax, y=bact_crit_geomean, yend=bact_crit_geomean,
-                              color = "Geomean Criteria", linetype = "Geomean Criteria", shape = "Geomean Criteria"))
-  }
-
-  title <- paste(station, unique(data$StationDes))
+  title <- paste(station, unique(data$StationDes), "Single Sample")
   subtitle <- paste0("Assessment Unit: ", unique(data$AU_ID), " ", unique(data$AU_Name))
-
-  # plot data with excursion colors
-  p <- p + geom_point(aes(x=sample_datetime, y=Result_cen, color = excursion, linetype = excursion, shape = excursion)) +
-    ggtitle(title, subtitle = subtitle) +
-    ylab(paste0(parameter, "/100ml")) +
-    xlab("Datetime")
 
   # plot the trend line if applicable
   if(nrow(seaken_bact) > 0){
     p <- p + geom_segment(aes(x=xmin, xend=xmax, y=sk_min, yend=sk_max, color = "Trend", linetype = "Trend", shape = "Trend"), lwd = 1) +
       annotate("text", x = xmin, y = ymax, label = paste0("Trend Results: ", trend, ",  Z-Stat: ", p_val, ",  Slope: ", slope), hjust = 0, vjust = 0)
   }
-
   # apply color, shape, line types, and range limits
   p <- p +
     scale_color_manual(name = "",
@@ -83,6 +66,33 @@ plot_bacteria <- function(data, seaKen, station){
     scale_x_datetime(date_labels = "%b-%Y")+
     theme_bw() +
     theme(legend.position="bottom", legend.direction = "horizontal", legend.box = "horizontal")
+
+  # plot single sample data with excursion colors
+  p_ss <- p + geom_point(aes(x=sample_datetime, y=Result_cen, color = excursion, linetype = excursion, shape = excursion)) +
+    ggtitle(title, subtitle = subtitle) +
+    ylab(paste0(parameter, "/100ml")) +
+    xlab("Datetime")
+
+  # add ss criteria lines
+  if(any(!is.na(data$bact_crit_ss))){
+    p_ss <- p_ss + geom_segment(aes(x=xmin, xend=xmax, y=bact_crit_ss, yend=bact_crit_ss,
+                              color = "Single Sample Criteria", linetype = "Single Sample Criteria", shape = "Single Sample Criteria"))
+  }
+
+  # plot geomean data with excursion colors
+  if(any(!is.na(data$geomean))){
+    title_geo <- paste(station, unique(data$StationDes), "Geomean")
+
+    p_geomean <- p + geom_point(aes(x=sample_datetime, y=geomean, color = excursion, linetype = excursion, shape = excursion)) +
+      ggtitle(title_geo, subtitle = subtitle) +
+      ylab(paste0(parameter, "/100ml")) +
+      xlab("Datetime")
+
+    if(any(!is.na(data$bact_crit_geomean))){
+      p_geomean <- p_geomean + geom_segment(aes(x=xmin, xend=xmax, y=bact_crit_geomean, yend=bact_crit_geomean,
+                                                color = "Geomean Criteria", linetype = "Geomean Criteria", shape = "Geomean Criteria"))
+    }
+  }
 
   return(p)
 }
