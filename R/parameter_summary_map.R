@@ -340,7 +340,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
     psum$z_offset <- if_else(!(psum[[status_current]] %in% c("Unassessed", "Insufficient Data") & psum$trend %in% c("Insufficient Data", "No Significant Trend")),
                              100, 0)
     psum_AU <- psum[!(psum[[status_current]] %in% c("Unassessed", "Insufficient Data") & psum$trend == "Insufficient Data"),]
-    au_data <- dplyr::filter(assessment_units[, c("AU_ID", "AU_Name")], AU_ID %in% unique(psum_AU$AU_ID))
+    au_data <- dplyr::filter(assessment_units[, c("AU_ID", "AU_Name", "HUC8_Name", "HUC8")], AU_ID %in% unique(psum_AU$AU_ID))
     au_data <- merge(au_data, dplyr::filter(au_colors, Char_Name == i)[,c("AU_ID", "color")], by = "AU_ID")
 
     # au_data <- au_colors %>% dplyr::filter(Char_Name == i)
@@ -357,14 +357,14 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                      weight = 3,
                      color = ~color,
                      popup = ~paste0("<b>", AU_Name, "<br>",
-                                     "<b>HUC8: </b>", au_param_summary[au_param_summary$AU_ID == AU_ID,]$HUC8_Name, " (",
-                                     au_param_summary[au_param_summary$AU_ID == AU_ID,]$HUC8, ")<br>",
+                                     "<b>HUC8: </b>", HUC8_Name, " (",
+                                     HUC8, ")<br>",
                                      # "<br><b>Parameter:</b> ", i, "<br>",
                                      sapply(AU_ID, au_table, param = i, USE.NAMES = FALSE),
                                      sapply(AU_ID, popupTable, station = NULL, param = i, USE.NAMES = FALSE)
                      ),
                      popupOptions = popupOptions(maxWidth = 600, maxHeight = 300),
-                     label = ~AU_ID,
+                     label = ~AU_Name,
                      smoothFactor = 2,
                      options = pathOptions(className = "assessmentUnits", interactive = TRUE),
                      highlightOptions = highlightOptions(color = "black", weight = 8, opacity = 1),
