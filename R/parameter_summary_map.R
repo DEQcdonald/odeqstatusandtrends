@@ -227,7 +227,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                charnames[charnames$awqms == param, "file"], "_", station, ".jpeg' download>Download plot</a>",
                "<br><br>",
                "<img src='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
-               charnames[charnames$awqms == param, "file"], "_", station, ".jpeg' style='height:300px'>")
+               charnames[charnames$awqms == param, "file"], "_", station, ".jpeg' style='width:550px'>")
       # } else {paste0("No ", param, " data plotted for this station")}
     }
   }
