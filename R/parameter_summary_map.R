@@ -82,7 +82,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
 
 # Create functions for mapping --------------------------------------------------------
 
-  au_colors <- param_summary %>% group_by(AU_ID, Char_Name) %>%
+  au_colors <- param_summary %>% group_by(AU_ID, Char_Name, HUC8_Name, HUC8) %>%
     dplyr::summarise(color = if_else(all(!!status_current %in% c("Unassessed", "Insufficient Data")),
                               "lightgray",
                               if_else(any(!!status_current == "Not Attaining"),
@@ -287,7 +287,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
     }
 
   map <- map %>%
-    addPolygons(data = area, color = "black", fill = FALSE, group = "Assessment Area", opacity = 0.8, label = "Assessment Area") %>%
+    addPolygons(data = area, color = "black", fillOpacity = 0.1, group = "Assessment Area", opacity = 0.8, label = ~paste("Subbasin:", HU_8_NAME)) %>%
     addMarkers(data = unique(param_summary[,c("AU_ID", "MLocID", "StationDes", "Lat_DD", "Long_DD")]),
                label = ~paste0(MLocID, ": ", StationDes),
                popup = ~paste0("<b>", MLocID, "</b>: ", StationDes, "<br>",
@@ -340,8 +340,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
     psum$z_offset <- if_else(!(psum[[status_current]] %in% c("Unassessed", "Insufficient Data") & psum$trend %in% c("Insufficient Data", "No Significant Trend")),
                              100, 0)
     psum_AU <- psum[!(psum[[status_current]] %in% c("Unassessed", "Insufficient Data") & psum$trend == "Insufficient Data"),]
-    au_data <- dplyr::filter(assessment_units[, c("AU_ID", "AU_Name", "HUC8_Name", "HUC8")], AU_ID %in% unique(psum_AU$AU_ID))
-    au_data <- merge(au_data, dplyr::filter(au_colors, Char_Name == i)[,c("AU_ID", "color")], by = "AU_ID")
+    au_data <- dplyr::filter(assessment_units[, c("AU_ID", "AU_Name")], AU_ID %in% unique(psum_AU$AU_ID))
+    au_data <- merge(au_data, dplyr::filter(au_colors, Char_Name == i)[,c("AU_ID", "color", "HUC8_Name", "HUC8")], by = "AU_ID")
 
     # au_data <- au_colors %>% dplyr::filter(Char_Name == i)
     # wql_streams_tmp <- dplyr::filter(wql_streams, Char_Name == i)
