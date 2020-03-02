@@ -27,7 +27,8 @@ plot_bacteria <- function(data, seaKen, station){
   xmax <- max(data$sample_datetime, na.rm = TRUE)
   ymin <- 0
   ymax <- ifelse(result_max > uylim, result_max, uylim)
-  data$excursion <- if_else(data$excursion_cen == 1, "Excursion", "Result") # change numeric value to descriptor
+  data$ss_excursion <- if_else(data$ss_excursion == 1, "Excursion", "Result") # change numeric value to descriptor
+  data$geomean_excursion <- if_else(data$geomean_excursion == 1, "Excursion", "Result") # change numeric value to descriptor
 
   # obtain plotting values for trend line if applicable
   if(nrow(seaken_bact) > 0){
@@ -68,7 +69,7 @@ plot_bacteria <- function(data, seaKen, station){
     theme(legend.position="bottom", legend.direction = "horizontal", legend.box = "horizontal")
 
   # plot single sample data with excursion colors
-  p_ss <- p + geom_point(aes(x=sample_datetime, y=Result_cen, color = excursion, linetype = excursion, shape = excursion)) +
+  p_ss <- p + geom_point(aes(x=sample_datetime, y=Result_cen, color = ss_excursion, linetype = ss_excursion, shape = ss_excursion)) +
     ggtitle(title, subtitle = subtitle) +
     ylab(paste0(parameter, "/100ml")) +
     xlab("Datetime")
@@ -85,7 +86,7 @@ plot_bacteria <- function(data, seaKen, station){
   if(any(!is.na(data$geomean))){
     title_geo <- paste(station, unique(data$StationDes), "Geomean")
 
-    p_geomean <- p + geom_point(aes(x=sample_datetime, y=geomean, color = excursion, linetype = excursion, shape = excursion)) +
+    p_geomean <- p + geom_point(aes(x=sample_datetime, y=geomean, color = geomean_excursion, linetype = geomean_excursion, shape = geomean_excursion)) +
       ggtitle(title_geo, subtitle = subtitle) +
       ylab(paste0(parameter, "/100ml")) +
       xlab("Datetime")
