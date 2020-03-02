@@ -44,7 +44,7 @@ status_periods <- function(datetime=NULL, periods=4, year_range=NULL, bins_only=
   breaks <- seq(year_range[2], year_range[1], by =(-1*periods))
   cols <<- sapply(breaks, function(x){
     start <- x - periods + 1
-    return(paste0(
+    return(paste0("status_",
       start, "_", x))
   })
 
@@ -64,6 +64,6 @@ status_periods <- function(datetime=NULL, periods=4, year_range=NULL, bins_only=
     return(names(bins[i]))
   })
 
-  return(data_bins)
+  return(paste0("status_", data_bins))
 
  }
