@@ -69,7 +69,7 @@ status_stns <- function(df) {
                        excursions = sum(perc_exceed),
                        bact_crit_percent = dplyr::first(bact_crit_percent), # 43 organisms per 100mL, requires 10% exceedance
                        bact_crit_ss = dplyr::first(bact_crit_ss), # 14 organisms per 100mL, median used to evaluate excursion
-                       n_years = length(unique(year)),
+                       # n_years = length(unique(year)),
                        excursion = dplyr::if_else((!is.na(median) & median > bact_crit_ss),
                                                   1,
                                                   dplyr::if_else(samples >= 10 & excursions/samples > 0.10,
