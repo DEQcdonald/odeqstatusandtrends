@@ -75,12 +75,12 @@ plot_DO <- function(data, seaKen, station){
     DO_7DADMean <- data %>% filter(Statistical_Base == "7DADMean")
     DO_Min <- data %>% filter(Statistical_Base == "Minimum")
 
-    DO_inst$excursion <- if_else(((DO_inst$in_spawn == 1) & (DO_inst$spwn_exc_inst == 1)) | DO_inst$yr_exc_inst == 1, "Excursion", "Result") # change numeric value to descriptor
+    DO_inst$excursion <- if_else(((DO_inst$Spawn_type == "Spawn") & (DO_inst$spwn_exc_inst == 1)) | DO_inst$yr_exc_inst == 1, "Excursion", "Result") # change numeric value to descriptor
     DO_inst$excursion <- if_else(is.na(DO_inst$excursion), "Result", DO_inst$excursion)
     DO_7DADMin$excursion <- if_else(DO_7DADMin$yr_exc_7DADMin == 1, "Excursion", "Result")
     DO_30DADMean$excursion <- if_else(DO_30DADMean$yr_exc_30DADMean == 1, "Excursion", "Result")
-    DO_7DADMean$excursion <- if_else(DO_7DADMean$in_spawn == 1 & DO_7DADMean$spwn_exc_7DADMean == 1, "Excursion", "Result")
-    DO_Min$excursion <- if_else(((DO_Min$in_spawn == 1) & (DO_Min$spwn_exc_min == 1)) | DO_Min$yr_exc_min == 1, "Excursion", "Result")
+    DO_7DADMean$excursion <- if_else(DO_7DADMean$Spawn_type == "Spawn" & DO_7DADMean$spwn_exc_7DADMean == 1, "Excursion", "Result")
+    DO_Min$excursion <- if_else(((DO_Min$Spawn_type == "Spawn") & (DO_Min$spwn_exc_min == 1)) | DO_Min$yr_exc_min == 1, "Excursion", "Result")
 
     # create dataframe of spawning start/end dates, and relevant values for Spawning Periods and criteria lines
     spawn_zones <- unique(data[,c("Start_spawn", "End_spawn", "Do_crit_30D", "Do_crit_7Mi", "DO_crit_min", "Do_crit_instant")])
@@ -174,11 +174,11 @@ plot_DO <- function(data, seaKen, station){
     DO_7DADMean <- data %>% filter(Statistical_Base == "7DADMean")
     DO_Min <- data %>% filter(Statistical_Base == "Minimum")
 
-    DO_inst$excursion <- if_else(((DO_inst$in_spawn == 1) & (DO_inst$spwn_exc_inst == 1)) | DO_inst$yr_exc_inst == 1, "Excursion", "Result") # change numeric value to descriptor
+    DO_inst$excursion <- if_else(((DO_inst$Spawn_type == "Spawn") & (DO_inst$spwn_exc_inst == 1)) | DO_inst$yr_exc_inst == 1, "Excursion", "Result") # change numeric value to descriptor
     DO_7DADMin$excursion <- if_else(DO_7DADMin$yr_exc_7DADMin == 1, "Excursion", "Result")
     DO_30DADMean$excursion <- if_else(DO_30DADMean$yr_exc_30DADMean == 1, "Excursion", "Result")
-    DO_7DADMean$excursion <- if_else(DO_7DADMean$in_spawn == 1 & DO_7DADMean$spwn_exc_7DADMean == 1, "Excursion", "Result")
-    DO_Min$excursion <- if_else(((DO_Min$in_spawn == 1) & (DO_Min$spwn_exc_min == 1)) | DO_Min$yr_exc_min == 1, "Excursion", "Result")
+    DO_7DADMean$excursion <- if_else(DO_7DADMean$Spawn_type == "Spawn" & DO_7DADMean$spwn_exc_7DADMean == 1, "Excursion", "Result")
+    DO_Min$excursion <- if_else(((DO_Min$Spawn_type == "Spawn") & (DO_Min$spwn_exc_min == 1)) | DO_Min$yr_exc_min == 1, "Excursion", "Result")
 
     p <- p + scale_x_datetime(date_labels = "%b-%Y", limits = c(xmin - lubridate::seconds(1), xmax + lubridate::seconds(1))
                               # , expand = expand_scale(mult = 0.01)
