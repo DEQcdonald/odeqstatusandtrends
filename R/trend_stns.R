@@ -31,25 +31,29 @@ trend_stns <- function(df, trend_years=NULL) {
   trend_years <- c(format(min(df$sample_datetime, na.rm = TRUE), "%Y"):format(Sys.Date(), "%Y"))
   }
 
-  if(length(trend_years) < 8){stop("Number of years should be more than or equal to 8")}
-
-  df$year <- lubridate::year(df$sample_datetime)
-
-  if(any(unique(df$year) %in% trend_years)){
-    trend_check <- df %>%
-      dplyr::filter(year %in% trend_years) %>%
-      dplyr::group_by(MLocID, Char_Name, Statistical_Base) %>%
-      dplyr::summarise(n_years = length(unique(year)),
-                       avg_obs = dplyr::n()/n_years,
-                       min_year = min(year),
-                       max_year = max(year)) %>%
-      dplyr::filter(n_years>=8)
-
-    print(paste("Data may be sufficient for", NROW(trend_check), "different trends to be determined."))
-
+  if(length(trend_years) < 8){
+    print("Number of years should be more than or equal to 8")
+    trend_check <- NULL
   } else {
-    trend_check <- "No stations meet trend year criteria"
-    print(trend_check)
+
+    df$year <- lubridate::year(df$sample_datetime)
+
+    if(any(unique(df$year) %in% trend_years)){
+      trend_check <- df %>%
+        dplyr::filter(year %in% trend_years) %>%
+        dplyr::group_by(MLocID, Char_Name, Statistical_Base) %>%
+        dplyr::summarise(n_years = length(unique(year)),
+                         avg_obs = dplyr::n()/n_years,
+                         min_year = min(year),
+                         max_year = max(year)) %>%
+        dplyr::filter(n_years>=8)
+
+      print(paste("Data may be sufficient for", NROW(trend_check), "different trends to be determined."))
+
+    } else {
+      trend_check <- "No stations meet trend year criteria"
+      print(trend_check)
+    }
   }
   return(trend_check)
 }
