@@ -21,6 +21,8 @@ get_stations_AWQMS <- function(polygon, exclude.tribal.lands = TRUE, stations.ch
   e.time <- Sys.time()
   print(paste("This query took approximately", difftime(e.time, s.time, units = "secs"), "seconds"))
 
+  RODBC::odbcClose(stations.channel)
+
   # Clip stations to input polygon
   print("Clipping stations to your shapefile...")
   stations <- dplyr::filter(stations,
