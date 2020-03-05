@@ -30,7 +30,7 @@ AWQMS_Char_Names <- function(parameters){
                                          "dissolved oxygen"),
                              AWQMS.Name = c("Total suspended solids",
                                             "Temperature, water",
-                                            "Phosphate-phosphorus", "Phosphate-phosphorus", "Phosphate-phosphorus",
+                                            "Total Phosphorus, mixed forms", "Total Phosphorus, mixed forms", "Total Phosphorus, mixed forms",
                                             "pH",
                                             "Fecal Coliform",
                                             "Escherichia coli", "Escherichia coli", "Escherichia coli",
@@ -68,7 +68,7 @@ AWQMS_to_standard <- function(AWQMS_params){
   standard_parms <- gsub("escherichia coli", "Escherichia coli", standard_parms)
   standard_parms <- gsub("\\bph\\b", "pH", standard_parms)
   standard_parms <- gsub("dissolved oxygen \\(do\\)", "dissolved oxygen", standard_parms)
-  standard_parms <- gsub("phosphate-phosphorus", "total phosphorus", standard_parms)
+  standard_parms <- gsub("Total Phosphorus, mixed forms", "total phosphorus", standard_parms)
   standard_parms <- gsub("temperature, water", "temperature", standard_parms)
 
   return(standard_parms)

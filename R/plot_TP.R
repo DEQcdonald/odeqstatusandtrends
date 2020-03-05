@@ -11,7 +11,7 @@
 
 plot_TP <- function(data, seaKen, station){
   # subset seaken table to parameter and significant trends
-  seaken_TP <- seaKen %>% filter(Char_Name == "Phosphate-phosphorus",
+  seaken_TP <- seaKen %>% filter(Char_Name == odeqstatusandtrends::AWQMS_Char_Names('TP'),
                                  significance != "No Significant Trend",
                                  MLocID == station)
 
