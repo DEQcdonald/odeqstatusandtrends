@@ -46,11 +46,6 @@ plot_bacteria <- function(data, seaKen, station){
   title <- paste(station, unique(data$StationDes), "Single Sample")
   subtitle <- paste0("Assessment Unit: ", unique(data$AU_ID), " ", unique(data$AU_Name))
 
-  # plot the trend line if applicable
-  if(nrow(seaken_bact) > 0){
-    p <- p + geom_segment(aes(x=xmin, xend=xmax, y=sk_min, yend=sk_max, color = "Trend", linetype = "Trend", shape = "Trend"), lwd = 1) +
-      annotate("text", x = xmin, y = ymax, label = paste0("Trend Results: ", trend, ",  Z-Stat: ", p_val, ",  Slope: ", slope), hjust = 0, vjust = 0)
-  }
   # apply color, shape, line types, and range limits
   p <- p +
     scale_color_manual(name = "",
@@ -68,8 +63,15 @@ plot_bacteria <- function(data, seaKen, station){
     theme_bw() +
     theme(legend.position="bottom", legend.direction = "horizontal", legend.box = "horizontal")
 
+
+  # plot the trend line if applicable
+  if(nrow(seaken_bact) > 0){
+    p_ss <- p + geom_segment(aes(x=xmin, xend=xmax, y=sk_min, yend=sk_max, color = "Trend", linetype = "Trend", shape = "Trend"), lwd = 1) +
+      annotate("text", x = xmin, y = ymax, label = paste0("Trend Results: ", trend, ",  Z-Stat: ", p_val, ",  Slope: ", slope), hjust = 0, vjust = 0)
+  }
+
   # plot single sample data with excursion colors
-  p_ss <- p + geom_point(aes(x=sample_datetime, y=Result_cen, color = ss_excursion, linetype = ss_excursion, shape = ss_excursion)) +
+  p_ss <- p_ss + geom_point(aes(x=sample_datetime, y=Result_cen, color = ss_excursion, linetype = ss_excursion, shape = ss_excursion)) +
     ggtitle(title, subtitle = subtitle) +
     ylab(paste0(parameter, "/100ml")) +
     xlab("Datetime")
@@ -77,7 +79,7 @@ plot_bacteria <- function(data, seaKen, station){
   # add ss criteria lines
   if(any(!is.na(data$bact_crit_ss))){
     p_ss <- p_ss + geom_segment(aes(x=xmin, xend=xmax, y=bact_crit_ss, yend=bact_crit_ss,
-                              color = "Single Sample Criteria", linetype = "Single Sample Criteria", shape = "Single Sample Criteria"))
+                                    color = "Single Sample Criteria", linetype = "Single Sample Criteria", shape = "Single Sample Criteria"))
   }
 
   bact_plots[["ss"]] <- p_ss

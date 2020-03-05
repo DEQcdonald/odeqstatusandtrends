@@ -58,12 +58,6 @@ plot_DO <- function(data, seaKen, station){
     labs(x = "Datetime") +
     theme(legend.position="bottom", legend.direction = "horizontal", legend.box = "horizontal")
 
-  # plot the trend line if applicable
-  if(station %in% seaKen$MLocID){
-    p <- p + geom_segment(aes(x=xmin, xend=xmax, y=sk_min, yend=sk_max, color = "Trend", linetype = "Trend", shape = "Trend"), lwd = 1) +
-      annotate("text", x = xmin, y = ymax, label = paste0("Trend Results: ", trend, ",  Z-Stat: ", p_val, ",  Slope: ", slope), hjust = 0, vjust = 0)
-  }
-
   if(any(data$Spawn_type == "Spawn", na.rm = TRUE)){
     # Convert spawning dates to datetimes
     data$Start_spawn <- as.POSIXct(data$Start_spawn)
@@ -233,6 +227,11 @@ plot_DO <- function(data, seaKen, station){
 
   # plot data with excursion colors
   if(!is.null(p_inst)){
+    # plot the trend line if applicable
+    if(station %in% seaKen$MLocID){
+      p_inst <- p_inst + geom_segment(aes(x=xmin, xend=xmax, y=sk_min, yend=sk_max, color = "Trend", linetype = "Trend", shape = "Trend"), lwd = 1) +
+        annotate("text", x = xmin, y = ymax, label = paste0("Trend Results: ", trend, ",  Z-Stat: ", p_val, ",  Slope: ", slope), hjust = 0, vjust = 0)
+    }
     p_inst <- p_inst + geom_point(data = DO_inst, aes(x=sample_datetime, y=Result_cen, color = excursion, shape = excursion
                                                       , linetype = excursion
     )) +
