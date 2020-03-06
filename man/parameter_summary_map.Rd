@@ -4,12 +4,14 @@
 \alias{parameter_summary_map}
 \title{Create parameter summary map for status and trends report}
 \usage{
-parameter_summary_map(param_summary, au_param_summary, area)
+parameter_summary_map(param_summary, au_param_summary, area, proj_dir)
 }
 \arguments{
 \item{param_summary}{Parameter summary table from parameter_summary()}
 
 \item{area}{Shapefile for assessment areas}
+
+\item{proj_dir}{Path to where 'Plot' folder is located.}
 
 \item{assess_summary}{Assessment summary table from parameter_summary()}
 }

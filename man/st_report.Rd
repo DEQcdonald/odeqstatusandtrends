@@ -7,7 +7,7 @@
 st_report(format = "word_document", table_format = "pandoc",
   file_name = "Oregon_SandT_report",
   rmd_dir = "N:/Status_and_Trend_Reports/Report_Files/st_report_files",
-  out_dir = "N:/Status_and_Trend_Reports/2019/Statewide Report")
+  out_dir)
 }
 \arguments{
 \item{format}{The output format for the rmarkdown document}
