@@ -68,7 +68,7 @@ AWQMS_to_standard <- function(AWQMS_params){
   standard_parms <- gsub("escherichia coli", "Escherichia coli", standard_parms)
   standard_parms <- gsub("\\bph\\b", "pH", standard_parms)
   standard_parms <- gsub("dissolved oxygen \\(do\\)", "dissolved oxygen", standard_parms)
-  standard_parms <- gsub("Total Phosphorus, mixed forms", "total phosphorus", standard_parms)
+  standard_parms <- gsub("total phosphorus, mixed forms", "total phosphorus", standard_parms)
   standard_parms <- gsub("temperature, water", "temperature", standard_parms)
 
   return(standard_parms)

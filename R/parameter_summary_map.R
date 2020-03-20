@@ -4,11 +4,14 @@
 #' @param param_summary Parameter summary table from parameter_summary()
 #' @param assess_summary Assessment summary table from parameter_summary()
 #' @param area Shapefile for assessment areas
+#' @param proj_dir Path to where 'Plot' folder is located.
 #' @return map of status and trends results
 #' @export
 #' @examples parameter_summary_map(param_summary = parameter_summary_df)
 
-parameter_summary_map <- function(param_summary, au_param_summary, area){
+parameter_summary_map <- function(param_summary, au_param_summary, area, proj_dir){
+
+  setwd(proj_dir)
 
   status_current <- as.symbol(colnames(param_summary)[grep("trend", colnames(param_summary)) - 1])
   au_param_summary <- au_param_summary %>% dplyr::filter(AU_ID != "")
@@ -186,63 +189,63 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
   plot_html <- function(station, sub_name, param){
     if(param == "Dissolved oxygen (DO)"){
       paste(
-        "DO plots (link will fail if plot is unavailable)<br>",
-        # if(file.exists(paste0('Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
-        #        charnames[charnames$awqms == param, "file"], "_", station, "_instantaneous.jpeg'))){
+        "DO plots<br>",
+        if(file.exists(paste0("Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                              charnames[charnames$awqms == param, "file"], "_", station, "_instantaneous.jpeg"))){
           paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
                  charnames[charnames$awqms == param, "file"], "_", station, "_instantaneous.jpeg' style='width:600px' target='_blank'>Instantaneous</a>")
-        # }
-    ,
-        # if(file.exists(paste0('Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
-        #        charnames[charnames$awqms == param, "file"], "_", station, "_sdadmin.jpeg'))){
-        paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
-               charnames[charnames$awqms == param, "file"], "_", station, "_sdadmin.jpeg' style='width:600px' target='_blank'>7DADMin</a>")
-        # }
-    ,
-        # if(file.exists(paste0('Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
-        #        charnames[charnames$awqms == param, "file"], "_", station, "_30dadmean.jpeg'))){
+        }
+        ,
+        if(file.exists(paste0("Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                              charnames[charnames$awqms == param, "file"], "_", station, "_sdadmin.jpeg"))){
+          paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                 charnames[charnames$awqms == param, "file"], "_", station, "_sdadmin.jpeg' style='width:600px' target='_blank'>7DADMin</a>")
+        }
+        ,
+        if(file.exists(paste0("Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                              charnames[charnames$awqms == param, "file"], "_", station, "_30dadmean.jpeg"))){
           paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
                  charnames[charnames$awqms == param, "file"], "_", station, "_30dadmean.jpeg' style='width:600px' target='_blank'>30DADMean</a>")
-        # }
-    ,
-        # if(file.exists(paste0('Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
-        #        charnames[charnames$awqms == param, "file"], "_", station, "_sdadmean.jpeg'))){
+        }
+        ,
+        if(file.exists(paste0("Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                              charnames[charnames$awqms == param, "file"], "_", station, "_sdadmean.jpeg"))){
           paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
                  charnames[charnames$awqms == param, "file"], "_", station, "_sdadmean.jpeg' style='width:600px' target='_blank'>7DADMean</a>")
-        # }
-    ,
-        # if(file.exists(paste0('Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
-        #        charnames[charnames$awqms == param, "file"], "_", station, "_minimum.jpeg'))){
+        }
+        ,
+        if(file.exists(paste0("Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                              charnames[charnames$awqms == param, "file"], "_", station, "_minimum.jpeg"))){
           paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
                  charnames[charnames$awqms == param, "file"], "_", station, "_minimum.jpeg' style='width:600px' target='_blank'>Minimum</a>")
-        # }
+        }
       )
     } else if(param %in% odeqstatusandtrends::AWQMS_Char_Names('bacteria')){
       paste(
-        "Bacteria plots (link will fail if plot is unavailable)<br>",
-        # if(file.exists(paste0('Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
-        #        charnames[charnames$awqms == param, "file"], "_", station, "_instantaneous.jpeg'))){
-        paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
-               charnames[charnames$awqms == param, "file"], "_", station, "_ss.jpeg' style='width:600px' target='_blank'>Single Sample</a>")
-        # }
+        "Bacteria plots<br>",
+        if(file.exists(paste0("Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                              charnames[charnames$awqms == param, "file"], "_", station, "_ss.jpeg"))){
+          paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                 charnames[charnames$awqms == param, "file"], "_", station, "_ss.jpeg' style='width:600px' target='_blank'>Single Sample</a>")
+        }
         ,
-        # if(file.exists(paste0('Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
-        #        charnames[charnames$awqms == param, "file"], "_", station, "_sdadmin.jpeg'))){
-        paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
-               charnames[charnames$awqms == param, "file"], "_", station, "_geomean.jpeg' style='width:600px' target='_blank'>Geomean</a>")
-        # }
+        if(file.exists(paste0("Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                              charnames[charnames$awqms == param, "file"], "_", station, "_geomean.jpeg"))){
+          paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                 charnames[charnames$awqms == param, "file"], "_", station, "_geomean.jpeg' style='width:600px' target='_blank'>Geomean</a>")
+        }
       )
     } else {
       # if(file.exists(paste0('Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
       #        charnames[charnames$awqms == param, "file"], "_", station, ".jpeg'))){
-        paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
-               charnames[charnames$awqms == param, "file"], "_", station, ".jpeg' style='width:600px' target='_blank'>Enlarge plot in new window</a>",
-               "    ",
-               "<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
-               charnames[charnames$awqms == param, "file"], "_", station, ".jpeg' download>Download plot</a>",
-               "<br><br>",
-               "<img src='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
-               charnames[charnames$awqms == param, "file"], "_", station, ".jpeg' style='width:550px'>")
+      paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+             charnames[charnames$awqms == param, "file"], "_", station, ".jpeg' style='width:600px' target='_blank'>Enlarge plot in new window</a>",
+             "    ",
+             "<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+             charnames[charnames$awqms == param, "file"], "_", station, ".jpeg' download>Download plot</a>",
+             "<br><br>",
+             "<img src='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+             charnames[charnames$awqms == param, "file"], "_", station, ".jpeg' style='width:550px'>")
       # } else {paste0("No ", param, " data plotted for this station")}
     }
   }
@@ -334,8 +337,11 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
       # )
     # } else {print(paste("No water quality limited streams for", i))}
 
+  layer_groups <- NULL
   for(i in unique(param_summary$Char_Name)){
     print(paste("Adding layer for", i))
+    standard_param <- odeqstatusandtrends::AWQMS_to_standard(i)
+    layer_groups <- c(layer_groups, standard_param)
     psum <- param_summary %>% dplyr::filter(Char_Name == i)
     psum$z_offset <- if_else(!(psum[[status_current]] %in% c("Unassessed", "Insufficient Data") & psum$trend %in% c("Insufficient Data", "No Significant Trend")),
                              100, 0)
@@ -368,7 +374,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                      smoothFactor = 2,
                      options = pathOptions(className = "assessmentUnits", interactive = TRUE),
                      highlightOptions = highlightOptions(color = "black", weight = 8, opacity = 1),
-                     group = i
+                     group = standard_param
         )
     }
     #   for(j in c("lightgray", "green", "orange")){
@@ -440,7 +446,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                         labelOptions = list(className = "stationLabels", noHide = T, permanent = T, interactive = T,
                                             offset = c(-10,-25), opacity = 0.9, textsize = "14px", sticky = TRUE),
                         options = ~markerOptions(zIndexOffset = z_offset, riseOnHover = TRUE),
-                        group = i
+                        group = standard_param
       )
 
   }
@@ -476,7 +482,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area){
                }"
       )
     )) %>%
-    addLayersControl(baseGroups = c("Escherichia coli", sort(unique(param_summary[param_summary$Char_Name != "Escherichia coli",]$Char_Name))),
+    addLayersControl(baseGroups = sort(layer_groups),
                      overlayGroups = c("Assessment Area", "WQ Listed Streams", "Ag WQ Management Areas",
                                        "World Imagery", "Hydrography", "Land Cover (NLCD 2016)"),
                      options = layersControlOptions(collapsed = FALSE)) %>%
