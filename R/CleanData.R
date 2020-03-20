@@ -9,9 +9,27 @@
 
 CleanData <- function(data)
 {
+  if(is.null(data)) {
+    warning("There are no results in data.")
+    return(data)
+  }
+
+  need_cols <- c('MLocID', 'StationDes', 'OrganizationID', 'Project1', 'Org_Name', 'Lat_DD', 'Long_DD', 'ELEV_Ft', 'Datum', 'HUC8', 'AU_ID',
+                 'Reachcode', 'Char_Name','SampleStartDate', 'SampleStartTime', 'Result','Result_Numeric', 'Result_Operator', 'Result_Unit',
+                 'Statistical_Base', 'act_depth_height', 'QualifierAbbr', 'Method_Code', 'Activity_Type', 'act_id', 'MRLValue', 'Result_status',
+                 'FishCode','SpawnCode', 'WaterTypeCode', 'WaterBodyCode', 'BacteriaCode', 'DO_code', 'ben_use_code', 'pH_code', 'DO_SpawnCode')
+
+  if(any(!need_cols %in% names(data))) {
+    missing_cols <- paste(need_cols[!(need_cols %in% names(data))], collapse = "', '")
+    stop(paste0("The following columns are needed: '", missing_cols,"."))
+  }
+
   # Add datetime columns and remove unused variables
   data$sample_datetime <- paste(data$SampleStartDate, data$SampleStartTime)
   data$sample_datetime <- as.POSIXct(data$sample_datetime, format = '%Y-%m-%d %H:%M:%S')
+
+  # remove 'SampleStartDate' and 'SampleStartTime' and add 'sample_datetime'
+  need_cols <- c(need_cols[c(1:13,16:36)], c('sample_datetime'))
 
   print("Checking for any missing start times...")
   print(any(is.na(data$SampleStartTime)))
@@ -25,10 +43,7 @@ CleanData <- function(data)
                  !Result_status %in% c("Rejected", "Provisional"))
 
   # Removing unnecessary columns
-  data <- data[, c('MLocID', 'StationDes', 'OrganizationID', 'Project1', 'Org_Name', 'Lat_DD', 'Long_DD', 'ELEV_Ft', 'Datum', 'HUC8', 'AU_ID', 'Reachcode', 'Char_Name', 'sample_datetime', 'Result',
-                   'Result_Numeric', 'Result_Operator', 'Result_Unit', 'Statistical_Base', 'act_depth_height', 'QualifierAbbr', 'Method_Code', 'Activity_Type', 'act_id', 'MRLValue',
-                   'Result_status', "FishCode", "SpawnCode", "WaterTypeCode", "WaterBodyCode", "BacteriaCode", "DO_code", "ben_use_code",
-                   "pH_code", "DO_SpawnCode")]
+  data <-  data[, need_cols]
 
   # Remove all Dissolved Oxygen summary statistics from analysis except for 'Minimum'
   data <- data %>% dplyr::filter(!(Char_Name == "Dissolved oxygen" & Statistical_Base %in% c('7DADM', 'Maximum')))
