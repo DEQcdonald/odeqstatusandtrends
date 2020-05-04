@@ -48,7 +48,7 @@ get_stations_AWQMS <- function(polygon, exclude.tribal.lands = TRUE, stations.ch
 
   if(any(is.na(stations$AU_ID))){
     print("The following stations have missing AU IDs and were removed...")
-    missing_au <- stations[is.na(stations$AU_ID),]
+    missing_au <<- stations[is.na(stations$AU_ID),]
     stations <- stations %>% dplyr::filter(!MLocID %in% missing_au$MLocID)
     print(missing_au[,c("OrgID", "MLocID", "MonLocType", "AU_ID", "Lat_DD", "Long_DD")])
     attr(stations, 'missing_AUs') <- missing_au[,c("OrgID", "MLocID", "MonLocType", "AU_ID", "Lat_DD", "Long_DD")]
