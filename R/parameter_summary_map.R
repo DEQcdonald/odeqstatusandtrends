@@ -10,42 +10,42 @@
 #' @examples parameter_summary_map(param_summary = parameter_summary_df)
 
 parameter_summary_map <- function(param_summary, au_param_summary, area, proj_dir){
-
+  
   setwd(proj_dir)
-
+  
   status_current <- as.symbol(colnames(param_summary)[grep("trend", colnames(param_summary)) - 1])
   au_param_summary <- au_param_summary %>% dplyr::filter(AU_ID != "")
-
+  
   print("Clipping summary table to shapefile...")
-  param_shp <- st_as_sf(param_summary, dim = "XY", coords = c("Long_DD", "Lat_DD"))
-  area_sf <- st_as_sf(area)
-  param_shp <- st_set_crs(param_shp, 4326)
+  param_shp <- sf::st_as_sf(param_summary, dim = "XY", coords = c("Long_DD", "Lat_DD"))
+  area_sf <- sf::st_as_sf(area)
+  param_shp <- sf::st_set_crs(param_shp, 4326)
   area_sf <- st_transform(area_sf, 4326)
-  param_shp <- param_shp[lengths(st_within(param_shp, area_sf)) == 1,]
+  param_shp <- param_shp[lengths(sf::st_within(param_shp, area_sf)) == 1,]
   param_summary <- param_summary %>% dplyr::filter(MLocID %in% param_shp$MLocID)
   rm(list = c("param_shp", "area_sf"))
-
+  
   lgnd <- base64enc::base64encode("//deqhq1/WQNPS/Status_and_Trend_Reports/Figures/map_legend.png")
   logo <- base64enc::base64encode("//deqhq1/WQNPS/Status_and_Trend_Reports/Figures/DEQ-logo-color-non-transp71x107.png")
-
-# Set up shapefiles for map -----------------------------------------------
+  
+  # Set up shapefiles for map -----------------------------------------------
   print("Processing shapefiles...")
   query <- paste0("SELECT * FROM AssessmentUnits_OR_Dissolve WHERE AU_ID IN ('",
                   paste(unique(param_summary$AU_ID), collapse = "', '"), "')")
-
+  
   assessment_units <- sf::st_read(
     dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/Assessment_2018_2020.gdb",
     layer = "AssessmentUnits_OR_Dissolve",
     query = query, stringsAsFactors = FALSE
   )
-
+  
   agwqma <- sf::st_read(
     dsn = "//deqhq1/WQNPS/Status_and_Trend_Reports/GIS",
     layer = "ODA_AgWQMA",
     stringsAsFactors = FALSE
   )
   agwqma <- agwqma[,c("PlanName","AgWQ_Repor")]
-
+  
   wql_streams <- sf::st_read(
     dsn = "//deqhq1/WQNPS/Agriculture/Status_and_Trend_Analysis/R_support_files",
     layer = "WQL_Streams_2012",
@@ -54,11 +54,11 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     stringsAsFactors = FALSE
   )
   wql_streams$Char_Name <- unlist(sapply(wql_streams$POLLUTANT, AWQMS_Char_Names, USE.NAMES = FALSE))
-
+  
   assessment_units <- sf::st_zm(assessment_units, what = "ZM")
   wql_streams <- sf::st_zm(wql_streams, what = "ZM")
   agwqma <- sf::st_zm(agwqma, what = "ZM")
-
+  
   st_crs(assessment_units)
   assessment_units <- st_transform(assessment_units, 4326)
   assessment_units <- assessment_units[,c("AU_ID", "AU_Name")] %>% dplyr::filter(AU_ID != "99")
@@ -69,37 +69,37 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   wql_streams$TMDL_INFO <- vapply(strsplit(wql_streams$TMDL_INFO, "<a"), `[`, 1, FUN.VALUE=character(1))
   st_crs(agwqma)
   agwqma <- st_transform(agwqma, 4326)
-
+  
   if(!any(class(area) == "sf")){
     area <- sf::st_as_sf(area)
   }
-
+  
   st_crs(area)
   area <- st_transform(area, 4326)
-  p_stns <- st_as_sf(param_summary, coords = c("Long_DD", "Lat_DD"), crs = 4326)
+  p_stns <- sf::st_as_sf(param_summary, coords = c("Long_DD", "Lat_DD"), crs = 4326)
   agwqma <- agwqma %>% dplyr::filter(lengths(st_intersects(., p_stns)) > 0)
-
-  assessment_units <- assessment_units %>% group_by(AU_ID, AU_Name) %>% dplyr::summarise()
+  
+  assessment_units <- assessment_units %>% dplyr::group_by(AU_ID, AU_Name) %>% dplyr::summarise()
   wql_streams_data <- sf::st_drop_geometry(wql_streams)
-  wql_streams_shp <- wql_streams %>% group_by(STREAM_NAM, SEGMENT_ID) %>% dplyr::summarise()
-
-# Create functions for mapping --------------------------------------------------------
-
-  au_colors <- param_summary %>% group_by(AU_ID, Char_Name, HUC8_Name, HUC8) %>%
-    dplyr::summarise(color = if_else(all(!!status_current %in% c("Unassessed", "Insufficient Data")),
-                              "lightgray",
-                              if_else(any(!!status_current == "Not Attaining"),
-                                      "orange",
-                                      "green")
-                              )
-              ) %>% ungroup()
-
-  param_summary <- param_summary %>% mutate(
-    color = if_else(!!status_current %in% c("Unassessed", "Insufficient Data"),
-                    "lightgray",
-                    if_else(!!status_current == "Attaining",
-                            "green",
-                            "orange"))
+  wql_streams_shp <- wql_streams %>% dplyr::group_by(STREAM_NAM, SEGMENT_ID) %>% dplyr::summarise()
+  
+  # Create functions for mapping --------------------------------------------------------
+  
+  au_colors <- param_summary %>% dplyr::group_by(AU_ID, Char_Name, HUC8_Name, HUC8) %>%
+    dplyr::summarise(color = dplyr::if_else(all(!!status_current %in% c("Unassessed", "Insufficient Data")),
+                                            "lightgray",
+                                            dplyr::if_else(any(!!status_current == "Not Attaining"),
+                                                           "orange",
+                                                           "green")
+    )
+    ) %>% dplyr::ungroup()
+  
+  param_summary <- param_summary %>% dplyr::mutate(
+    color = dplyr::if_else(!!status_current %in% c("Unassessed", "Insufficient Data"),
+                           "lightgray",
+                           dplyr::if_else(!!status_current == "Attaining",
+                                          "green",
+                                          "orange"))
   )
   param_summary$icon <- sapply(param_summary$trend,
                                function(x){
@@ -113,79 +113,79 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                                    "glyphicon-arrow-right"
                                  } else {"glyphicon-none"}
                                }
-                               )
-
+  )
+  
   # function to pull the selected parameter's status and trend and create a popup table for the station.
   # This function is called on the click of a station marker in the parameter summary map.
   popupTable <- function(station = NULL, AU = NULL, param){
-
+    
     data <- param_summary %>% dplyr::rename(Parameter = Char_Name, Station_ID = MLocID, Station_Description = StationDes)
-
+    
     if(!is.null(station)){
       data <- dplyr::filter(data[, c(2, 1, grep("status|trend", colnames(param_summary)))],
-                     Station_ID == station, Parameter == param)
+                            Station_ID == station, Parameter == param)
       # %>%
-        # dplyr::select(-Parameter, -Station_ID)
-
+      # dplyr::select(-Parameter, -Station_ID)
+      
       colnames(data) <- gsub("(?<=[0-9])[^0-9]", "-", colnames(data), perl = TRUE)
       colnames(data) <- gsub("_", " ", colnames(data), perl = TRUE)
       colnames(data) <- sapply(colnames(data), simpleCap, USE.NAMES = FALSE)
-
+      
       table <- knitr::kable(data,
                             format = "html", row.names = FALSE) %>%
         kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
-                             full_width = TRUE, font_size = 10)
-
+                                  full_width = TRUE, font_size = 10)
+      
     }
     if(!is.null(AU)){
       data <- dplyr::filter(data[, c(2, 1, 3, grep("status|trend", colnames(param_summary)))],
                             AU_ID == AU, Parameter == param) %>%
         dplyr::select(-AU_ID)
-
+      
       colnames(data) <- gsub("(?<=[0-9])[^0-9]", "-", colnames(data), perl = TRUE)
       colnames(data) <- gsub("_", " ", colnames(data), perl = TRUE)
       colnames(data) <- sapply(colnames(data), simpleCap, USE.NAMES = FALSE)
-
+      
       table <- knitr::kable(data,
-                     format = "html", row.names = FALSE) %>%
+                            format = "html", row.names = FALSE) %>%
         kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
-                      full_width = TRUE, font_size = 10)
-
+                                  full_width = TRUE, font_size = 10)
+      
     }
     return(table)
   }
-
+  
   au_table <- function(AU = NULL, param){
-
+    
     data <- au_param_summary %>% dplyr::rename(Parameter = Char_Name)
     data <- dplyr::filter(data, AU_ID == AU, Parameter == param)
-    data <- data %>% select(-AU_Name, -HUC8_Name, -HUC8, -Stations, -Organizations)
+    data <- data %>% dplyr::select(-AU_Name, -HUC8_Name, -HUC8, -Stations, -Organizations)
     data <- data[, c("AU_ID", colnames(data)[colnames(data) != "AU_ID"])]
-
+    
     colnames(data) <- gsub("(?<=[0-9])[^0-9]", "-", colnames(data), perl = TRUE)
     colnames(data) <- gsub("_", " ", colnames(data), perl = TRUE)
     colnames(data) <- sapply(colnames(data), simpleCap, USE.NAMES = FALSE)
-
+    
     table <- knitr::kable(data, format = "html",
-                   table.attr = "id=\"mytable\"", row.names = FALSE) %>%
+                          table.attr = "id=\"mytable\"", row.names = FALSE) %>%
       kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
-                    full_width = TRUE, font_size = 10)
-
+                                full_width = TRUE, font_size = 10)
+    
     return(table)
   }
-
+  
   WQLpopupTable <- function(seg_ID = NULL, param = NULL){
     if(!is.null(seg_ID)){
       table <- knitr::kable(
         dplyr::filter(wql_streams_data, SEGMENT_ID == seg_ID) %>%
           dplyr::select(Pollutant = Char_Name, Listing = LISTING_ST, Season = SEASON, TMDL = TMDL_INFO) %>% unique(),
-                     format = "html", row.names = FALSE) %>%
+        format = "html", row.names = FALSE) %>%
         kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
-                      full_width = TRUE, font_size = 10)
+                                  full_width = TRUE, font_size = 10)
     }
     return(table)
   }
-
+  
   plot_html <- function(station, sub_name, param){
     if(param == "Dissolved oxygen (DO)"){
       paste(
@@ -249,132 +249,132 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
       # } else {paste0("No ", param, " data plotted for this station")}
     }
   }
-
+  
   charnames <- data.frame(awqms = c("Temperature, water", "Dissolved oxygen (DO)", "pH", "Total suspended solids", odeqstatusandtrends::AWQMS_Char_Names('TP'),
-                                       "Fecal Coliform", "Escherichia coli", "Enterococcus"),
-                             folder = c("Temperature", "DO", "pH", "TSS", "TP", "Fecal_Coliform", "Ecoli", "Enterococcus"),
-                             file = c("temp", "DO", "pH", "TSS", "TP", "FeColi", "Ecoli", "Enterococcus"),
+                                    "Fecal Coliform", "Escherichia coli", "Enterococcus"),
+                          folder = c("Temperature", "DO", "pH", "TSS", "TP", "Fecal_Coliform", "Ecoli", "Enterococcus"),
+                          file = c("temp", "DO", "pH", "TSS", "TP", "FeColi", "Ecoli", "Enterococcus"),
                           stringsAsFactors = FALSE)
-
-# Create parameter summary map --------------------------------------------
-
+  
+  # Create parameter summary map --------------------------------------------
+  
   print("Creating Map...")
-
+  
   map <- leaflet() %>% addTiles() %>%
     # htmlwidgets::appendContent(HTML(table)) %>%
-  #   htmlwidgets::onRender(
-  #     "
-  # function(el, x) {
-  #   // our leaflet map is available as this
-  #   mymap = this;
-  # }
-  # "
-  #   ) %>%
-    addEsriDependency() %>%
-    addProviderTiles(providers$Esri.WorldImagery, group = "World Imagery") %>%
-    addWMSTiles(baseUrl = 'https://www.mrlc.gov/geoserver/mrlc_display/NLCD_2016_Land_Cover_L48/wms?',
-                group = "Land Cover (NLCD 2016)",
-                layers = "NLCD_2016_Land_Cover_L48",
-                options = WMSTileOptions(version = '1.3.0',
-                                         format = 'image/png',
-                                         transparent = TRUE)) %>%
-    addWMSTiles("https://basemap.nationalmap.gov/arcgis/services/USGSHydroCached/MapServer/WmsServer",
-                group = "Hydrography",
-                options = WMSTileOptions(format = "image/png",
-                                         transparent = TRUE),
-                layers = "0")
+    #   htmlwidgets::onRender(
+    #     "
+    # function(el, x) {
+    #   // our leaflet map is available as this
+    #   mymap = this;
+    # }
+    # "
+    #   ) %>%
+    leaflet::addEsriDependency() %>%
+    leaflet::addProviderTiles(providers$Esri.WorldImagery, group = "World Imagery") %>%
+    leaflet::addWMSTiles(baseUrl = 'https://www.mrlc.gov/geoserver/mrlc_display/NLCD_2016_Land_Cover_L48/wms?',
+                         group = "Land Cover (NLCD 2016)",
+                         layers = "NLCD_2016_Land_Cover_L48",
+                         options = leaflet::WMSTileOptions(version = '1.3.0',
+                                                           format = 'image/png',
+                                                           transparent = TRUE)) %>%
+    leaflet::addWMSTiles("https://basemap.nationalmap.gov/arcgis/services/USGSHydroCached/MapServer/WmsServer",
+                         group = "Hydrography",
+                         options = leaflet::WMSTileOptions(format = "image/png",
+                                                           transparent = TRUE),
+                         layers = "0")
   if(nrow(agwqma) > 0){
     map <- map %>%
-      addPolygons(data = agwqma, fill = TRUE, color = "blue", fillColor = "blue", opacity = 0.8, weight = 5,
-                  group = "Ag WQ Management Areas", label = ~PlanName)
-    }
-
+      leaflet::addPolygons(data = agwqma, fill = TRUE, color = "blue", fillColor = "blue", opacity = 0.8, weight = 5,
+                           group = "Ag WQ Management Areas", label = ~PlanName)
+  }
+  
   map <- map %>%
-    addPolygons(data = area, color = "black", fillOpacity = 0.1, group = "Assessment Area", opacity = 0.8, label = ~paste("Subbasin:", HU_8_NAME)) %>%
-    addMarkers(data = unique(param_summary[,c("AU_ID", "MLocID", "StationDes", "Lat_DD", "Long_DD")]),
-               label = ~paste0(MLocID, ": ", StationDes),
-               popup = ~paste0("<b>", MLocID, "</b>: ", StationDes, "<br>",
-                               "AU: ", AU_ID),
-               lat = ~Lat_DD,
-               lng = ~Long_DD,
-               group = "search"
+    leaflet::addPolygons(data = area, color = "black", fillOpacity = 0.1, group = "Assessment Area", opacity = 0.8, label = ~paste("Subbasin:", HU_8_NAME)) %>%
+    leaflet::addMarkers(data = unique(param_summary[,c("AU_ID", "MLocID", "StationDes", "Lat_DD", "Long_DD")]),
+                        label = ~paste0(MLocID, ": ", StationDes),
+                        popup = ~paste0("<b>", MLocID, "</b>: ", StationDes, "<br>",
+                                        "AU: ", AU_ID),
+                        lat = ~Lat_DD,
+                        lng = ~Long_DD,
+                        group = "search"
     )
-
+  
   if(nrow(wql_streams_data)>0){
     map <- map %>%
-      addPolylines(data = wql_streams_shp,
-                   opacity = 1,
-                   weight = 3.5,
-                   color = "red",
-                   # popup = ~paste0("<b>", STREAM_NAM,
-                   #                 "<br>Parameter:</b> ", Char_Name,
-                   #                 "<br><b>Listing:</b> ", LISTING_ST),
-                   popup = ~paste0("<b>", STREAM_NAM,
-                                   # "<br>Parameter:</b> ", Char_Name,
-                                   "<br></b><br>",
-                                   sapply(SEGMENT_ID, WQLpopupTable, USE.NAMES = FALSE)),
-                   popupOptions = popupOptions(maxWidth = 600, maxHeight = 300),
-                   highlightOptions = highlightOptions(color = "red", weight = 8, opacity = 1),
-                   label = ~STREAM_NAM,
-                   smoothFactor = 1.5,
-                   group = "WQ Listed Streams"
+      leaflet::addPolylines(data = wql_streams_shp,
+                            opacity = 1,
+                            weight = 3.5,
+                            color = "red",
+                            # popup = ~paste0("<b>", STREAM_NAM,
+                            #                 "<br>Parameter:</b> ", Char_Name,
+                            #                 "<br><b>Listing:</b> ", LISTING_ST),
+                            popup = ~paste0("<b>", STREAM_NAM,
+                                            # "<br>Parameter:</b> ", Char_Name,
+                                            "<br></b><br>",
+                                            sapply(SEGMENT_ID, WQLpopupTable, USE.NAMES = FALSE)),
+                            popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300),
+                            highlightOptions = leaflet::highlightOptions(color = "red", weight = 8, opacity = 1),
+                            label = ~STREAM_NAM,
+                            smoothFactor = 1.5,
+                            group = "WQ Listed Streams"
       )
   } else {print(paste("No water quality limited streams found for the selected area."))}
-
-    # if(nrow(wql_streams_data) > 0){
-      # map <- map %>%
-      # addPolylines(data = wql_streams,
-      #              opacity = 0.7,
-      #              weight = 2,
-      #              color = "blue",
-      #              # popup = ~paste0("<b>", STREAM_NAM,
-      #              #                 "<br>Parameter:</b> ", Char_Name,
-      #              #                 "<br><b>Listing:</b> ", LISTING_ST),
-      #              popup = ~paste0("<b>", STREAM_NAM, "<br></b>",
-      #                              sapply(SEGMENT_ID, WQLpopupTable, param = i, USE.NAMES = FALSE)),
-      #              popupOptions = popupOptions(maxWidth = 600),
-      #              group = "WQL Streams"
-      # )
-    # } else {print(paste("No water quality limited streams for", i))}
-
+  
+  # if(nrow(wql_streams_data) > 0){
+  # map <- map %>%
+  # leaflet::addPolylines(data = wql_streams,
+  #              opacity = 0.7,
+  #              weight = 2,
+  #              color = "blue",
+  #              # popup = ~paste0("<b>", STREAM_NAM,
+  #              #                 "<br>Parameter:</b> ", Char_Name,
+  #              #                 "<br><b>Listing:</b> ", LISTING_ST),
+  #              popup = ~paste0("<b>", STREAM_NAM, "<br></b>",
+  #                              sapply(SEGMENT_ID, WQLpopupTable, param = i, USE.NAMES = FALSE)),
+  #              popupOptions = leaflet::popupOptions(maxWidth = 600),
+  #              group = "WQL Streams"
+  # )
+  # } else {print(paste("No water quality limited streams for", i))}
+  
   layer_groups <- NULL
   for(i in unique(param_summary$Char_Name)){
     print(paste("Adding layer for", i))
     standard_param <- odeqstatusandtrends::AWQMS_to_standard(i)
     layer_groups <- c(layer_groups, standard_param)
     psum <- param_summary %>% dplyr::filter(Char_Name == i)
-    psum$z_offset <- if_else(!(psum[[status_current]] %in% c("Unassessed", "Insufficient Data") & psum$trend %in% c("Insufficient Data", "No Significant Trend")),
-                             100, 0)
+    psum$z_offset <- dplyr::if_else(!(psum[[status_current]] %in% c("Unassessed", "Insufficient Data") & psum$trend %in% c("Insufficient Data", "No Significant Trend")),
+                                    100, 0)
     psum_AU <- psum[!(psum[[status_current]] %in% c("Unassessed", "Insufficient Data") & psum$trend == "Insufficient Data"),]
     au_data <- dplyr::filter(assessment_units[, c("AU_ID", "AU_Name")], AU_ID %in% unique(psum_AU$AU_ID))
     au_data <- merge(au_data, dplyr::filter(au_colors, Char_Name == i)[,c("AU_ID", "color", "HUC8_Name", "HUC8")], by = "AU_ID")
-
+    
     # au_data <- au_colors %>% dplyr::filter(Char_Name == i)
     # wql_streams_tmp <- dplyr::filter(wql_streams, Char_Name == i)
     # green_ids <- au_data[au_data$color == "green", ]$AU_ID
-
+    
     if(nrow(au_data) > 0){
       au_data <- rmapshaper::ms_simplify(au_data)
-
+      
       map <- map %>%
-        addPolylines(data = au_data,
-                     stroke = TRUE,
-                     opacity = 0.8,
-                     weight = 3,
-                     color = ~color,
-                     popup = ~paste0("<b>", AU_Name, "<br>",
-                                     "<b>HUC8: </b>", HUC8_Name, " (",
-                                     HUC8, ")<br>",
-                                     # "<br><b>Parameter:</b> ", i, "<br>",
-                                     sapply(AU_ID, au_table, param = i, USE.NAMES = FALSE),
-                                     sapply(AU_ID, popupTable, station = NULL, param = i, USE.NAMES = FALSE)
-                     ),
-                     popupOptions = popupOptions(maxWidth = 600, maxHeight = 300),
-                     label = ~AU_Name,
-                     smoothFactor = 2,
-                     options = pathOptions(className = "assessmentUnits", interactive = TRUE),
-                     highlightOptions = highlightOptions(color = "black", weight = 8, opacity = 1),
-                     group = standard_param
+        leaflet::addPolylines(data = au_data,
+                              stroke = TRUE,
+                              opacity = 0.8,
+                              weight = 3,
+                              color = ~color,
+                              popup = ~paste0("<b>", AU_Name, "<br>",
+                                              "<b>HUC8: </b>", HUC8_Name, " (",
+                                              HUC8, ")<br>",
+                                              # "<br><b>Parameter:</b> ", i, "<br>",
+                                              sapply(AU_ID, au_table, param = i, USE.NAMES = FALSE),
+                                              sapply(AU_ID, popupTable, station = NULL, param = i, USE.NAMES = FALSE)
+                              ),
+                              popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300),
+                              label = ~AU_Name,
+                              smoothFactor = 2,
+                              options = leaflet::pathOptions(className = "assessmentUnits", interactive = TRUE),
+                              highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
+                              group = standard_param
         )
     }
     #   for(j in c("lightgray", "green", "orange")){
@@ -386,7 +386,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     #                               options = featureLayerOptions(
     #                                 where = paste0("AU_ID IN ('", paste(k, collapse = "', '"), "')")
     #                                 ),
-    #                               highlightOptions = highlightOptions(color = "black", weight = 8, opacity = 1, bringToFront = TRUE),
+    #                               highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1, bringToFront = TRUE),
     #                               color = j, fill = FALSE, group = i, opacity = 1, labelProperty = "AU_Name",
     #                               pathOptions = leaflet::pathOptions(className = "assessmentUnits", interactive = TRUE)
     #                               ,
@@ -426,33 +426,33 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     #     }
     #   }
     # }
-
+    
     map <- map %>%
-      addAwesomeMarkers(data = psum,
-                        lat = ~Lat_DD,
-                        lng = ~Long_DD,
-                        icon = awesomeIcons(icon = ~icon,
-                                            iconColor = 'black',
-                                            library = 'glyphicon',
-                                            markerColor = ~color),
-                        label = ~MLocID,
-                        popup = ~paste0("<b>", StationDes, "<br>ID:</b> ", MLocID,
-                                        "<br><b>AU ID:</b> ", AU_ID,
-                                        "<br>",
-                                        sapply(MLocID, popupTable, AU = NULL, param = i, USE.NAMES = FALSE),
-                                        mapply(plot_html, station = MLocID, sub_name = HUC8_Name, param = i, USE.NAMES = FALSE)
-                                        ),
-                        popupOptions = popupOptions(maxWidth = 600, maxHeight = 300),
-                        labelOptions = list(className = "stationLabels", noHide = T, permanent = T, interactive = T,
-                                            offset = c(-10,-25), opacity = 0.9, textsize = "14px", sticky = TRUE),
-                        options = ~markerOptions(zIndexOffset = z_offset, riseOnHover = TRUE),
-                        group = standard_param
+      leaflet::addAwesomeMarkers(data = psum,
+                                 lat = ~Lat_DD,
+                                 lng = ~Long_DD,
+                                 icon = leaflet::awesomeIcons(icon = ~icon,
+                                                              iconColor = 'black',
+                                                              library = 'glyphicon',
+                                                              markerColor = ~color),
+                                 label = ~MLocID,
+                                 popup = ~paste0("<b>", StationDes, "<br>ID:</b> ", MLocID,
+                                                 "<br><b>AU ID:</b> ", AU_ID,
+                                                 "<br>",
+                                                 sapply(MLocID, popupTable, AU = NULL, param = i, USE.NAMES = FALSE),
+                                                 mapply(plot_html, station = MLocID, sub_name = HUC8_Name, param = i, USE.NAMES = FALSE)
+                                 ),
+                                 popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300),
+                                 labelOptions = list(className = "stationLabels", noHide = T, permanent = T, interactive = T,
+                                                     offset = c(-10,-25), opacity = 0.9, textsize = "14px", sticky = TRUE),
+                                 options = ~leaflet::markerOptions(zIndexOffset = z_offset, riseOnHover = TRUE),
+                                 group = standard_param
       )
-
+    
   }
-
+  
   map <- map %>%
-    addEasyButton(easyButton(
+    leaflet::addEasyButton(leaflet::easyButton(
       position = "topright",
       icon = "fa-align-justify",
       title = "Toggle Layers Control",
@@ -482,28 +482,28 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                }"
       )
     )) %>%
-    addLayersControl(baseGroups = sort(layer_groups),
-                     overlayGroups = c("Assessment Area", "WQ Listed Streams", "Ag WQ Management Areas",
-                                       "World Imagery", "Hydrography", "Land Cover (NLCD 2016)"),
-                     options = layersControlOptions(collapsed = FALSE)) %>%
-    hideGroup(c("World Imagery", "Hydrography", "Ag WQ Management Areas", "Land Cover (NLCD 2016)", "WQ Listed Streams")) %>%
-    addControl(position = "bottomleft", className = "legend",
-               html = sprintf('<html><body><div style="opacity:0.95">
+    leaflet::addLayersControl(baseGroups = sort(layer_groups),
+                              overlayGroups = c("Assessment Area", "WQ Listed Streams", "Ag WQ Management Areas",
+                                                "World Imagery", "Hydrography", "Land Cover (NLCD 2016)"),
+                              options = leaflet::layersControlOptions(collapsed = FALSE)) %>%
+    leaflet::hideGroup(c("World Imagery", "Hydrography", "Ag WQ Management Areas", "Land Cover (NLCD 2016)", "WQ Listed Streams")) %>%
+    leaflet::addControl(position = "bottomleft", className = "legend",
+                        html = sprintf('<html><body><div style="opacity:0.95">
                                         <img width="375" height="180" src="data:image/png;base64,%s">
                             </div></body></html>', lgnd)) %>%
-    addControl(position = "bottomright", className = "logo",
-               html = sprintf('<html><body><div style="opacity:1">
+    leaflet::addControl(position = "bottomright", className = "logo",
+                        html = sprintf('<html><body><div style="opacity:1">
                <a href="https://www.oregon.gov/deq/wq/programs/Pages/wqstatustrends.aspx">
                                         <img width="60" src="data:image/png;base64,%s">
                             </a></div></body></html>', logo)) %>%
-    addEasyButton(easyButton(
+    leaflet::addEasyButton(leaflet::easyButton(
       icon = "fa-globe",
       title = "Zoom to assessment area",
       onClick = JS("function(btn, map){
                 var groupLayer = map.layerManager.getLayerGroup('Assessment Area');
                 map.fitBounds(groupLayer.getBounds());
                  }"))) %>%
-    addEasyButton(easyButton(
+    leaflet::addEasyButton(leaflet::easyButton(
       icon = "fa-sitemap",
       title = "Toggle Assessment Units",
       onClick = JS("function(btn, map){
@@ -531,7 +531,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                }"
       )
     )) %>%
-    addEasyButton(easyButton(
+    leaflet::addEasyButton(leaflet::easyButton(
       icon = "fa-map-marker",
       title = "Toggle Station Markers",
       onClick = JS("function(btn, map){
@@ -581,7 +581,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                }"
       )
     )) %>%
-    addEasyButton(easyButton(
+    leaflet::addEasyButton(leaflet::easyButton(
       icon = "fa-map-signs",
       title = "Toggle Station ID labels",
       onClick = JS("function(btn, map){
@@ -609,7 +609,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                }"
       )
     )) %>%
-    addEasyButton(easyButton(
+    leaflet::addEasyButton(leaflet::easyButton(
       position = "bottomleft",
       icon = "fa-info-circle",
       title = "Toggle Legend",
@@ -649,9 +649,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     #               sizeModes: ['Current'],
     #               exportOnly: true,
     #               filename: 'map',
-    #           }).addTo(this);}") %>%
-    leaflet.extras::addSearchFeatures(targetGroups = "search",
-                                      options = searchFeaturesOptions(openPopup = TRUE, textPlaceholder = "Search Station IDs...")) %>%
+  #           }).addTo(this);}") %>%
+  leaflet.extras::addSearchFeatures(targetGroups = "search",
+                                    options = leaflet.extras::searchFeaturesOptions(openPopup = TRUE, textPlaceholder = "Search Station IDs...")) %>%
     htmlwidgets::onRender(jsCode = "function(el, x){
     var elements = document.getElementsByClassName('stationLabels');
     var index;
@@ -690,42 +690,42 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     #   "var c;",
     #   "switch (feature.properties.AU_ID) {",
     #   'case "', paste0(au_data[au_data$color == "green", ]$AU_ID, collapse = ","), '"',
-    #   "c = '#179639';",
-    #   "break;",
-    #   'case "', paste0(au_data[au_data$color == "orange", ]$AU_ID, collapse = ","), '"',
-    #   "c = '#fc923a';",
-    #   "break;",
-    #   'case "', paste0(au_data[au_data$color == "lightgray", ]$AU_ID, collapse = ","), '"',
-    #   "c = '#a3a3a3';",
-    #   "break;",
-    #   "default: '#ff00f2';",
-    #   "}",
-    #   "return {color: c, opacity: 1, weight: 8};",
-    #   "}",
-    #   "}).addTo(this);",
-    #   "assessmentUnits.bindPopup(",
-    #   "function (layer) {",
-    #   "var input, table, tr, td, i, txtValue;",
-    #   "input = layer.feature.properties.AU_ID;",
-    #   "table = document.getElementById('mytable');",
-    #   "tr = table.getElementsByTagName('tr');",
-    #   "for (i = 0; i < tr.length; i++) { ",
-    #   "td = tr[i].getElementsByTagName('td')[0];",
-    #   "if (td) {",
-    #   "txtValue = td.innerText || td.innerHTML;",
-    #   "if (txtValue.toUpperCase().indexOf(input) > -1) {",
-    #   "tr[i].style.display = '';",
-    #   "} else {",
-    #   "tr[i].style.display = 'none';",
-    #   "}}}",
-    #   ";",
-    #   "return table",
-    #   "}, {maxWidth : 1200});",
-    #   "}"
-    # )
-    # ) %>%
-    hideGroup("search") %>%
+  #   "c = '#179639';",
+  #   "break;",
+  #   'case "', paste0(au_data[au_data$color == "orange", ]$AU_ID, collapse = ","), '"',
+  #   "c = '#fc923a';",
+  #   "break;",
+  #   'case "', paste0(au_data[au_data$color == "lightgray", ]$AU_ID, collapse = ","), '"',
+  #   "c = '#a3a3a3';",
+  #   "break;",
+  #   "default: '#ff00f2';",
+  #   "}",
+  #   "return {color: c, opacity: 1, weight: 8};",
+  #   "}",
+  #   "}).addTo(this);",
+  #   "assessmentUnits.bindPopup(",
+  #   "function (layer) {",
+  #   "var input, table, tr, td, i, txtValue;",
+  #   "input = layer.feature.properties.AU_ID;",
+  #   "table = document.getElementById('mytable');",
+  #   "tr = table.getElementsByTagName('tr');",
+  #   "for (i = 0; i < tr.length; i++) { ",
+  #   "td = tr[i].getElementsByTagName('td')[0];",
+  #   "if (td) {",
+  #   "txtValue = td.innerText || td.innerHTML;",
+  #   "if (txtValue.toUpperCase().indexOf(input) > -1) {",
+  #   "tr[i].style.display = '';",
+  #   "} else {",
+  #   "tr[i].style.display = 'none';",
+  #   "}}}",
+  #   ";",
+  #   "return table",
+  #   "}, {maxWidth : 1200});",
+  #   "}"
+  # )
+  # ) %>%
+  leaflet::hideGroup("search") %>%
     htmlwidgets::appendContent(tags$head(tags$meta(name="viewport", content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no")))
-
+  
   return(map)
 }

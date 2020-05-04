@@ -10,7 +10,7 @@
 add_criteria <- function(data) {
   options(scipen = 999)
   parameters <- unique(data$Char_Name)
-
+  
   print("Checking spawn dates...")
   data$spawn_start <- LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnStart"]
   data$spawn_end <- LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnEnd"]
@@ -19,11 +19,11 @@ add_criteria <- function(data) {
 
   if(any("Temperature, water" %in% parameters)) {
     print("Adding temperature criteria values...")
-    # temp_data <- data %>% filter(Char_Name == "Temperature, water")
+    # temp_data <- data %>% dplyr::filter(Char_Name == "Temperature, water")
     # sdadm <- temp_data %>% filter(Statistical_Base == "7DADM")
-
-    # data <- bind_rows(data[data$Char_Name != "Temperature, water",], sdadm)
-
+    
+    # data <- dplyr::bind_rows(data[data$Char_Name != "Temperature, water",], sdadm)
+    
     data$temp_crit <- Temp_crit[match(data$FishCode, Temp_crit$FishUse_code), "Temp_Criteria"]
     data$criteria <- "Temperature standard"
   }
@@ -48,6 +48,7 @@ add_criteria <- function(data) {
     data$bact_crit_percent <- Bact_crit[match(data$BacteriaCode, Bact_crit$BacteriaCode), "Perc_Crit"]
     data$criteria <- "Bacteria standard"
   }
+
   # if(any(parameters %in% c("Total suspended solids"))) {
   #   print("Looking for TSS target values...")
   #   tss_targets <- tmdl_lookup %>% dplyr::filter(Parameter == "TSS (mg/L)")
@@ -57,45 +58,46 @@ add_criteria <- function(data) {
   #   if(!"summer_target" %in% colnames(data_tss)){
   #     data_tss <- data_tss %>% dplyr::mutate(summer_target = NaN, summer_start = NA_character_, summer_end = NA_character_, winter_target = NA_character_)
   #   }
-  #   data_tss$summer_start <- if_else(!is.na(data_tss$summer_start),
-  #                                    paste0(data_tss$summer_start, "-", lubridate::year(data_tss$sample_datetime)),
-  #                                    NA_character_)
+  #   data_tss$summer_start <- dplyr::if_else(!is.na(data_tss$summer_start),
+  #                                           paste0(data_tss$summer_start, "-", lubridate::year(data_tss$sample_datetime)),
+  #                                           NA_character_)
   #   data_tss$summer_start <- as.POSIXct(data_tss$summer_start, format = "%d-%b-%Y")
-  #   data_tss$summer_end <- if_else(!is.na(data_tss$summer_end),
-  #                                    paste0(data_tss$summer_end, "-", lubridate::year(data_tss$sample_datetime)),
-  #                                    NA_character_)
+  #   data_tss$summer_end <- dplyr::if_else(!is.na(data_tss$summer_end),
+  #                                         paste0(data_tss$summer_end, "-", lubridate::year(data_tss$sample_datetime)),
+  #                                         NA_character_)
   #   data_tss$summer_end <- as.POSIXct(data_tss$summer_end, format = "%d-%b-%Y")
-  #   data_tss$TSS_crit <- if_else(data_tss$sample_datetime >= data_tss$summer_start & data_tss$sample_datetime < data_tss$summer_end,
-  #                                data_tss$summer_target, data_tss$winter_target)
+  #   data_tss$TSS_crit <- dplyr::if_else(data_tss$sample_datetime >= data_tss$summer_start & data_tss$sample_datetime < data_tss$summer_end,
+  #                                       data_tss$summer_target, data_tss$winter_target)
   #   data_tss <- data_tss %>% dplyr::select(-summer_target, -summer_start, -summer_end, -winter_target)
-  # 
-  #   data <- bind_rows(data[data$Char_Name != "Total suspended solids",], data_tss)
+  #   
+  #   data <- dplyr::bind_rows(data[data$Char_Name != "Total suspended solids",], data_tss)
   # }
   # if(any(parameters %in% c(odeqstatusandtrends::AWQMS_Char_Names('TP')))) {
   #   print("Looking for TP target values...")
   #   tp_targets <- tmdl_lookup %>% dplyr::filter(Parameter == "TP (mg/L)")
   #   data_tp <- data %>% dplyr::filter(Char_Name == odeqstatusandtrends::AWQMS_Char_Names('TP'))
-  # 
+  #   
   #   data_tp <- merge(data_tp, unique(tp_targets[,c("Reach_codes", "summer_target", "summer_start", "summer_end", "winter_target", "stat.base")]),
-  #                     by.x = "Reachcode", by.y = "Reach_codes", all.x = TRUE, all.y = FALSE)
+  #                    by.x = "Reachcode", by.y = "Reach_codes", all.x = TRUE, all.y = FALSE)
   #   if(!"summer_target" %in% colnames(data_tp)){
   #     data_tp <- data_tp %>% dplyr::mutate(summer_target = NaN, summer_start = NA_character_, summer_end = NA_character_, winter_target = NA_character_)
   #   }
-  # 
-  #   data_tp$summer_start <- if_else(!is.na(data_tp$summer_start),
-  #                                    paste0(data_tp$summer_start, "-", lubridate::year(data_tp$sample_datetime)),
-  #                                    NA_character_)
+  #   
+  #   data_tp$summer_start <- dplyr::if_else(!is.na(data_tp$summer_start),
+  #                                          paste0(data_tp$summer_start, "-", lubridate::year(data_tp$sample_datetime)),
+  #                                          NA_character_)
   #   data_tp$summer_start <- as.POSIXct(data_tp$summer_start, format = "%d-%b-%Y")
-  #   data_tp$summer_end <- if_else(!is.na(data_tp$summer_end),
-  #                                  paste0(data_tp$summer_end, "-", lubridate::year(data_tp$sample_datetime)),
-  #                                  NA_character_)
+  #   data_tp$summer_end <- dplyr::if_else(!is.na(data_tp$summer_end),
+  #                                        paste0(data_tp$summer_end, "-", lubridate::year(data_tp$sample_datetime)),
+  #                                        NA_character_)
   #   data_tp$summer_end <- as.POSIXct(data_tp$summer_end, format = "%d-%b-%Y")
-  #   data_tp$tp_summer <- if_else(data_tp$sample_datetime >= data_tp$summer_start & data_tp$sample_datetime < data_tp$summer_end,
-  #                                1, 0)
-  #   data_tp$TP_crit <- if_else(data_tp$sample_datetime >= data_tp$summer_start & data_tp$sample_datetime < data_tp$summer_end,
-  #                               data_tp$summer_target, data_tp$winter_target)
+  #   data_tp$tp_summer <- dplyr::if_else(data_tp$sample_datetime >= data_tp$summer_start & data_tp$sample_datetime < data_tp$summer_end,
+  #                                       1, 0)
+  #   data_tp$TP_crit <- dplyr::if_else(data_tp$sample_datetime >= data_tp$summer_start & data_tp$sample_datetime < data_tp$summer_end,
+  #                                     data_tp$summer_target, data_tp$winter_target)
   #   data_tp <- data_tp %>% dplyr::select(-summer_target, -summer_start, -summer_end, -winter_target)
-  #   data <- bind_rows(data[data$Char_Name != odeqstatusandtrends::AWQMS_Char_Names('TP'),], data_tp)
+  #   data <- dplyr::bind_rows(data[data$Char_Name != odeqstatusandtrends::AWQMS_Char_Names('TP'),], data_tp)
   # }
+  
   return(data)
 }
