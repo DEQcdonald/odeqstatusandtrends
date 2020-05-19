@@ -54,10 +54,15 @@ status_stns <- function(df) {
                                              dplyr::if_else(any(excursion_cen == 1, na.rm = TRUE),
                                                             "Not Attaining",
                                                             "Attaining")
-                     )
+                     ),
+                     reason = dplyr::if_else(status == "Unassessed",
+                                             dplyr::if_else(all(is.na(excursion_cen)), "no_target",
+                                                            "no_results"),
+                                             NA_character_)
     ) %>%
-    dplyr::ungroup() %>% select(-samples) %>%
-    tidyr::spread(key = status_period, value = status)
+    dplyr::ungroup() %>%
+    dplyr::select(-samples) %>%
+    tidyr::pivot_wider(names_from = status_period, values_from = c(status, reason))
 
   if(any(df$BacteriaCode == 3 & df$Char_Name == "Fecal Coliform")){
     shell_status <- df %>%
@@ -82,9 +87,15 @@ status_stns <- function(df) {
                                                dplyr::if_else(any(excursion == 1, na.rm = TRUE),
                                                               "Not Attaining",
                                                               "Attaining")
-                       )
+                       ),
+                       reason = dplyr::if_else(status == "Unassessed",
+                                               dplyr::if_else(all(is.na(excursion)), "no_target",
+                                                              "no_results"),
+                                               NA_character_)
       ) %>%
-      dplyr::ungroup() %>% dplyr::select(MLocID, Char_Name, status_period, status) %>% tidyr::pivot_wider(names_from=status_period, values_from=status)
+      dplyr::ungroup() %>%
+      dplyr::select(MLocID, Char_Name, status_period, status, reason) %>%
+      tidyr::pivot_wider(names_from = status_period, values_from = c(status, reason))
 
     if(nrow(shell_status) >0){
       status_check <- dplyr::bind_rows(status_check, shell_status)
