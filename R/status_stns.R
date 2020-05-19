@@ -61,8 +61,13 @@ status_stns <- function(df) {
                                              NA_character_)
     ) %>%
     dplyr::ungroup() %>%
-    dplyr::select(-samples) %>%
-    tidyr::pivot_wider(names_from = status_period, values_from = c(status, reason))
+    dplyr::select(-samples)
+
+  status_reason <<- bind_rows(status_reason, status_check)
+
+  status_check <- status_check %>%
+    select(-reason) %>%
+    tidyr::pivot_wider(names_from = status_period, values_from = status)
 
   if(any(df$BacteriaCode == 3 & df$Char_Name == "Fecal Coliform")){
     shell_status <- df %>%
@@ -94,8 +99,15 @@ status_stns <- function(df) {
                                                NA_character_)
       ) %>%
       dplyr::ungroup() %>%
-      dplyr::select(MLocID, Char_Name, status_period, status, reason) %>%
-      tidyr::pivot_wider(names_from = status_period, values_from = c(status, reason))
+      dplyr::select(MLocID, Char_Name, status_period, status, reason)
+
+    if(nrow(status_reason) > 0){
+      status_reason <<- dplyr::bind_rows(status_reason, shell_status)
+    }
+
+    shell_status <- shell_status %>%
+      select(-reason) %>%
+      tidyr::pivot_wider(names_from = status_period, values_from = status)
 
     if(nrow(shell_status) >0){
       status_check <- dplyr::bind_rows(status_check, shell_status)
