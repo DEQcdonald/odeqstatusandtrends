@@ -57,12 +57,12 @@ status_periods <- function(datetime=NULL, periods=4, year_range=NULL, bins_only=
     return(c(start:x))
   })
   names(bins) <- cols
-  data_bins <- sapply(data_years, function(x){
+  data_bins <- unlist(sapply(data_years, function(x){
     i <- sapply(bins, function(y){
       return(x %in% y)
     })
     return(names(bins[i]))
-  })
+  }))
 
   return(data_bins)
 
