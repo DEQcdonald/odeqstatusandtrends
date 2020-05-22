@@ -45,7 +45,12 @@ CleanData <- function(data)
   data_QA <- dplyr::filter(data,
                  !QualifierAbbr %in% c("DQL=A", "DQL=B") | Result_status %in% c("Rejected", "Provisional")) %>%
     dplyr::mutate(reason = "low_grade")
-  data_dropped <<- dplyr::bind_rows(data_dropped, data_QA)
+  data_dropped <<- dplyr::bind_rows(data_dropped, data_QA) %>%
+    dplyr::group_by(MLocID, Char_Name) %>%
+    dplyr::summarise(min_date = min(sample_datetime, na.rm = TRUE),
+                     max_date = max(sample_datetime, na.rm = TRUE),
+                     low_grade = sum(reason == "low_grade", na.rm = TRUE),
+                     missing_datetime = sum(reason == "missing_datetime", na.rm = TRUE))
   data <- dplyr::filter(data,
                  QualifierAbbr %in% c("DQL=A", "DQL=B") | is.na(QualifierAbbr),
                  !Result_status %in% c("Rejected", "Provisional"))
