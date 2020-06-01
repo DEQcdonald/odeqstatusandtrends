@@ -14,7 +14,7 @@ plot_TSS <- function(data, seaKen, station){
   seaken_TSS <- seaKen %>% dplyr::filter(Char_Name == "Total suspended solids",
                                          significance != "No Significant Trend",
                                          MLocID == station)
-  
+
   # obtain data range limits for plotting
   result_max <- max(c(data$Result_cen, data$TSS_crit), na.rm = TRUE)
   xmin <- min(data$sample_datetime, na.rm = TRUE)
@@ -24,7 +24,7 @@ plot_TSS <- function(data, seaKen, station){
   data$excursion <- dplyr::if_else(!is.na(data$excursion_cen),
                                    dplyr::if_else(data$excursion_cen == 1, "Excursion", "Result"),
                                    "Result") # change numeric value to descriptor
-  
+
   # obtain plotting values for trend line if applicable
   if(nrow(seaken_TSS) > 0){
     slope <- round(seaken_TSS[, "slope"], digits=3)
@@ -35,30 +35,30 @@ plot_TSS <- function(data, seaKen, station){
     sk_min <- y_median - x_delta*slope/365.25
     sk_max <- y_median + x_delta*slope/365.25
   }
-  
+
   p <- ggplot2::ggplot(data)
-  
+
   # add TMDL TSS Target lines
-  if(any(!is.na(data$TSS_crit))){
-    p <- p + ggplot2::geom_segment(aes(x=xmin, xend=xmax, y=TSS_crit, yend=TSS_crit,
+  if(any(!is.na(data$target_value))){
+    p <- p + ggplot2::geom_segment(aes(x=xmin, xend=xmax, y=target_value, yend=target_value,
                                        color = "TMDL Target", linetype = "TMDL Target", shape = "TMDL Target"))
   }
-  
+
   title <- paste(station, unique(data$StationDes))
   subtitle <- paste0("Assessment Unit: ", unique(data$AU_ID), " ", unique(data$AU_Name))
-  
+
   # plot data with excursion colors
   p <- p + ggplot2::geom_point(aes(x=sample_datetime, y=Result_cen, color = excursion, linetype = excursion, shape = excursion)) +
     ggplot2::ggtitle(title, subtitle = subtitle) +
     ggplot2::ylab("Total Suspended Solids (mg/L)") +
     ggplot2::xlab("Datetime")
-  
+
   # plot the trend line if applicable
   if(nrow(seaken_TSS) > 0){
     p <- p + ggplot2::geom_segment(aes(x=xmin, xend=xmax, y=sk_min, yend=sk_max, color = "Trend", linetype = "Trend", shape = "Trend"), lwd = 1) +
       ggplot2::annotate("text", x = xmin, y = ymax, label = paste0("Trend Results: ", trend, ",  Z-Stat: ", p_val, ",  Slope: ", slope), hjust = 0, vjust = 0)
   }
-  
+
   # apply color, shape, line types, and range limits
   p <- p +
     ggplot2::scale_color_manual(name = "",
@@ -72,6 +72,6 @@ plot_TSS <- function(data, seaKen, station){
     ggplot2::scale_x_datetime(date_labels = "%b-%Y") +
     ggplot2::theme_bw() +
     ggplot2::theme(legend.position="bottom", legend.direction = "horizontal", legend.box = "horizontal")
-  
+
   return(p)
 }
