@@ -20,5 +20,5 @@ dataframe of stations with sufficient data
 Create Total Suspended Solids plots to display status and trend.
 }
 \examples{
-plot_pH(data = data.frame, seaKen, station)
+plot_TSS(data = data.frame, seaKen, station)
 }

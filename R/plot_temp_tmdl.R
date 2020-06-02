@@ -1,4 +1,4 @@
-#' Create Total Phosphorus plots to display status and trend.
+#' Create temperature plots to display status and trend.
 #'
 #'
 #' @param data Dataframe to determine status from. Must have 'excursion' column generated.
@@ -7,29 +7,29 @@
 #' @return dataframe of stations with sufficient data
 #' @export
 #' @examples
-#' plot_TP(data = data.frame, seaKen, station)
+#' plot_temp_tmdl(data = data.frame, seaKen, station)
 
-plot_TP <- function(data, seaKen, station){
+plot_temp_tmdl <- function(data, seaKen, station){
   # subset seaken table to parameter and significant trends
-  seaken_TP <- seaKen %>% dplyr::filter(Char_Name == odeqstatusandtrends::AWQMS_Char_Names('TP'),
-                                        significance != "No Significant Trend",
-                                        MLocID == station)
+  seaken_temp <- seaKen %>% dplyr::filter(Char_Name == "Temperature, water",
+                                         significance != "No Significant Trend",
+                                         MLocID == station)
 
   # obtain data range limits for plotting
-  result_max <- max(c(data$Result_cen, data$TP_crit), na.rm = TRUE)
+  result_max <- max(c(data$Result_cen, data$target_value), na.rm = TRUE)
   xmin <- min(data$sample_datetime, na.rm = TRUE)
   xmax <- max(data$sample_datetime, na.rm = TRUE)
   ymin <- 0
-  ymax <- ifelse(result_max > 0.15, result_max, 0.15)
+  ymax <- ifelse(result_max > 100, result_max, 100)
   data$excursion <- dplyr::if_else(!is.na(data$excursion_cen),
                                    dplyr::if_else(data$excursion_cen == 1, "Excursion", "Result"),
                                    "Result") # change numeric value to descriptor
 
   # obtain plotting values for trend line if applicable
-  if(nrow(seaken_TP) > 0){
-    slope <- round(seaken_TP[, "slope"], digits=3)
-    trend <- seaken_TP[, "trend"]
-    p_val <- round(seaken_TP[, "p_value"], digits=3)
+  if(nrow(seaken_temp) > 0){
+    slope <- round(seaken_temp[, "slope"], digits=3)
+    trend <- seaken_temp[, "trend"]
+    p_val <- round(seaken_temp[, "p_value"], digits=3)
     x_delta <- as.numeric((xmax-xmin)/2)
     y_median <- median(data$Result_cen, na.rm = TRUE)
     sk_min <- y_median - x_delta*slope/365.25
@@ -38,7 +38,7 @@ plot_TP <- function(data, seaKen, station){
 
   p <- ggplot2::ggplot(data)
 
-  # add TMDL TP Target line
+  # add TMDL temperature Target lines
   if(any(!is.na(data$target_value))){
     target_periods <- unique(data[!is.na(data$start_datetime),c("start_datetime", "end_datetime")])
     for(i in 1:NROW(target_periods)){
@@ -54,11 +54,11 @@ plot_TP <- function(data, seaKen, station){
   # plot data with excursion colors
   p <- p + ggplot2::geom_point(aes(x=sample_datetime, y=Result_cen, color = excursion, linetype = excursion, shape = excursion)) +
     ggplot2::ggtitle(title, subtitle = subtitle) +
-    ggplot2::ylab("Total Phosphorus (mg/L)") +
+    ggplot2::ylab("Temperature (C)") +
     ggplot2::xlab("Datetime")
 
   # plot the trend line if applicable
-  if(nrow(seaken_TP) > 0){
+  if(nrow(seaken_temp) > 0){
     p <- p + ggplot2::geom_segment(aes(x=xmin, xend=xmax, y=sk_min, yend=sk_max, color = "Trend", linetype = "Trend", shape = "Trend"), lwd = 1) +
       ggplot2::annotate("text", x = xmin, y = ymax, label = paste0("Trend Results: ", trend, ",  Z-Stat: ", p_val, ",  Slope: ", slope), hjust = 0, vjust = 0)
   }
@@ -73,7 +73,7 @@ plot_TP <- function(data, seaKen, station){
                                 values =    c('Excursion' = 4, 'Result' = 16, "Trend" = 32, "TMDL Target" = 32)) +
     ggplot2::ylim(c(ymin, ymax)) +
     ggplot2::xlim(c(xmin, xmax)) +
-    ggplot2::scale_x_datetime(date_labels = "%b-%Y")+
+    ggplot2::scale_x_datetime(date_labels = "%b-%Y") +
     ggplot2::theme_bw() +
     ggplot2::theme(legend.position="bottom", legend.direction = "horizontal", legend.box = "horizontal")
 

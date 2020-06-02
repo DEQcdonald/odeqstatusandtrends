@@ -7,7 +7,7 @@
 #' @return dataframe of stations with sufficient data
 #' @export
 #' @examples
-#' plot_pH(data = data.frame, seaKen, station)
+#' plot_TSS(data = data.frame, seaKen, station)
 
 plot_TSS <- function(data, seaKen, station){
   # subset seaken table to parameter and significant trends
@@ -16,7 +16,7 @@ plot_TSS <- function(data, seaKen, station){
                                          MLocID == station)
 
   # obtain data range limits for plotting
-  result_max <- max(c(data$Result_cen, data$TSS_crit), na.rm = TRUE)
+  result_max <- max(c(data$Result_cen, data$target_value), na.rm = TRUE)
   xmin <- min(data$sample_datetime, na.rm = TRUE)
   xmax <- max(data$sample_datetime, na.rm = TRUE)
   ymin <- 0
@@ -40,8 +40,12 @@ plot_TSS <- function(data, seaKen, station){
 
   # add TMDL TSS Target lines
   if(any(!is.na(data$target_value))){
-    p <- p + ggplot2::geom_segment(aes(x=xmin, xend=xmax, y=target_value, yend=target_value,
-                                       color = "TMDL Target", linetype = "TMDL Target", shape = "TMDL Target"))
+    target_periods <- unique(data[!is.na(data$start_datetime),c("start_datetime", "end_datetime")])
+    for(i in 1:NROW(target_periods)){
+      p <- p + ggplot2::geom_segment(aes(x=target_periods$start_datetime[i], xend=target_periods$end_datetime[i],
+                                         y=target_value, yend=target_value,
+                                         color = "TMDL Target", linetype = "TMDL Target", shape = "TMDL Target"))
+    }
   }
 
   title <- paste(station, unique(data$StationDes))
