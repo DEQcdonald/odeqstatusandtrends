@@ -10,12 +10,12 @@
 #' @examples parameter_summary_map(param_summary = parameter_summary_df)
 
 parameter_summary_map <- function(param_summary, au_param_summary, area, proj_dir){
-  
+
   setwd(proj_dir)
-  
+
   status_current <- as.symbol(colnames(param_summary)[grep("trend", colnames(param_summary)) - 1])
   au_param_summary <- au_param_summary %>% dplyr::filter(AU_ID != "")
-  
+
   print("Clipping summary table to shapefile...")
   param_shp <- sf::st_as_sf(param_summary, dim = "XY", coords = c("Long_DD", "Lat_DD"))
   area_sf <- sf::st_as_sf(area)
@@ -24,28 +24,28 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   param_shp <- param_shp[lengths(sf::st_within(param_shp, area_sf)) == 1,]
   param_summary <- param_summary %>% dplyr::filter(MLocID %in% param_shp$MLocID)
   rm(list = c("param_shp", "area_sf"))
-  
+
   lgnd <- base64enc::base64encode("//deqhq1/WQNPS/Status_and_Trend_Reports/Figures/map_legend.png")
   logo <- base64enc::base64encode("//deqhq1/WQNPS/Status_and_Trend_Reports/Figures/DEQ-logo-color-non-transp71x107.png")
-  
+
   # Set up shapefiles for map -----------------------------------------------
   print("Processing shapefiles...")
   query <- paste0("SELECT * FROM AssessmentUnits_OR_Dissolve WHERE AU_ID IN ('",
                   paste(unique(param_summary$AU_ID), collapse = "', '"), "')")
-  
+
   assessment_units <- sf::st_read(
     dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/Assessment_2018_2020.gdb",
     layer = "AssessmentUnits_OR_Dissolve",
     query = query, stringsAsFactors = FALSE
   )
-  
+
   agwqma <- sf::st_read(
     dsn = "//deqhq1/WQNPS/Status_and_Trend_Reports/GIS",
     layer = "ODA_AgWQMA",
     stringsAsFactors = FALSE
   )
   agwqma <- agwqma[,c("PlanName","AgWQ_Repor")]
-  
+
   wql_streams <- sf::st_read(
     dsn = "//deqhq1/WQNPS/Agriculture/Status_and_Trend_Analysis/R_support_files",
     layer = "WQL_Streams_2012",
@@ -54,11 +54,11 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     stringsAsFactors = FALSE
   )
   wql_streams$Char_Name <- unlist(sapply(wql_streams$POLLUTANT, AWQMS_Char_Names, USE.NAMES = FALSE))
-  
+
   assessment_units <- sf::st_zm(assessment_units, what = "ZM")
   wql_streams <- sf::st_zm(wql_streams, what = "ZM")
   agwqma <- sf::st_zm(agwqma, what = "ZM")
-  
+
   st_crs(assessment_units)
   assessment_units <- st_transform(assessment_units, 4326)
   assessment_units <- assessment_units[,c("AU_ID", "AU_Name")] %>% dplyr::filter(AU_ID != "99")
@@ -69,22 +69,22 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   wql_streams$TMDL_INFO <- vapply(strsplit(wql_streams$TMDL_INFO, "<a"), `[`, 1, FUN.VALUE=character(1))
   st_crs(agwqma)
   agwqma <- st_transform(agwqma, 4326)
-  
+
   if(!any(class(area) == "sf")){
     area <- sf::st_as_sf(area)
   }
-  
+
   st_crs(area)
   area <- st_transform(area, 4326)
   p_stns <- sf::st_as_sf(param_summary, coords = c("Long_DD", "Lat_DD"), crs = 4326)
   agwqma <- agwqma %>% dplyr::filter(lengths(st_intersects(., p_stns)) > 0)
-  
+
   assessment_units <- assessment_units %>% dplyr::group_by(AU_ID, AU_Name) %>% dplyr::summarise()
   wql_streams_data <- sf::st_drop_geometry(wql_streams)
   wql_streams_shp <- wql_streams %>% dplyr::group_by(STREAM_NAM, SEGMENT_ID) %>% dplyr::summarise()
-  
+
   # Create functions for mapping --------------------------------------------------------
-  
+
   au_colors <- param_summary %>% dplyr::group_by(AU_ID, Char_Name, HUC8_Name, HUC8) %>%
     dplyr::summarise(color = dplyr::if_else(all(!!status_current %in% c("Unassessed", "Insufficient Data")),
                                             "lightgray",
@@ -93,7 +93,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                                                            "green")
     )
     ) %>% dplyr::ungroup()
-  
+
   param_summary <- param_summary %>% dplyr::mutate(
     color = dplyr::if_else(!!status_current %in% c("Unassessed", "Insufficient Data"),
                            "lightgray",
@@ -114,66 +114,66 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                                  } else {"glyphicon-none"}
                                }
   )
-  
+
   # function to pull the selected parameter's status and trend and create a popup table for the station.
   # This function is called on the click of a station marker in the parameter summary map.
   popupTable <- function(station = NULL, AU = NULL, param){
-    
+
     data <- param_summary %>% dplyr::rename(Parameter = Char_Name, Station_ID = MLocID, Station_Description = StationDes)
-    
+
     if(!is.null(station)){
       data <- dplyr::filter(data[, c(2, 1, grep("status|trend", colnames(param_summary)))],
                             Station_ID == station, Parameter == param)
       # %>%
       # dplyr::select(-Parameter, -Station_ID)
-      
+
       colnames(data) <- gsub("(?<=[0-9])[^0-9]", "-", colnames(data), perl = TRUE)
       colnames(data) <- gsub("_", " ", colnames(data), perl = TRUE)
       colnames(data) <- sapply(colnames(data), simpleCap, USE.NAMES = FALSE)
-      
+
       table <- knitr::kable(data,
                             format = "html", row.names = FALSE) %>%
         kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
                                   full_width = TRUE, font_size = 10)
-      
+
     }
     if(!is.null(AU)){
       data <- dplyr::filter(data[, c(2, 1, 3, grep("status|trend", colnames(param_summary)))],
                             AU_ID == AU, Parameter == param) %>%
         dplyr::select(-AU_ID)
-      
+
       colnames(data) <- gsub("(?<=[0-9])[^0-9]", "-", colnames(data), perl = TRUE)
       colnames(data) <- gsub("_", " ", colnames(data), perl = TRUE)
       colnames(data) <- sapply(colnames(data), simpleCap, USE.NAMES = FALSE)
-      
+
       table <- knitr::kable(data,
                             format = "html", row.names = FALSE) %>%
         kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
                                   full_width = TRUE, font_size = 10)
-      
+
     }
     return(table)
   }
-  
+
   au_table <- function(AU = NULL, param){
-    
+
     data <- au_param_summary %>% dplyr::rename(Parameter = Char_Name)
     data <- dplyr::filter(data, AU_ID == AU, Parameter == param)
     data <- data %>% dplyr::select(-AU_Name, -HUC8_Name, -HUC8, -Stations, -Organizations)
     data <- data[, c("AU_ID", colnames(data)[colnames(data) != "AU_ID"])]
-    
+
     colnames(data) <- gsub("(?<=[0-9])[^0-9]", "-", colnames(data), perl = TRUE)
     colnames(data) <- gsub("_", " ", colnames(data), perl = TRUE)
     colnames(data) <- sapply(colnames(data), simpleCap, USE.NAMES = FALSE)
-    
+
     table <- knitr::kable(data, format = "html",
                           table.attr = "id=\"mytable\"", row.names = FALSE) %>%
       kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
                                 full_width = TRUE, font_size = 10)
-    
+
     return(table)
   }
-  
+
   WQLpopupTable <- function(seg_ID = NULL, param = NULL){
     if(!is.null(seg_ID)){
       table <- knitr::kable(
@@ -185,7 +185,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     }
     return(table)
   }
-  
+
   plot_html <- function(station, sub_name, param){
     if(param == "Dissolved oxygen (DO)"){
       paste(
@@ -249,17 +249,17 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
       # } else {paste0("No ", param, " data plotted for this station")}
     }
   }
-  
+
   charnames <- data.frame(awqms = c("Temperature, water", "Dissolved oxygen (DO)", "pH", "Total suspended solids", odeqstatusandtrends::AWQMS_Char_Names('TP'),
                                     "Fecal Coliform", "Escherichia coli", "Enterococcus"),
                           folder = c("Temperature", "DO", "pH", "TSS", "TP", "Fecal_Coliform", "Ecoli", "Enterococcus"),
                           file = c("temp", "DO", "pH", "TSS", "TP", "FeColi", "Ecoli", "Enterococcus"),
                           stringsAsFactors = FALSE)
-  
+
   # Create parameter summary map --------------------------------------------
-  
+
   print("Creating Map...")
-  
+
   map <- leaflet() %>% addTiles() %>%
     # htmlwidgets::appendContent(HTML(table)) %>%
     #   htmlwidgets::onRender(
@@ -270,7 +270,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     # }
     # "
     #   ) %>%
-    leaflet::addEsriDependency() %>%
+    leaflet.esri::addEsriDependency() %>%
     leaflet::addProviderTiles(providers$Esri.WorldImagery, group = "World Imagery") %>%
     leaflet::addWMSTiles(baseUrl = 'https://www.mrlc.gov/geoserver/mrlc_display/NLCD_2016_Land_Cover_L48/wms?',
                          group = "Land Cover (NLCD 2016)",
@@ -288,7 +288,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
       leaflet::addPolygons(data = agwqma, fill = TRUE, color = "blue", fillColor = "blue", opacity = 0.8, weight = 5,
                            group = "Ag WQ Management Areas", label = ~PlanName)
   }
-  
+
   map <- map %>%
     leaflet::addPolygons(data = area, color = "black", fillOpacity = 0.1, group = "Assessment Area", opacity = 0.8, label = ~paste("Subbasin:", HU_8_NAME)) %>%
     leaflet::addMarkers(data = unique(param_summary[,c("AU_ID", "MLocID", "StationDes", "Lat_DD", "Long_DD")]),
@@ -299,7 +299,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                         lng = ~Long_DD,
                         group = "search"
     )
-  
+
   if(nrow(wql_streams_data)>0){
     map <- map %>%
       leaflet::addPolylines(data = wql_streams_shp,
@@ -320,7 +320,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                             group = "WQ Listed Streams"
       )
   } else {print(paste("No water quality limited streams found for the selected area."))}
-  
+
   # if(nrow(wql_streams_data) > 0){
   # map <- map %>%
   # leaflet::addPolylines(data = wql_streams,
@@ -336,7 +336,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   #              group = "WQL Streams"
   # )
   # } else {print(paste("No water quality limited streams for", i))}
-  
+
   layer_groups <- NULL
   for(i in unique(param_summary$Char_Name)){
     print(paste("Adding layer for", i))
@@ -348,14 +348,14 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     psum_AU <- psum[!(psum[[status_current]] %in% c("Unassessed", "Insufficient Data") & psum$trend == "Insufficient Data"),]
     au_data <- dplyr::filter(assessment_units[, c("AU_ID", "AU_Name")], AU_ID %in% unique(psum_AU$AU_ID))
     au_data <- merge(au_data, dplyr::filter(au_colors, Char_Name == i)[,c("AU_ID", "color", "HUC8_Name", "HUC8")], by = "AU_ID")
-    
+
     # au_data <- au_colors %>% dplyr::filter(Char_Name == i)
     # wql_streams_tmp <- dplyr::filter(wql_streams, Char_Name == i)
     # green_ids <- au_data[au_data$color == "green", ]$AU_ID
-    
+
     if(nrow(au_data) > 0){
       au_data <- rmapshaper::ms_simplify(au_data)
-      
+
       map <- map %>%
         leaflet::addPolylines(data = au_data,
                               stroke = TRUE,
@@ -426,7 +426,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     #     }
     #   }
     # }
-    
+
     map <- map %>%
       leaflet::addAwesomeMarkers(data = psum,
                                  lat = ~Lat_DD,
@@ -448,9 +448,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                                  options = ~leaflet::markerOptions(zIndexOffset = z_offset, riseOnHover = TRUE),
                                  group = standard_param
       )
-    
+
   }
-  
+
   map <- map %>%
     leaflet::addEasyButton(leaflet::easyButton(
       position = "topright",
@@ -726,6 +726,6 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   # ) %>%
   leaflet::hideGroup("search") %>%
     htmlwidgets::appendContent(tags$head(tags$meta(name="viewport", content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no")))
-  
+
   return(map)
 }
