@@ -40,11 +40,11 @@ plot_TP <- function(data, seaKen, station){
 
   # add TMDL TP Target line
   if(any(!is.na(data$target_value))){
-    target_periods <- unique(data[!is.na(data$start_datetime),c("start_datetime", "end_datetime")])
+    target_periods <- unique(data[!is.na(data$start_datetime),c("start_datetime", "end_datetime", "target_value")])
     for(i in 1:NROW(target_periods)){
-      p <- p + ggplot2::geom_segment(aes(x=target_periods$start_datetime[i], xend=target_periods$end_datetime[i],
-                                         y=target_value, yend=target_value,
-                                         color = "TMDL Target", linetype = "TMDL Target", shape = "TMDL Target"))
+      p <- p + ggplot2::geom_segment(x=target_periods$start_datetime[i], xend=target_periods$end_datetime[i],
+                                     y=target_periods$target_value[i], yend=target_periods$target_value[i],
+                                     aes(color = "TMDL Target", linetype = "TMDL Target", shape = "TMDL Target"))
     }
   }
 
