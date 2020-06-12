@@ -63,7 +63,7 @@ status_stns <- function(df) {
     dplyr::ungroup() %>%
     dplyr::select(-samples)
 
-  status_reason <<- bind_rows(status_reason, status_check)
+  status_reason <<- bind_rows(status_reason, filter(status_check, status == "Unassessed"))
 
   status_check <- status_check %>%
     select(-reason) %>%
