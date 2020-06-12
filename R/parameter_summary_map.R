@@ -235,7 +235,80 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                  charnames[charnames$awqms == param, "file"], "_", station, "_geomean.jpeg' style='width:600px' target='_blank'>Geomean</a>")
         }
       )
-    } else {
+    } else if(param %in% odeqstatusandtrends::AWQMS_Char_Names('TSS')){
+      paste(
+        "TSS plots<br>",
+        if(file.exists(paste0("Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                              charnames[charnames$awqms == param, "file"], "_", station, "_single sample.jpeg"))){
+          paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                 charnames[charnames$awqms == param, "file"], "_", station, "_single sample.jpeg' style='width:600px' target='_blank'>Single Sample</a>")
+        }
+        ,
+        if(file.exists(paste0("Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                              charnames[charnames$awqms == param, "file"], "_", station, "_monthly mean.jpeg"))){
+          paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                 charnames[charnames$awqms == param, "file"], "_", station, "_monthly mean.jpeg' style='width:600px' target='_blank'>Monthly Mean</a>")
+        }
+        ,
+        if(file.exists(paste0("Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                              charnames[charnames$awqms == param, "file"], "_", station, "_annual mean.jpeg"))){
+          paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                 charnames[charnames$awqms == param, "file"], "_", station, "_annual mean.jpeg' style='width:600px' target='_blank'>Annual Mean</a>")
+        }
+      )
+    } else if(param %in% odeqstatusandtrends::AWQMS_Char_Names('TP')){
+      paste(
+        "TP plots<br>",
+        if(file.exists(paste0("Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                              charnames[charnames$awqms == param, "file"], "_", station, "_single sample.jpeg"))){
+          paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                 charnames[charnames$awqms == param, "file"], "_", station, "_single sample.jpeg' style='width:600px' target='_blank'>Single Sample</a>")
+        }
+        ,
+        if(file.exists(paste0("Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                              charnames[charnames$awqms == param, "file"], "_", station, "_monthly median.jpeg"))){
+          paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                 charnames[charnames$awqms == param, "file"], "_", station, "_monthly median.jpeg' style='width:600px' target='_blank'>Monthly Median</a>")
+        }
+        ,
+        if(file.exists(paste0("Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                              charnames[charnames$awqms == param, "file"], "_", station, "_median over two consecutive years.jpeg"))){
+          paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                 charnames[charnames$awqms == param, "file"], "_", station, "_median over two consecutive years.jpeg' style='width:600px' target='_blank'>Two Year Median</a>")
+        }
+        ,
+        if(file.exists(paste0("Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                              charnames[charnames$awqms == param, "file"], "_", station, "_annual mean.jpeg"))){
+          paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                 charnames[charnames$awqms == param, "file"], "_", station, "_annual mean.jpeg' style='width:600px' target='_blank'>Geomean</a>")
+        }
+        ,
+        if(file.exists(paste0("Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                              charnames[charnames$awqms == param, "file"], "_", station, "_seasonal mean.jpeg"))){
+          paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                 charnames[charnames$awqms == param, "file"], "_", station, "_seasonal mean.jpeg' style='width:600px' target='_blank'>Seasonal Mean</a>")
+        }
+        ,
+        if(file.exists(paste0("Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                              charnames[charnames$awqms == param, "file"], "_", station, "_seasonal median.jpeg"))){
+          paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                 charnames[charnames$awqms == param, "file"], "_", station, "_seasonal median.jpeg' style='width:600px' target='_blank'>Seasonal Median</a>")
+        }
+      )
+    } else if(param %in% odeqstatusandtrends::AWQMS_Char_Names('temperature')){
+      paste(
+        "Temperature plots<br>",
+        if(file.exists(paste0("Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                              charnames[charnames$awqms == param, "file"], "_", station, ".jpeg"))){
+          paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                 charnames[charnames$awqms == param, "file"], "_", station, ".jpeg' style='width:600px' target='_blank'>7DADM</a>")
+        }
+        ,
+        if(file.exists(paste0("Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                              charnames[charnames$awqms == param, "file"], "_", station, "_daily maximum.jpeg"))){
+          paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                 charnames[charnames$awqms == param, "file"], "_", station, "_daily maximum.jpeg' style='width:600px' target='_blank'>Daily Maximum</a>")
+        } else {
       # if(file.exists(paste0('Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
       #        charnames[charnames$awqms == param, "file"], "_", station, ".jpeg'))){
       paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",

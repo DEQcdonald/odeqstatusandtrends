@@ -48,7 +48,7 @@ plot_TP <- function(data, seaKen, station){
     }
   }
 
-  title <- paste(station, unique(data$StationDes))
+  title <- paste(station, unique(data$StationDes), dplyr::if_else(!is.na(unique(data$target_stat_base)), unique(data$target_stat_base), ""))
   subtitle <- paste0("Assessment Unit: ", unique(data$AU_ID), " ", unique(data$AU_Name))
 
   # plot data with excursion colors
