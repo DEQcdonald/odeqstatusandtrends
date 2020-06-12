@@ -309,6 +309,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
           paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
                  charnames[charnames$awqms == param, "file"], "_", station, "_daily maximum.jpeg' style='width:600px' target='_blank'>Daily Maximum</a>")
         }
+      )
     } else {
       # if(file.exists(paste0('Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
       #        charnames[charnames$awqms == param, "file"], "_", station, ".jpeg'))){
