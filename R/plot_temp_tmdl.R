@@ -4,12 +4,13 @@
 #' @param data Dataframe to determine status from. Must have 'excursion' column generated.
 #' @param seaKen Results of Seasonal Kendall Analysis
 #' @param station The station to plot
+#' @param max_date The max date to show on the plot
 #' @return dataframe of stations with sufficient data
 #' @export
 #' @examples
 #' plot_temp_tmdl(data = data.frame, seaKen, station)
 
-plot_temp_tmdl <- function(data, seaKen, station){
+plot_temp_tmdl <- function(data, seaKen, station, max_date = min(data$sample_datetime, na.rm = TRUE)){
   # subset seaken table to parameter and significant trends
   seaken_temp <- seaKen %>% dplyr::filter(Char_Name == "Temperature, water",
                                          significance != "No Significant Trend",
@@ -18,7 +19,7 @@ plot_temp_tmdl <- function(data, seaKen, station){
   # obtain data range limits for plotting
   result_max <- max(c(data$Result_cen, data$target_value), na.rm = TRUE)
   xmin <- min(data$sample_datetime, na.rm = TRUE)
-  xmax <- max(data$sample_datetime, na.rm = TRUE)
+  xmax <- max_date
   ymin <- 0
   ymax <- ifelse(result_max > 100, result_max, 100)
   data$excursion <- dplyr::if_else(!is.na(data$excursion_cen),
@@ -54,7 +55,7 @@ plot_temp_tmdl <- function(data, seaKen, station){
   # plot data with excursion colors
   p <- p + ggplot2::geom_point(aes(x=sample_datetime, y=Result_cen, color = excursion, linetype = excursion, shape = excursion)) +
     ggplot2::ggtitle(title, subtitle = subtitle) +
-    ggplot2::ylab("Temperature (C)") +
+    ggplot2::ylab("Daily Maximum Temperature (C)") +
     ggplot2::xlab("Datetime")
 
   # plot the trend line if applicable

@@ -4,12 +4,13 @@
 #' @param data Dataframe to determine status from. Must have 'excursion' column generated.
 #' @param seaKen Results of Seasonal Kendall Analysis
 #' @param station The station to plot
+#' @param max_date The max date to show on the plot
 #' @return dataframe of stations with sufficient data
 #' @export
 #' @examples
 #' plot_TP(data = data.frame, seaKen, station)
 
-plot_TP <- function(data, seaKen, station){
+plot_TP <- function(data, seaKen, station, max_date = min(data$sample_datetime, na.rm = TRUE)){
   # subset seaken table to parameter and significant trends
   seaken_TP <- seaKen %>% dplyr::filter(Char_Name == odeqstatusandtrends::AWQMS_Char_Names('TP'),
                                         significance != "No Significant Trend",
@@ -18,7 +19,7 @@ plot_TP <- function(data, seaKen, station){
   # obtain data range limits for plotting
   result_max <- max(c(data$Result_cen, data$TP_crit), na.rm = TRUE)
   xmin <- min(data$sample_datetime, na.rm = TRUE)
-  xmax <- max(data$sample_datetime, na.rm = TRUE)
+  xmax <- max_date
   ymin <- 0
   ymax <- ifelse(result_max > 0.15, result_max, 0.15)
   data$excursion <- dplyr::if_else(!is.na(data$excursion_cen),
@@ -48,13 +49,14 @@ plot_TP <- function(data, seaKen, station){
     }
   }
 
-  title <- paste(station, unique(data$StationDes), dplyr::if_else(!is.na(unique(data$target_stat_base)), unique(data$target_stat_base), ""))
+  stat_base <- dplyr::if_else(!is.na(unique(data$target_stat_base)), unique(data$target_stat_base), "")
+  title <- paste(station, unique(data$StationDes))
   subtitle <- paste0("Assessment Unit: ", unique(data$AU_ID), " ", unique(data$AU_Name))
 
   # plot data with excursion colors
   p <- p + ggplot2::geom_point(aes(x=sample_datetime, y=Result_cen, color = excursion, linetype = excursion, shape = excursion)) +
     ggplot2::ggtitle(title, subtitle = subtitle) +
-    ggplot2::ylab("Total Phosphorus (mg/L)") +
+    ggplot2::ylab(paste0(stat_base, " Total Phosphorus (mg/L)")) +
     ggplot2::xlab("Datetime")
 
   # plot the trend line if applicable
