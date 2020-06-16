@@ -49,7 +49,7 @@ plot_temp_tmdl <- function(data, seaKen, station, max_date = min(data$sample_dat
     }
   }
 
-  title <- paste(station, unique(data$StationDes), dplyr::if_else(!is.na(unique(data$target_stat_base)), unique(data$target_stat_base), ""))
+  title <- paste(station, unique(data$StationDes))
   subtitle <- paste0("Assessment Unit: ", unique(data$AU_ID), " ", unique(data$AU_Name))
 
   # plot data with excursion colors

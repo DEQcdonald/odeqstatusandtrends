@@ -4,7 +4,8 @@
 \alias{plot_DO}
 \title{Create dissolved oxygen plots to display status and trend.}
 \usage{
-plot_DO(data, seaKen, station)
+plot_DO(data, seaKen, station, max_date = min(data$sample_datetime, na.rm
+  = TRUE))
 }
 \arguments{
 \item{data}{Dataframe to determine status from. Must have 'excursion_cen' column generated.}
@@ -12,6 +13,8 @@ plot_DO(data, seaKen, station)
 \item{seaKen}{Results of Seasonal Kendall Analysis}
 
 \item{station}{The station to plot}
+
+\item{max_date}{The max date to show on the plot}
 }
 \value{
 dataframe of stations with sufficient data
