@@ -17,7 +17,7 @@ plot_TP <- function(data, seaKen, station, max_date = min(data$sample_datetime, 
                                         MLocID == station)
 
   # obtain data range limits for plotting
-  result_max <- max(c(data$Result_cen, data$TP_crit), na.rm = TRUE)
+  result_max <- max(c(data$Result_cen, data$target_value), na.rm = TRUE)
   xmin <- min(data$sample_datetime, na.rm = TRUE)
   xmax <- max_date
   ymin <- 0
