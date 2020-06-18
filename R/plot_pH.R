@@ -21,7 +21,7 @@ plot_pH <- function(data, seaKen, station, max_date = min(data$sample_datetime, 
   xmin <- min(data$sample_datetime, na.rm = TRUE)
   xmax <- max_date
   ymin <- 0
-  ymax <- ifelse(result_max > 11.5, result_max, 11.5)
+  ymax <- ifelse(result_max > 11.5, result_max * 1.1, 11.5)
   data$excursion <- dplyr::if_else(data$pH_excursion == 1, "Excursion", "Result") # change numeric value to descriptor
 
   # obtain plotting values for trend line if applicable

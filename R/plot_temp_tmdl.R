@@ -21,7 +21,7 @@ plot_temp_tmdl <- function(data, seaKen, station, max_date = min(data$sample_dat
   xmin <- min(data$sample_datetime, na.rm = TRUE)
   xmax <- max_date
   ymin <- 0
-  ymax <- ifelse(result_max > 50, result_max, 50)
+  ymax <- ifelse(result_max > 50, result_max * 1.1, 50)
   data$excursion <- dplyr::if_else(!is.na(data$excursion_cen),
                                    dplyr::if_else(data$excursion_cen == 1, "Excursion", "Result"),
                                    "Result") # change numeric value to descriptor

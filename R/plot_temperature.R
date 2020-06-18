@@ -16,7 +16,7 @@ plot_temperature <- function(data, seaKen, station, max_date = min(data$sample_d
   xmin <- min(data$sample_datetime, na.rm = TRUE)
   xmax <- max_date
   ymin <- 0
-  ymax <- ifelse(result_max > 26, result_max, 26)
+  ymax <- ifelse(result_max > 26, result_max * 1.1, 26)
 
   data$excursion <- dplyr::if_else(data$excursion_cen == 1, "Excursion", "Result") # change numeric value to descriptor
   if(all(is.na(data$excursion))){

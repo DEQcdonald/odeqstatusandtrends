@@ -21,7 +21,7 @@ plot_TP <- function(data, seaKen, station, max_date = min(data$sample_datetime, 
   xmin <- min(data$sample_datetime, na.rm = TRUE)
   xmax <- max_date
   ymin <- 0
-  ymax <- ifelse(result_max > 0.15, result_max, 0.15)
+  ymax <- ifelse(result_max > 0.15, result_max * 1.1, 0.15)
   data$excursion <- dplyr::if_else(!is.na(data$excursion_cen),
                                    dplyr::if_else(data$excursion_cen == 1, "Excursion", "Result"),
                                    "Result") # change numeric value to descriptor
@@ -49,7 +49,7 @@ plot_TP <- function(data, seaKen, station, max_date = min(data$sample_datetime, 
     }
   }
 
-  stat_base <- dplyr::if_else(!is.na(unique(data$target_stat_base)), unique(data$target_stat_base), "")
+  stat_base <- odeqstatusandtrends::simpleCap(dplyr::if_else(!is.na(unique(data$target_stat_base)), unique(data$target_stat_base), ""))
   title <- paste(station, unique(data$StationDes))
   subtitle <- paste0("Assessment Unit: ", unique(data$AU_ID), " ", unique(data$AU_Name))
 

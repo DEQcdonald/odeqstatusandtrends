@@ -27,7 +27,7 @@ plot_bacteria <- function(data, seaKen, station, max_date = min(data$sample_date
   xmin <- min(data$sample_datetime, na.rm = TRUE)
   xmax <- max_date
   ymin <- 0
-  ymax <- ifelse(result_max > uylim, result_max, uylim)
+  ymax <- ifelse(result_max > uylim, result_max * 1.1, uylim)
   data$ss_excursion <- dplyr::if_else(data$ss_excursion == 1, "Excursion", "Result") # change numeric value to descriptor
   data$geomean_excursion <- dplyr::if_else(data$geomean_excursion == 1, "Excursion", "Result") # change numeric value to descriptor
 
