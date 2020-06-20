@@ -30,13 +30,20 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
 
   # Set up shapefiles for map -----------------------------------------------
   print("Processing shapefiles...")
-  query <- paste0("SELECT * FROM AssessmentUnits_OR_Dissolve WHERE AU_ID IN ('",
-                  paste(unique(param_summary$AU_ID), collapse = "', '"), "')")
+  # query <- paste0("SELECT * FROM AssessmentUnits_OR_Dissolve WHERE AU_ID IN ('",
+  #                 paste(unique(param_summary$AU_ID), collapse = "', '"), "')")
 
-  assessment_units <- sf::st_read(
-    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/Assessment_2018_2020.gdb",
-    layer = "AssessmentUnits_OR_Dissolve",
-    query = query, stringsAsFactors = FALSE
+  assessment_units_lines <- sf::st_read(
+    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
+    layer = "AssessmentUnits_OR_Rivers_Coast",
+    query = paste0("SELECT * FROM AssessmentUnits_OR_Rivers_Coast WHERE AU_ID IN ('",
+                   paste(unique(param_summary$AU_ID), collapse = "', '"), "')"), stringsAsFactors = FALSE
+  )
+  assessment_units_ws <- sf::st_read(
+    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
+    layer = "AssessmentUnit_Watershed",
+    query = paste0("SELECT * FROM AssessmentUnit_Watershed WHERE AU_ID IN ('",
+                   paste(unique(param_summary$AU_ID), collapse = "', '"), "')"), stringsAsFactors = FALSE
   )
 
   agwqma <- sf::st_read(
@@ -46,27 +53,36 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   )
   agwqma <- agwqma[,c("PlanName","AgWQ_Repor")]
 
+  # wql_streams <- sf::st_read(
+  #   dsn = "//deqhq1/WQNPS/Agriculture/Status_and_Trend_Analysis/R_support_files",
+  #   layer = "WQL_Streams_2012",
+  #   query = paste0("SELECT * FROM WQL_Streams_2012 WHERE HUC_4TH_CO IN ('",
+  #                  paste(unique(param_summary$HUC8), collapse = "', '"), "')"),
+  #   stringsAsFactors = FALSE
+  # )
   wql_streams <- sf::st_read(
-    dsn = "//deqhq1/WQNPS/Agriculture/Status_and_Trend_Analysis/R_support_files",
-    layer = "WQL_Streams_2012",
-    query = paste0("SELECT * FROM WQL_Streams_2012 WHERE HUC_4TH_CO IN ('",
-                   paste(unique(param_summary$HUC8), collapse = "', '"), "')"),
+    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
+    layer = "AU_Status_Flowlines",
+    # query = paste0("SELECT * FROM AU_Status_Flowlines WHERE HUC_4TH_CO IN ('",
+    #                paste(unique(param_summary$HUC8), collapse = "', '"), "')"),
     stringsAsFactors = FALSE
   )
   wql_streams$Char_Name <- unlist(sapply(wql_streams$POLLUTANT, AWQMS_Char_Names, USE.NAMES = FALSE))
 
-  assessment_units <- sf::st_zm(assessment_units, what = "ZM")
+  assessment_units_lines <- sf::st_zm(assessment_units_lines, what = "ZM")
+  assessment_units_ws <- sf::st_zm(assessment_units_ws, what = "ZM")
   wql_streams <- sf::st_zm(wql_streams, what = "ZM")
   agwqma <- sf::st_zm(agwqma, what = "ZM")
 
-  st_crs(assessment_units)
-  assessment_units <- st_transform(assessment_units, 4326)
-  assessment_units <- assessment_units[,c("AU_ID", "AU_Name")] %>% dplyr::filter(AU_ID != "99")
+  assessment_units_lines <- st_transform(assessment_units_lines, 4326)
+  assessment_units_lines <- assessment_units_lines[,c("AU_ID", "AU_Name")] %>% dplyr::filter(AU_ID != "99")
+  assessment_units_ws <- st_transform(assessment_units_ws, 4326)
+  assessment_units_ws <- assessment_units_ws[,c("AU_ID", "AU_Name")] %>% dplyr::filter(AU_ID != "99")
   st_crs(wql_streams)
   wql_streams <- st_transform(wql_streams, 4326)
   wql_streams <- dplyr::filter(wql_streams[, c("STREAM_NAM", "SEGMENT_ID", "SEASON", "Char_Name", "LISTING_ST", "TMDL_INFO")], Char_Name %in% unique(param_summary$Char_Name))
   wql_streams <- wql_streams[lapply(wql_streams$`_ogr_geometry_`, length) != 0,]
-  wql_streams$TMDL_INFO <- vapply(strsplit(wql_streams$TMDL_INFO, "<a"), `[`, 1, FUN.VALUE=character(1))
+  # wql_streams$TMDL_INFO <- vapply(strsplit(wql_streams$TMDL_INFO, "<a"), `[`, 1, FUN.VALUE=character(1))
   st_crs(agwqma)
   agwqma <- st_transform(agwqma, 4326)
 
@@ -79,9 +95,10 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   p_stns <- sf::st_as_sf(param_summary, coords = c("Long_DD", "Lat_DD"), crs = 4326)
   agwqma <- agwqma %>% dplyr::filter(lengths(st_intersects(., p_stns)) > 0)
 
-  assessment_units <- assessment_units %>% dplyr::group_by(AU_ID, AU_Name) %>% dplyr::summarise()
+  assessment_units_lines <- assessment_units_lines %>% dplyr::group_by(AU_ID, AU_Name) %>% dplyr::summarise()
+  assessment_units_ws <- assessment_units_ws %>% dplyr::group_by(AU_ID, AU_Name) %>% dplyr::summarise()
   wql_streams_data <- sf::st_drop_geometry(wql_streams)
-  wql_streams_shp <- wql_streams %>% dplyr::group_by(STREAM_NAM, SEGMENT_ID) %>% dplyr::summarise()
+  wql_streams_shp <- wql_streams %>% dplyr::group_by(AU_Name, SEGMENT_ID) %>% dplyr::summarise()
 
   # Create functions for mapping --------------------------------------------------------
 
@@ -124,6 +141,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     if(!is.null(station)){
       data <- dplyr::filter(data[, c(2, 1, grep("status|trend", colnames(param_summary)))],
                             Station_ID == station, Parameter == param)
+      data$Parameter <- odeqstatusandtrends::simpleCap(odeqstatusandtrends::AWQMS_to_standard(data$Parameter))
       # %>%
       # dplyr::select(-Parameter, -Station_ID)
 
@@ -141,6 +159,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
       data <- dplyr::filter(data[, c(2, 1, 3, grep("status|trend", colnames(param_summary)))],
                             AU_ID == AU, Parameter == param) %>%
         dplyr::select(-AU_ID)
+      data$Parameter <- odeqstatusandtrends::simpleCap(odeqstatusandtrends::AWQMS_to_standard(data$Parameter))
 
       colnames(data) <- gsub("(?<=[0-9])[^0-9]", "-", colnames(data), perl = TRUE)
       colnames(data) <- gsub("_", " ", colnames(data), perl = TRUE)
@@ -161,6 +180,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     data <- dplyr::filter(data, AU_ID == AU, Parameter == param)
     data <- data %>% dplyr::select(-AU_Name, -HUC8_Name, -HUC8, -Stations, -Organizations)
     data <- data[, c("AU_ID", colnames(data)[colnames(data) != "AU_ID"])]
+    data$Parameter <- odeqstatusandtrends::simpleCap(odeqstatusandtrends::AWQMS_to_standard(data$Parameter))
 
     colnames(data) <- gsub("(?<=[0-9])[^0-9]", "-", colnames(data), perl = TRUE)
     colnames(data) <- gsub("_", " ", colnames(data), perl = TRUE)
@@ -415,14 +435,16 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   layer_groups <- NULL
   for(i in unique(param_summary$Char_Name)){
     print(paste("Adding layer for", i))
-    standard_param <- odeqstatusandtrends::AWQMS_to_standard(i)
+    standard_param <- odeqstatusandtrends::simpleCap(odeqstatusandtrends::AWQMS_to_standard(i))
     layer_groups <- c(layer_groups, standard_param)
     psum <- param_summary %>% dplyr::filter(Char_Name == i)
     psum$z_offset <- dplyr::if_else(!(psum[[status_current]] %in% c("Unassessed", "Insufficient Data") & psum$trend %in% c("Insufficient Data", "No Significant Trend")),
                                     100, 0)
     psum_AU <- psum[!(psum[[status_current]] %in% c("Unassessed", "Insufficient Data") & psum$trend == "Insufficient Data"),]
-    au_data <- dplyr::filter(assessment_units[, c("AU_ID", "AU_Name")], AU_ID %in% unique(psum_AU$AU_ID))
+    au_data <- dplyr::filter(assessment_units_lines[, c("AU_ID", "AU_Name")], AU_ID %in% unique(psum_AU$AU_ID))
     au_data <- merge(au_data, dplyr::filter(au_colors, Char_Name == i)[,c("AU_ID", "color", "HUC8_Name", "HUC8")], by = "AU_ID")
+    au_data_ws <- dplyr::filter(assessment_units_ws[, c("AU_ID", "AU_Name")], AU_ID %in% unique(psum_AU$AU_ID))
+    au_data_ws <- merge(au_data_ws, dplyr::filter(au_colors, Char_Name == i)[,c("AU_ID", "color", "HUC8_Name", "HUC8")], by = "AU_ID")
 
     # au_data <- au_colors %>% dplyr::filter(Char_Name == i)
     # wql_streams_tmp <- dplyr::filter(wql_streams, Char_Name == i)
@@ -450,6 +472,30 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                               options = leaflet::pathOptions(className = "assessmentUnits", interactive = TRUE),
                               highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
                               group = standard_param
+        )
+    }
+    if(nrow(au_data_ws) > 0){
+      map <- map %>%
+        leaflet::addPolygons(data = au_data_ws,
+                             stroke = TRUE,
+                             opacity = 0.9,
+                             weight = 3,
+                             color = ~color,
+                             fillOpacity = 0.1,
+                             fillColor = ~color,
+                             popup = ~paste0("<b>", AU_Name, "<br>",
+                                             "<b>HUC8: </b>", HUC8_Name, " (",
+                                             HUC8, ")<br>",
+                                             # "<br><b>Parameter:</b> ", i, "<br>",
+                                             sapply(AU_ID, au_table, param = i, USE.NAMES = FALSE),
+                                             sapply(AU_ID, popupTable, station = NULL, param = i, USE.NAMES = FALSE)
+                             ),
+                             popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300),
+                             label = ~AU_Name,
+                             smoothFactor = 2,
+                             options = leaflet::pathOptions(className = "assessmentUnits", interactive = TRUE),
+                             highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
+                             group = standard_param
         )
     }
     #   for(j in c("lightgray", "green", "orange")){
