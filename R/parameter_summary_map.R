@@ -13,6 +13,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
 
   setwd(proj_dir)
 
+  load("//deqhq1/WQNPS/Status_and_Trend_Reports/2020/Oregon_target_data.RData")
+  load(file = "//deqhq1/WQNPS/Status_and_Trend_Reports/Lookups_Statewide/huc_crosswalk.RData")
+
   status_current <- as.symbol(colnames(param_summary)[grep("trend", colnames(param_summary)) - 1])
   au_param_summary <- au_param_summary %>% dplyr::filter(AU_ID != "")
 
@@ -60,28 +63,43 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   #                  paste(unique(param_summary$HUC8), collapse = "', '"), "')"),
   #   stringsAsFactors = FALSE
   # )
-  wql_streams <- sf::st_read(
+  huc_12s <- hucs[hucs$HUC_8 %in% unique(param_summary$HUC8),]$HUC_12
+  wql_streams_lines <- sf::st_read(
     dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
-    layer = "AU_Status_Flowlines",
-    # query = paste0("SELECT * FROM AU_Status_Flowlines WHERE HUC_4TH_CO IN ('",
-    #                paste(unique(param_summary$HUC8), collapse = "', '"), "')"),
+    layer = "Impaired_Pollutant_Rivers_Coast",
+    query = paste0("SELECT * FROM Impaired_Pollutant_Rivers_Coast WHERE HUC12 IN ('",
+                   paste(huc_12s, collapse = "', '"), "')"),
     stringsAsFactors = FALSE
   )
-  wql_streams$Char_Name <- unlist(sapply(wql_streams$POLLUTANT, AWQMS_Char_Names, USE.NAMES = FALSE))
+  wql_streams_ws <- sf::st_read(
+    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
+    layer = "Impaired_Pollutant_Watershed",
+    query = paste0("SELECT * FROM Impaired_Pollutant_Watershed WHERE HUC12 IN ('",
+                   paste(huc_12s, collapse = "', '"), "')"),
+    stringsAsFactors = FALSE
+  )
+  wql_streams_lines$Char_Name <- unlist(sapply(wql_streams_lines$Char_Name, AWQMS_Char_Names, USE.NAMES = FALSE))
+  wql_streams_ws$Char_Name <- unlist(sapply(wql_streams_ws$Char_Name, AWQMS_Char_Names, USE.NAMES = FALSE))
 
   assessment_units_lines <- sf::st_zm(assessment_units_lines, what = "ZM")
   assessment_units_ws <- sf::st_zm(assessment_units_ws, what = "ZM")
-  wql_streams <- sf::st_zm(wql_streams, what = "ZM")
+  wql_streams_lines <- sf::st_zm(wql_streams_lines, what = "ZM")
+  wql_streams_ws <- sf::st_zm(wql_streams_ws, what = "ZM")
   agwqma <- sf::st_zm(agwqma, what = "ZM")
 
   assessment_units_lines <- st_transform(assessment_units_lines, 4326)
   assessment_units_lines <- assessment_units_lines[,c("AU_ID", "AU_Name")] %>% dplyr::filter(AU_ID != "99")
   assessment_units_ws <- st_transform(assessment_units_ws, 4326)
   assessment_units_ws <- assessment_units_ws[,c("AU_ID", "AU_Name")] %>% dplyr::filter(AU_ID != "99")
-  st_crs(wql_streams)
-  wql_streams <- st_transform(wql_streams, 4326)
-  wql_streams <- dplyr::filter(wql_streams[, c("STREAM_NAM", "SEGMENT_ID", "SEASON", "Char_Name", "LISTING_ST", "TMDL_INFO")], Char_Name %in% unique(param_summary$Char_Name))
-  wql_streams <- wql_streams[lapply(wql_streams$`_ogr_geometry_`, length) != 0,]
+  st_crs(wql_streams_lines)
+  wql_streams_lines <- st_transform(wql_streams_lines, 4326)
+  wql_streams_lines <- dplyr::filter(wql_streams_lines[, c("AU_Name", "AU_ID", "Period", "Char_Name", "IR_category")],
+                               Char_Name %in% unique(param_summary$Char_Name))
+  st_crs(wql_streams_ws)
+  wql_streams_ws <- st_transform(wql_streams_ws, 4326)
+  wql_streams_ws <- dplyr::filter(wql_streams_ws[, c("AU_Name", "AU_ID", "Period", "Char_Name", "IR_category")],
+                               Char_Name %in% unique(param_summary$Char_Name))
+  # wql_streams <- wql_streams[lapply(wql_streams$`_ogr_geometry_`, length) != 0,]
   # wql_streams$TMDL_INFO <- vapply(strsplit(wql_streams$TMDL_INFO, "<a"), `[`, 1, FUN.VALUE=character(1))
   st_crs(agwqma)
   agwqma <- st_transform(agwqma, 4326)
@@ -97,8 +115,11 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
 
   assessment_units_lines <- assessment_units_lines %>% dplyr::group_by(AU_ID, AU_Name) %>% dplyr::summarise()
   assessment_units_ws <- assessment_units_ws %>% dplyr::group_by(AU_ID, AU_Name) %>% dplyr::summarise()
-  wql_streams_data <- sf::st_drop_geometry(wql_streams)
-  wql_streams_shp <- wql_streams %>% dplyr::group_by(AU_Name, SEGMENT_ID) %>% dplyr::summarise()
+  wql_streams_data <- bind_rows(sf::st_drop_geometry(wql_streams_lines),
+                                sf::st_drop_geometry(wql_streams_ws))
+
+  wql_streams_lines_shp <- wql_streams_lines %>% dplyr::group_by(AU_Name, AU_ID) %>% dplyr::summarise()
+  wql_streams_ws_shp <- wql_streams_ws %>% dplyr::group_by(AU_Name, AU_ID) %>% dplyr::summarise()
 
   # Create functions for mapping --------------------------------------------------------
 
@@ -142,8 +163,6 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
       data <- dplyr::filter(data[, c(2, 1, grep("status|trend", colnames(param_summary)))],
                             Station_ID == station, Parameter == param)
       data$Parameter <- odeqstatusandtrends::simpleCap(odeqstatusandtrends::AWQMS_to_standard(data$Parameter))
-      # %>%
-      # dplyr::select(-Parameter, -Station_ID)
 
       colnames(data) <- gsub("(?<=[0-9])[^0-9]", "-", colnames(data), perl = TRUE)
       colnames(data) <- gsub("_", " ", colnames(data), perl = TRUE)
@@ -194,11 +213,26 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     return(table)
   }
 
-  WQLpopupTable <- function(seg_ID = NULL, param = NULL){
-    if(!is.null(seg_ID)){
+  target_table <- function(station = NULL, param){
+    targets <- state_target_data %>%
+      dplyr::filter(MLocID == station, Char_Name == param) %>%
+      dplyr::select(Pollutant = Char_Name, Target = target_value, "Statistical Base" = target_stat_base)
+    if(any(!is.na(targets$Target))){
+      table <- table <- knitr::kable(targets,
+                                     format = "html", row.names = FALSE) %>%
+        kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                                  full_width = TRUE, font_size = 10)
+      return(table)
+    } else {
+      return(paste("No target assessed for", odeqstatusandtrends::AWQMS_to_standard(param), "at this station."))
+    }
+  }
+
+  WQLpopupTable <- function(au_id = NULL, param = NULL){
+    if(!is.null(au_id)){
       table <- knitr::kable(
-        dplyr::filter(wql_streams_data, SEGMENT_ID == seg_ID) %>%
-          dplyr::select(Pollutant = Char_Name, Listing = LISTING_ST, Season = SEASON, TMDL = TMDL_INFO) %>% unique(),
+        dplyr::filter(wql_streams_data, AU_ID == au_id) %>%
+          dplyr::select(Pollutant = Char_Name, Listing = IR_category, Season = Period) %>% unique(),
         format = "html", row.names = FALSE) %>%
         kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
                                   full_width = TRUE, font_size = 10)
@@ -397,22 +431,35 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
 
   if(nrow(wql_streams_data)>0){
     map <- map %>%
-      leaflet::addPolylines(data = wql_streams_shp,
+      leaflet::addPolygons(data = wql_streams_ws_shp,
+                                       opacity = 1,
+                                       weight = 3.5,
+                                       color = "red",
+                                       fillColor = "red",
+                                       fillOpacity = 0.25,
+                                       popup = ~paste0("<b>", AU_Name,
+                                                       # "<br>Parameter:</b> ", Char_Name,
+                                                       "<br></b><br>",
+                                                       sapply(AU_ID, WQLpopupTable, USE.NAMES = FALSE)),
+                                       popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300),
+                                       highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
+                                       label = ~AU_Name,
+                                       smoothFactor = 1.5,
+                                       group = "WQ Listed Assessment Units"
+    ) %>%
+      leaflet::addPolylines(data = wql_streams_lines_shp,
                             opacity = 1,
                             weight = 3.5,
                             color = "red",
-                            # popup = ~paste0("<b>", STREAM_NAM,
-                            #                 "<br>Parameter:</b> ", Char_Name,
-                            #                 "<br><b>Listing:</b> ", LISTING_ST),
-                            popup = ~paste0("<b>", STREAM_NAM,
+                            popup = ~paste0("<b>", AU_Name,
                                             # "<br>Parameter:</b> ", Char_Name,
                                             "<br></b><br>",
-                                            sapply(SEGMENT_ID, WQLpopupTable, USE.NAMES = FALSE)),
+                                            sapply(AU_ID, WQLpopupTable, USE.NAMES = FALSE)),
                             popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300),
-                            highlightOptions = leaflet::highlightOptions(color = "red", weight = 8, opacity = 1),
-                            label = ~STREAM_NAM,
+                            highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
+                            label = ~AU_Name,
                             smoothFactor = 1.5,
-                            group = "WQ Listed Streams"
+                            group = "WQ Listed Assessment Units"
       )
   } else {print(paste("No water quality limited streams found for the selected area."))}
 
@@ -560,6 +607,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                                  popup = ~paste0("<b>", StationDes, "<br>ID:</b> ", MLocID,
                                                  "<br><b>AU ID:</b> ", AU_ID,
                                                  "<br>",
+                                                 sapply(MLocID, target_table, param = i, USE.NAMES = FALSE),
                                                  sapply(MLocID, popupTable, AU = NULL, param = i, USE.NAMES = FALSE),
                                                  mapply(plot_html, station = MLocID, sub_name = HUC8_Name, param = i, USE.NAMES = FALSE)
                                  ),
@@ -604,10 +652,10 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
       )
     )) %>%
     leaflet::addLayersControl(baseGroups = sort(layer_groups),
-                              overlayGroups = c("Assessment Area", "WQ Listed Streams", "Ag WQ Management Areas",
+                              overlayGroups = c("Assessment Area", "WQ Listed Assessment Units", "Ag WQ Management Areas",
                                                 "World Imagery", "Hydrography", "Land Cover (NLCD 2016)"),
                               options = leaflet::layersControlOptions(collapsed = FALSE)) %>%
-    leaflet::hideGroup(c("World Imagery", "Hydrography", "Ag WQ Management Areas", "Land Cover (NLCD 2016)", "WQ Listed Streams")) %>%
+    leaflet::hideGroup(c("World Imagery", "Hydrography", "Ag WQ Management Areas", "Land Cover (NLCD 2016)", "WQ Listed Assessment Units")) %>%
     leaflet::addControl(position = "bottomleft", className = "legend",
                         html = sprintf('<html><body><div style="opacity:0.95">
                                         <img width="375" height="180" src="data:image/png;base64,%s">
