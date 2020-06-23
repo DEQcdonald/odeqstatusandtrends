@@ -12,8 +12,8 @@ add_criteria <- function(data) {
   parameters <- unique(data$Char_Name)
   
   print("Checking spawn dates...")
-  data$spawn_start <- LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnStart"]
-  data$spawn_end <- LU_spawn[match(data$SpawnCode, LU_spawn$SpawnCode),"SpawnEnd"]
+  data$spawn_start <- AWQMSdata::LU_spawn[match(data$SpawnCode, AWQMSdata::LU_spawn$SpawnCode),"SpawnStart"]
+  data$spawn_end <- AWQMSdata::LU_spawn[match(data$SpawnCode, AWQMSdata::LU_spawn$SpawnCode),"SpawnEnd"]
 
   # tmdl_lookup <- odeqstatusandtrends::tmdl_targets
 
@@ -24,28 +24,28 @@ add_criteria <- function(data) {
     
     # data <- dplyr::bind_rows(data[data$Char_Name != "Temperature, water",], sdadm)
     
-    data$temp_crit <- Temp_crit[match(data$FishCode, Temp_crit$FishUse_code), "Temp_Criteria"]
+    data$temp_crit <- AWQMSdata::Temp_crit[match(data$FishCode, AWQMSdata::Temp_crit$FishUse_code), "Temp_Criteria"]
     data$criteria <- "Temperature standard"
   }
   if(any("Dissolved oxygen (DO)" %in% parameters)) {
     print("Adding dissolved oxygen criteria values...")
-    data$Do_crit_30D <- DO_crit[match(data$DO_code, DO_crit$DO_code), "crit_30D"]
-    data$Do_crit_7Mi <- DO_crit[match(data$DO_code, DO_crit$DO_code), "crit_7Mi"]
-    data$DO_crit_min <- DO_crit[match(data$DO_code, DO_crit$DO_code), "crit_Min"]
-    data$Do_crit_instant <- DO_crit[match(data$DO_code, DO_crit$DO_code), "crit_Instant"]
+    data$Do_crit_30D <- AWQMSdata::DO_crit[match(data$DO_code, AWQMSdata::DO_crit$DO_code), "crit_30D"]
+    data$Do_crit_7Mi <- AWQMSdata::DO_crit[match(data$DO_code, AWQMSdata::DO_crit$DO_code), "crit_7Mi"]
+    data$DO_crit_min <- AWQMSdata::DO_crit[match(data$DO_code, AWQMSdata::DO_crit$DO_code), "crit_Min"]
+    data$Do_crit_instant <- AWQMSdata::DO_crit[match(data$DO_code, AWQMSdata::DO_crit$DO_code), "crit_Instant"]
     data$criteria <- "DO standard"
   }
   if(any("pH" %in% parameters)) {
     print("Adding pH criteria values...")
-    data$pH_Min <- pH_crit[match(data$pH_code, pH_crit$pH_code), "pH_Min"]
-    data$pH_Max <- pH_crit[match(data$pH_code, pH_crit$pH_code), "pH_Max"]
+    data$pH_Min <- AWQMSdata::pH_crit[match(data$pH_code, AWQMSdata::pH_crit$pH_code), "pH_Min"]
+    data$pH_Max <- AWQMSdata::pH_crit[match(data$pH_code, AWQMSdata::pH_crit$pH_code), "pH_Max"]
     data$criteria <- "pH standard"
   }
   if(any(parameters %in% c("Escherichia coli", "Fecal Coliform", "Enterococcus"))) {
     print("adding bacteria criteria values...")
-    data$bact_crit_ss <- Bact_crit[match(data$BacteriaCode, Bact_crit$BacteriaCode), "SS_Crit"]
-    data$bact_crit_geomean <- Bact_crit[match(data$BacteriaCode, Bact_crit$BacteriaCode), "Geomean_Crit"]
-    data$bact_crit_percent <- Bact_crit[match(data$BacteriaCode, Bact_crit$BacteriaCode), "Perc_Crit"]
+    data$bact_crit_ss <- AWQMSdata::Bact_crit[match(data$BacteriaCode, AWQMSdata::Bact_crit$BacteriaCode), "SS_Crit"]
+    data$bact_crit_geomean <- AWQMSdata::Bact_crit[match(data$BacteriaCode, AWQMSdata::Bact_crit$BacteriaCode), "Geomean_Crit"]
+    data$bact_crit_percent <- AWQMSdata::Bact_crit[match(data$BacteriaCode, AWQMSdata::Bact_crit$BacteriaCode), "Perc_Crit"]
     data$criteria <- "Bacteria standard"
   }
 
