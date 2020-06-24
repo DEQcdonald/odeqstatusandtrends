@@ -88,7 +88,7 @@ status_stns <- function(df) {
                                                   1,
                                                   dplyr::if_else(samples >= 10 & excursions/samples > 0.10,
                                                                  1,
-                                                                 dplyr::if_else(samples >= 5 & samples <= 9 & excursions >= 1,
+                                                                 dplyr::if_else(samples >= 5 & samples <= 9 & excursions > 1,
                                                                                 1, 0)
                                                   )),
                        status = dplyr::if_else(samples < 1 | is.na(samples) | all(is.na(excursion)),
