@@ -98,8 +98,12 @@ status_stns <- function(df) {
                                                               "Attaining")
                        ),
                        reason = dplyr::if_else(status == "Unassessed",
-                                               dplyr::if_else(all(is.na(excursion)), "no_target",
-                                                              "no_results"),
+                                               dplyr::if_else(samples < 5,
+                                                              "less_than_5_samples",
+                                                              if_else(all(is.na(excursion)),
+                                                                      "no_target",
+                                                                      "no_results")
+                                                              ),
                                                NA_character_)
       ) %>%
       dplyr::ungroup() %>%
