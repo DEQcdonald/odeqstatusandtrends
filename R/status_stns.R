@@ -124,7 +124,7 @@ status_stns <- function(df) {
 
   }
 
-  status_check <- df %>%
+  status_check_DO_pH <- df %>%
     dplyr::filter(Char_Name %in% c("Dissolved oxygen (DO)", "pH")) %>%
     dplyr::group_by(MLocID, Char_Name, status_period) %>%
     dplyr::summarise(samples = n(),
@@ -150,11 +150,15 @@ status_stns <- function(df) {
     dplyr::ungroup() %>%
     dplyr::select(-samples)
 
-  status_reason <<- bind_rows(status_reason, filter(status_check, status == "Unassessed"))
+  status_reason <<- bind_rows(status_reason, filter(status_check_DO_pH, status == "Unassessed"))
 
-  status_check <- status_check %>%
+  status_check_DO_pH <- status_check_DO_pH %>%
     select(-reason) %>%
     tidyr::pivot_wider(names_from = status_period, values_from = status)
+
+  if(nrow(status_check_DO_pH) > 0){
+    status_check <- dplyr::bind_rows(status_check, status_check_DO_pH)
+  }
 
   status_check[is.na(status_check)] <- "Unassessed"
   cols <- c("MLocID", "Char_Name", cols)
