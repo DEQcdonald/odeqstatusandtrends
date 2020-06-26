@@ -46,7 +46,8 @@ status_stns <- function(df) {
   }
 
   status_check <- df %>%
-    dplyr::filter(!(BacteriaCode == 3 & Char_Name == "Fecal Coliform")) %>%
+    dplyr::filter(!(BacteriaCode == 3 & Char_Name == "Fecal Coliform"),
+                  !Char_Name %in% c("Dissolved oxygen (DO)", "pH")) %>%
     dplyr::group_by(MLocID, Char_Name, status_period) %>%
     dplyr::summarise(samples = n(),
                      status = dplyr::if_else(samples < 1 | is.na(samples) | all(is.na(excursion_cen)),
@@ -122,6 +123,38 @@ status_stns <- function(df) {
     }
 
   }
+
+  status_check <- df %>%
+    dplyr::filter(Char_Name %in% c("Dissolved oxygen (DO)", "pH")) %>%
+    dplyr::group_by(MLocID, Char_Name, status_period) %>%
+    dplyr::summarise(samples = n(),
+                     n_excursion = sum(excursion_cen, na.rm = TRUE),
+                     binomial_excursions = odeqassessment::excursions_req(samples),
+                     per_exceed = dplyr::if_else(samples >= 5 & n_excursion > binomial_excursions,
+                                                               1, 0),
+                     status = dplyr::if_else(samples < 5 | is.na(samples) | all(is.na(excursion_cen)),
+                                             "Unassessed",
+                                             dplyr::if_else(per_exceed == 1,
+                                                            "Not Attaining",
+                                                            "Attaining")
+                     ),
+                     reason = dplyr::if_else(status == "Unassessed",
+                                             dplyr::if_else(samples < 5,
+                                                            "no_results",
+                                                            if_else(all(is.na(excursion_cen)),
+                                                                    "no_target",
+                                                                    "no_results")
+                                             ),
+                                             NA_character_)
+    ) %>%
+    dplyr::ungroup() %>%
+    dplyr::select(-samples)
+
+  status_reason <<- bind_rows(status_reason, filter(status_check, status == "Unassessed"))
+
+  status_check <- status_check %>%
+    select(-reason) %>%
+    tidyr::pivot_wider(names_from = status_period, values_from = status)
 
   status_check[is.na(status_check)] <- "Unassessed"
   cols <- c("MLocID", "Char_Name", cols)
