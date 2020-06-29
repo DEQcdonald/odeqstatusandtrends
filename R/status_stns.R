@@ -151,7 +151,7 @@ status_stns <- function(df) {
                                                NA_character_)
       ) %>%
       dplyr::ungroup() %>%
-      dplyr::select(-samples)
+      dplyr::select(-samples, -n_excursion, -binomial_excursions, -per_exceed)
 
     status_reason <<- bind_rows(status_reason, filter(status_check_DO_pH, status == "Unassessed"))
 
