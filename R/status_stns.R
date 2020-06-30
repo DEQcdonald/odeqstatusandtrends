@@ -126,9 +126,9 @@ status_stns <- function(df) {
 
   }
 
-  if(any(unique(df$Char_Name) %in% c("Dissolved oxygen (DO)", "pH"))){
-    status_check_DO_pH <- df %>%
-      dplyr::filter(Char_Name %in% c("Dissolved oxygen (DO)", "pH")) %>%
+  if(any(unique(df$Char_Name) == "pH")){
+    status_check_pH <- df %>%
+      dplyr::filter(Char_Name == "pH") %>%
       dplyr::group_by(MLocID, Char_Name, status_period) %>%
       dplyr::summarise(samples = n(),
                        n_excursion = sum(excursion_cen, na.rm = TRUE),
@@ -153,14 +153,78 @@ status_stns <- function(df) {
       dplyr::ungroup() %>%
       dplyr::select(-samples, -n_excursion, -binomial_excursions, -per_exceed)
 
-    status_reason <<- bind_rows(status_reason, filter(status_check_DO_pH, status == "Unassessed"))
+    status_reason <<- bind_rows(status_reason, filter(status_check_pH, status == "Unassessed"))
 
-    status_check_DO_pH <- status_check_DO_pH %>%
+    status_check_pH <- status_check_pH %>%
       select(-reason) %>%
       tidyr::pivot_wider(names_from = status_period, values_from = status)
 
-    if(nrow(status_check_DO_pH) > 0){
-      status_check <- dplyr::bind_rows(status_check, status_check_DO_pH)
+    if(nrow(status_check_pH) > 0){
+      status_check <- dplyr::bind_rows(status_check, status_check_pH)
+    }
+  }
+
+  if(any(unique(df$Char_Name) == "Dissolved oxygen (DO)")){
+    status_check_DO <- df %>%
+      dplyr::filter(Char_Name == "Dissolved oxygen (DO)") %>%
+      dplyr::group_by(MLocID, Char_Name, status_period) %>%
+      dplyr::summarise(samples = n(),
+                       spawn_samples = sum(Spawn_type == "Spawn", na.rm = TRUE),
+                       n_yr_inst_exc = max(sum(yr_exc_inst, na.rm = TRUE), sum(yr_exc_min, na.rm = TRUE)),
+                       n_spawn_inst_exc = max(sum(spwn_exc_inst, na.rm = TRUE), sum(spwn_exc_min, na.rm = TRUE)),
+                       yr_binomial_excursions = odeqassessment::excursions_req(samples),
+                       spawn_binomial_excursions = odeqassessment::excursions_req(spawn_samples),
+                       yr_per_exceed = dplyr::if_else(samples >= 5 & n_yr_inst_exc > binomial_excursions,
+                                                   1, 0),
+                       spawn_per_exceed = dplyr::if_else(spawn_samples >= 5 & n_spawn_inst_exc > spawn_binomial_excursions,
+                                                         1, 0),
+                       n_critical_30D = sum(is.crit & Statistical_Base == "30DADMean", na.rm = TRUE),
+                       n_critical_7D = sum(Spawn_type == "Spawn" & Statistical_Base == "7DADMean", na.rm = TRUE)
+                       yr_crit = n_critical_30D >= 15,
+                       spawn_crit = n_critical_7D >= 15,
+                       yr_status = dplyr::if_else(yr_crit,
+                                                  dplyr::if_else(any(1 %in% c(yr_exc_30DADMean, yr_exc_7DADMin, yr_exc_min)),
+                                                                 "Not Attaining",
+                                                                 "Attaining"),
+                                                  dplyr::if_else(samples >= 5,
+                                                                 dplyr::if_else(n_yr_inst_exc > yr_binomial_excursions,
+                                                                                "Not Attaining",
+                                                                                "Attaining"),
+                                                                 "Unassessed"
+                                                  )
+                       ),
+                       spawn_status = dplyr::if_else(spawn_crit,
+                                                     dplyr::if_else(any(1 %in% c(spwn_exc_7DADMean, spwn_exc_min)),
+                                                                    "Not Attaining",
+                                                                    "Attaining"),
+                                                     dplyr::if_else(samples >= 5,
+                                                                    dplyr::if_else(n_spawn_inst_exc > spawn_binomial_excursions,
+                                                                                   "Not Attaining",
+                                                                                   "Attaining"),
+                                                                    "Unassessed"
+                                                     )
+                       ),
+                       status = dplyr::if_else("Not Attaining" %in% c(yr_status, spawn_status),
+                                               "Not_Attaining",
+                                               dplyr::if_else("Attaining" %in% c(yr_status, spawn_status),
+                                                              "Attaining",
+                                                              "Unassessed")
+                       ),
+                       reason = dplyr::if_else(status == "Unassessed",
+                                               "no_results",
+                                               NA_character_)
+      ) %>%
+      dplyr::ungroup() %>%
+      dplyr::select(MLocID, Char_Name, status_period, status, reason)
+
+    status_reason <<- bind_rows(status_reason, filter(status_check_DO, status == "Unassessed"))
+
+    status_check_DO <- status_check_DO %>%
+      select(-reason) %>%
+      tidyr::pivot_wider(names_from = status_period, values_from = status)
+
+    if(nrow(status_check_DO) > 0){
+      status_check <- dplyr::bind_rows(status_check, status_check_DO)
     }
   }
 
