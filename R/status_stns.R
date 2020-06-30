@@ -174,12 +174,12 @@ status_stns <- function(df) {
                        n_spawn_inst_exc = max(sum(spwn_exc_inst, na.rm = TRUE), sum(spwn_exc_min, na.rm = TRUE)),
                        yr_binomial_excursions = odeqassessment::excursions_req(samples),
                        spawn_binomial_excursions = odeqassessment::excursions_req(spawn_samples),
-                       yr_per_exceed = dplyr::if_else(samples >= 5 & n_yr_inst_exc > binomial_excursions,
+                       yr_per_exceed = dplyr::if_else(samples >= 5 & n_yr_inst_exc > yr_binomial_excursions,
                                                    1, 0),
                        spawn_per_exceed = dplyr::if_else(spawn_samples >= 5 & n_spawn_inst_exc > spawn_binomial_excursions,
                                                          1, 0),
-                       n_critical_30D = sum(is.crit & Statistical_Base == "30DADMean", na.rm = TRUE),
-                       n_critical_7D = sum(Spawn_type == "Spawn" & Statistical_Base == "7DADMean", na.rm = TRUE)
+                       n_critical_30D = sum(is.crit == 1 & Statistical_Base == "30DADMean", na.rm = TRUE),
+                       n_critical_7D = sum(Spawn_type == "Spawn" & Statistical_Base == "7DADMean", na.rm = TRUE),
                        yr_crit = n_critical_30D >= 15,
                        spawn_crit = n_critical_7D >= 15,
                        yr_status = dplyr::if_else(yr_crit,
@@ -205,7 +205,7 @@ status_stns <- function(df) {
                                                      )
                        ),
                        status = dplyr::if_else("Not Attaining" %in% c(yr_status, spawn_status),
-                                               "Not_Attaining",
+                                               "Not Attaining",
                                                dplyr::if_else("Attaining" %in% c(yr_status, spawn_status),
                                                               "Attaining",
                                                               "Unassessed")
