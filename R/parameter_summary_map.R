@@ -309,6 +309,12 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
           paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
                  charnames[charnames$awqms == param, "file"], "_", station, "_annual mean.jpeg' style='width:600px' target='_blank'>Annual Mean</a>")
         }
+        ,
+        if(file.exists(paste0("Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                              charnames[charnames$awqms == param, "file"], "_", station, "_no target.jpeg"))){
+          paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                 charnames[charnames$awqms == param, "file"], "_", station, "_no target.jpeg' style='width:600px' target='_blank'>Single Sample</a>")
+        }
       )
     } else if(param %in% odeqstatusandtrends::AWQMS_Char_Names('TP')){
       paste(
@@ -347,6 +353,12 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                               charnames[charnames$awqms == param, "file"], "_", station, "_seasonal median.jpeg"))){
           paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
                  charnames[charnames$awqms == param, "file"], "_", station, "_seasonal median.jpeg' style='width:600px' target='_blank'>Seasonal Median</a>")
+        }
+        ,
+        if(file.exists(paste0("Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                              charnames[charnames$awqms == param, "file"], "_", station, "_no target.jpeg"))){
+          paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
+                 charnames[charnames$awqms == param, "file"], "_", station, "_no target.jpeg' style='width:600px' target='_blank'>Single Sample</a>")
         }
       )
     } else if(param %in% odeqstatusandtrends::AWQMS_Char_Names('temperature')){
