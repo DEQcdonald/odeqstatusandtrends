@@ -218,7 +218,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
       dplyr::filter(MLocID == station, Char_Name == param) %>%
       dplyr::select(Pollutant = Char_Name, Target = target_value, "Statistical Base" = target_stat_base)
     if(any(!is.na(targets$Target))){
-      table <- table <- knitr::kable(targets,
+      targets <- targets %>% dplyr::filter(!is.na(Target))
+      table <- knitr::kable(targets,
                                      format = "html", row.names = FALSE) %>%
         kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
                                   full_width = TRUE, font_size = 10)
