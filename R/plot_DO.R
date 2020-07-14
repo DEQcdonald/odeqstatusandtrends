@@ -55,9 +55,11 @@ plot_DO <- function(data, seaKen, station, max_date = min(data$sample_datetime, 
                                 values =    c('Excursion' = 4, 'Result' = 16, "Trend" = 32, "Spawning" = 32, "Year-Round" = 32)) +
     ggplot2::scale_fill_manual(name = "", values = c("Spawning Period" = 'black')) +
     ggplot2::ylim(c(ymin, ymax)) +
-    ggplot2::theme_bw() +
+    ggplot2::theme_linedraw() +
     ggplot2::labs(x = "Datetime") +
-    ggplot2::theme(legend.position="bottom", legend.direction = "horizontal", legend.box = "horizontal")
+    ggplot2::theme(legend.position="bottom", legend.direction = "horizontal", legend.box = "horizontal",
+                   panel.grid.major = element_line(color = "gray"),
+                   panel.grid.minor = element_line(color = "gray"))
 
   if(any(data$Spawn_type == "Spawn", na.rm = TRUE)){
     # Convert spawning dates to datetimes

@@ -61,8 +61,10 @@ plot_bacteria <- function(data, seaKen, station, max_date = min(data$sample_date
     ggplot2::ylim(c(ymin, ymax)) +
     ggplot2::xlim(c(xmin, xmax)) +
     ggplot2::scale_x_datetime(date_labels = "%b-%Y")+
-    ggplot2::theme_bw() +
-    ggplot2::theme(legend.position="bottom", legend.direction = "horizontal", legend.box = "horizontal")
+    ggplot2::theme_linedraw() +
+    ggplot2::theme(legend.position="bottom", legend.direction = "horizontal", legend.box = "horizontal",
+                   panel.grid.major = element_line(color = "gray"),
+                   panel.grid.minor = element_line(color = "gray"))
 
 
 
