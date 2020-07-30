@@ -49,6 +49,35 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                    paste(unique(param_summary$AU_ID), collapse = "', '"), "')"), stringsAsFactors = FALSE
   )
 
+  if(unique(area$MAP) == "Columbia River"){
+
+    columbia_aus <- sf::st_read(
+      dsn = "//deqhq1/wqnps/Status_and_Trend_Reports/GIS/Assessment_Units.gdb",
+      layer = "Columbia_River"
+    )$AU_ID
+
+    assessment_units_lines <- assessment_units_lines %>% dplyr::filter(AU_ID %in% columbia_aus)
+    assessment_units_ws <- assessment_units_ws %>% dplyr::filter(AU_ID %in% columbia_aus)
+
+  } else if(unique(area$MAP) == "Snake River"){
+
+    snake_aus <- c(
+      sf::st_read(
+        dsn = "//deqhq1/wqnps/Status_and_Trend_Reports/GIS/Assessment_Units.gdb",
+        layer = "Snake_River_Lines")$AU_ID,
+      sf::st_read(
+        dsn = "//deqhq1/wqnps/Status_and_Trend_Reports/GIS/Assessment_Units.gdb",
+        layer = "Snake_River_waterbodies")$AU_ID,
+      sf::st_read(
+        dsn = "//deqhq1/wqnps/Status_and_Trend_Reports/GIS/Assessment_Units.gdb",
+        layer = "Snake_River_Watershed")$AU_ID
+    )
+
+    assessment_units_lines <- assessment_units_lines %>% dplyr::filter(AU_ID %in% snake_aus)
+    assessment_units_ws <- assessment_units_ws %>% dplyr::filter(AU_ID %in% snake_aus)
+
+  }
+
   agwqma <- sf::st_read(
     dsn = "//deqhq1/WQNPS/Status_and_Trend_Reports/GIS",
     layer = "ODA_AgWQMA",
