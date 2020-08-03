@@ -253,7 +253,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
         kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
                                   full_width = TRUE, font_size = 10)
       return(table)
-    } else {
+    } else {""
       # return(paste("No target assessed for", odeqstatusandtrends::AWQMS_to_standard(param), "at this station."))
     }
   }
