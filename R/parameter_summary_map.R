@@ -48,6 +48,12 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     query = paste0("SELECT * FROM AssessmentUnit_Watershed WHERE AU_ID IN ('",
                    paste(unique(param_summary$AU_ID), collapse = "', '"), "')"), stringsAsFactors = FALSE
   )
+  assessment_units_bodies <- sf::st_read(
+    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
+    layer = "AssessmentUnit_Waterbodies",
+    query = paste0("SELECT * FROM AssessmentUnit_Watershed WHERE AU_ID IN ('",
+                   paste(unique(param_summary$AU_ID), collapse = "', '"), "')"), stringsAsFactors = FALSE
+  )
 
   if(unique(area$MAP) == "Columbia River"){
 
@@ -58,6 +64,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
 
     assessment_units_lines <- assessment_units_lines %>% dplyr::filter(AU_ID %in% columbia_aus)
     assessment_units_ws <- assessment_units_ws %>% dplyr::filter(AU_ID %in% columbia_aus)
+    assessment_units_bodies <- assessment_units_bodies %>% dplyr::filter(AU_ID %in% columbia_aus)
 
   } else if(unique(area$MAP) == "Snake River"){
 
@@ -75,6 +82,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
 
     assessment_units_lines <- assessment_units_lines %>% dplyr::filter(AU_ID %in% snake_aus)
     assessment_units_ws <- assessment_units_ws %>% dplyr::filter(AU_ID %in% snake_aus)
+    assessment_units_bodies <- assessment_units_bodies %>% dplyr::filter(AU_ID %in% snake_aus)
 
   }
 
@@ -107,16 +115,26 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                    paste(huc_12s, collapse = "', '"), "')"),
     stringsAsFactors = FALSE
   )
+  wql_bodies <- sf::st_read(
+    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
+    layer = "Impaired_Pollutant_Waterbodies",
+    query = paste0("SELECT * FROM Impaired_Pollutant_Watershed WHERE HUC12 IN ('",
+                   paste(huc_12s, collapse = "', '"), "')"),
+    stringsAsFactors = FALSE
+  )
+
 
   if(unique(area$MAP) == "Columbia River"){
 
     wql_streams_lines <- wql_streams_lines %>% dplyr::filter(AU_ID %in% columbia_aus)
     wql_streams_ws <- wql_streams_ws %>% dplyr::filter(AU_ID %in% columbia_aus)
+    wql_bodies <- wql_bodies %>% dplyr::filter(AU_ID %in% columbia_aus)
 
   } else if(unique(area$MAP) == "Snake River"){
 
     wql_streams_lines <- wql_streams_lines %>% dplyr::filter(AU_ID %in% snake_aus)
     wql_streams_ws <- wql_streams_ws %>% dplyr::filter(AU_ID %in% snake_aus)
+    wql_bodies <- wql_bodies %>% dplyr::filter(AU_ID %in% snake_aus)
 
   }
 
@@ -126,17 +144,24 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   if(NROW(wql_streams_ws) > 0){
     wql_streams_ws$Char_Name <- unlist(sapply(wql_streams_ws$Char_Name, AWQMS_Char_Names, USE.NAMES = FALSE))
   }
+  if(NROW(wql_bodies) > 0){
+    wql_bodies$Char_Name <- unlist(sapply(wql_bodies$Char_Name, AWQMS_Char_Names, USE.NAMES = FALSE))
+  }
 
   assessment_units_lines <- sf::st_zm(assessment_units_lines, what = "ZM")
   assessment_units_ws <- sf::st_zm(assessment_units_ws, what = "ZM")
+  assessment_units_bodies <- sf::st_zm(assessment_units_bodies, what = "ZM")
   wql_streams_lines <- sf::st_zm(wql_streams_lines, what = "ZM")
   wql_streams_ws <- sf::st_zm(wql_streams_ws, what = "ZM")
+  wql_streams_bodies <- sf::st_zm(wql_streams_bodies, what = "ZM")
   agwqma <- sf::st_zm(agwqma, what = "ZM")
 
   assessment_units_lines <- st_transform(assessment_units_lines, 4326)
   assessment_units_lines <- assessment_units_lines[,c("AU_ID", "AU_Name")] %>% dplyr::filter(AU_ID != "99")
   assessment_units_ws <- st_transform(assessment_units_ws, 4326)
   assessment_units_ws <- assessment_units_ws[,c("AU_ID", "AU_Name")] %>% dplyr::filter(AU_ID != "99")
+  assessment_units_bodies <- st_transform(assessment_units_bodies, 4326)
+  assessment_units_bodies <- assessment_units_bodies[,c("AU_ID", "AU_Name")] %>% dplyr::filter(AU_ID != "99")
   st_crs(wql_streams_lines)
   wql_streams_lines <- st_transform(wql_streams_lines, 4326)
   wql_streams_lines <- dplyr::filter(wql_streams_lines[, c("AU_Name", "AU_ID", "Period", "Char_Name", "IR_category")],
@@ -145,6 +170,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   wql_streams_ws <- st_transform(wql_streams_ws, 4326)
   wql_streams_ws <- dplyr::filter(wql_streams_ws[, c("AU_Name", "AU_ID", "Period", "Char_Name", "IR_category")],
                                Char_Name %in% unique(param_summary$Char_Name))
+  wql_bodies <- st_transform(wql_bodies, 4326)
+  wql_bodies <- dplyr::filter(wql_bodies[, c("AU_Name", "AU_ID", "Period", "Char_Name", "IR_category")],
+                                  Char_Name %in% unique(param_summary$Char_Name))
   # wql_streams <- wql_streams[lapply(wql_streams$`_ogr_geometry_`, length) != 0,]
   # wql_streams$TMDL_INFO <- vapply(strsplit(wql_streams$TMDL_INFO, "<a"), `[`, 1, FUN.VALUE=character(1))
   st_crs(agwqma)
@@ -161,11 +189,14 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
 
   assessment_units_lines <- assessment_units_lines %>% dplyr::group_by(AU_ID, AU_Name) %>% dplyr::summarise()
   assessment_units_ws <- assessment_units_ws %>% dplyr::group_by(AU_ID, AU_Name) %>% dplyr::summarise()
+  assessment_units_bodies <- assessment_units_bodies %>% dplyr::group_by(AU_ID, AU_Name) %>% dplyr::summarise()
   wql_streams_data <- bind_rows(sf::st_drop_geometry(wql_streams_lines),
-                                sf::st_drop_geometry(wql_streams_ws))
+                                sf::st_drop_geometry(wql_streams_ws),
+                                sf::st_drop_geometry(wql_bodies))
 
   wql_streams_lines_shp <- wql_streams_lines %>% dplyr::group_by(AU_Name, AU_ID) %>% dplyr::summarise()
   wql_streams_ws_shp <- wql_streams_ws %>% dplyr::group_by(AU_Name, AU_ID) %>% dplyr::summarise()
+  wql_bodies_shp <- wql_bodies %>% dplyr::group_by(AU_Name, AU_ID) %>% dplyr::summarise()
 
   # Create functions for mapping --------------------------------------------------------
 
@@ -489,24 +520,28 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                         group = "search"
     )
 
-  if(nrow(wql_streams_data)>0){
+  if(nrow(wql_streams_ws_shp)>0){
     map <- map %>%
       leaflet::addPolygons(data = wql_streams_ws_shp,
-                                       opacity = 1,
-                                       weight = 3.5,
-                                       color = "red",
-                                       fillColor = "red",
-                                       fillOpacity = 0.25,
-                                       popup = ~paste0("<b>", AU_Name,
-                                                       # "<br>Parameter:</b> ", Char_Name,
-                                                       "<br></b><br>",
-                                                       sapply(AU_ID, WQLpopupTable, USE.NAMES = FALSE)),
-                                       popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300),
-                                       highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
-                                       label = ~AU_Name,
-                                       smoothFactor = 1.5,
-                                       group = "WQ Listed Assessment Units"
-    ) %>%
+                           opacity = 1,
+                           weight = 3.5,
+                           color = "red",
+                           fillColor = "red",
+                           fillOpacity = 0.25,
+                           popup = ~paste0("<b>", AU_Name,
+                                           # "<br>Parameter:</b> ", Char_Name,
+                                           "<br></b><br>",
+                                           sapply(AU_ID, WQLpopupTable, USE.NAMES = FALSE)),
+                           popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300),
+                           highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
+                           label = ~AU_Name,
+                           smoothFactor = 1.5,
+                           group = "WQ Listed Assessment Units"
+      )
+  }
+
+  if(nrow(wql_streams_ws_shp)>0){
+    map <- map %>%
       leaflet::addPolylines(data = wql_streams_lines_shp,
                             opacity = 1,
                             weight = 3.5,
@@ -521,7 +556,25 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                             smoothFactor = 1.5,
                             group = "WQ Listed Assessment Units"
       )
-  } else {print(paste("No water quality limited streams found for the selected area."))}
+  }
+
+  if(nrow(wql_bodies_shp)>0){
+    map <- map %>%
+      leaflet::addPolylines(data = wql_bodies_shp,
+                            opacity = 1,
+                            weight = 3.5,
+                            color = "red",
+                            popup = ~paste0("<b>", AU_Name,
+                                            # "<br>Parameter:</b> ", Char_Name,
+                                            "<br></b><br>",
+                                            sapply(AU_ID, WQLpopupTable, USE.NAMES = FALSE)),
+                            popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300),
+                            highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
+                            label = ~AU_Name,
+                            smoothFactor = 1.5,
+                            group = "WQ Listed Assessment Units"
+      )
+  }
 
   # if(nrow(wql_streams_data) > 0){
   # map <- map %>%
@@ -552,6 +605,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     au_data <- merge(au_data, dplyr::filter(au_colors, Char_Name == i)[,c("AU_ID", "color", "HUC8_Name", "HUC8")], by = "AU_ID")
     au_data_ws <- dplyr::filter(assessment_units_ws[, c("AU_ID", "AU_Name")], AU_ID %in% unique(psum_AU$AU_ID))
     au_data_ws <- merge(au_data_ws, dplyr::filter(au_colors, Char_Name == i)[,c("AU_ID", "color", "HUC8_Name", "HUC8")], by = "AU_ID")
+    au_data_bodies <- dplyr::filter(assessment_units_bodies[, c("AU_ID", "AU_Name")], AU_ID %in% unique(psum_AU$AU_ID))
+    au_data_bodies <- merge(au_data_bodies, dplyr::filter(au_colors, Char_Name == i)[,c("AU_ID", "color", "HUC8_Name", "HUC8")], by = "AU_ID")
 
     # au_data <- au_colors %>% dplyr::filter(Char_Name == i)
     # wql_streams_tmp <- dplyr::filter(wql_streams, Char_Name == i)
@@ -581,6 +636,30 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                               group = standard_param
         )
     }
+    if(nrow(au_data_bodies) > 0){
+      map <- map %>%
+        leaflet::addPolygons(data = au_data_bodies,
+                             stroke = TRUE,
+                             opacity = 0.9,
+                             weight = 3,
+                             color = ~color,
+                             fillOpacity = 0.1,
+                             fillColor = ~color,
+                             popup = ~paste0("<b>", AU_Name, "<br>",
+                                             "<b>HUC8: </b>", HUC8_Name, " (",
+                                             HUC8, ")<br>",
+                                             # "<br><b>Parameter:</b> ", i, "<br>",
+                                             sapply(AU_ID, au_table, param = i, USE.NAMES = FALSE),
+                                             sapply(AU_ID, popupTable, station = NULL, param = i, USE.NAMES = FALSE)
+                             ),
+                             popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300),
+                             label = ~AU_Name,
+                             smoothFactor = 2,
+                             options = leaflet::pathOptions(className = "assessmentUnits", interactive = TRUE),
+                             highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
+                             group = standard_param
+        )
+    }
     if(nrow(au_data_ws) > 0){
       map <- map %>%
         leaflet::addPolygons(data = au_data_ws,
@@ -605,6 +684,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                              group = standard_param
         )
     }
+
     #   for(j in c("lightgray", "green", "orange")){
     #     au_ids <- au_data %>% dplyr::filter(color == j)
     #     if(nrow(au_ids)>0){
