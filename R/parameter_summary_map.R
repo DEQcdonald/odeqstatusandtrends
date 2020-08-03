@@ -107,8 +107,25 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                    paste(huc_12s, collapse = "', '"), "')"),
     stringsAsFactors = FALSE
   )
-  wql_streams_lines$Char_Name <- unlist(sapply(wql_streams_lines$Char_Name, AWQMS_Char_Names, USE.NAMES = FALSE))
-  wql_streams_ws$Char_Name <- unlist(sapply(wql_streams_ws$Char_Name, AWQMS_Char_Names, USE.NAMES = FALSE))
+
+  if(unique(area$MAP) == "Columbia River"){
+
+    wql_streams_lines <- wql_streams_lines %>% dplyr::filter(AU_ID %in% columbia_aus)
+    wql_streams_ws <- wql_streams_ws %>% dplyr::filter(AU_ID %in% columbia_aus)
+
+  } else if(unique(area$MAP) == "Snake River"){
+
+    wql_streams_lines <- wql_streams_lines %>% dplyr::filter(AU_ID %in% snake_aus)
+    wql_streams_ws <- wql_streams_ws %>% dplyr::filter(AU_ID %in% snake_aus)
+
+  }
+
+  if(NROW(wql_streams_lines) > 0){
+    wql_streams_lines$Char_Name <- unlist(sapply(wql_streams_lines$Char_Name, AWQMS_Char_Names, USE.NAMES = FALSE))
+  }
+  if(NROW(wql_streams_ws) > 0){
+    wql_streams_ws$Char_Name <- unlist(sapply(wql_streams_ws$Char_Name, AWQMS_Char_Names, USE.NAMES = FALSE))
+  }
 
   assessment_units_lines <- sf::st_zm(assessment_units_lines, what = "ZM")
   assessment_units_ws <- sf::st_zm(assessment_units_ws, what = "ZM")
