@@ -38,8 +38,8 @@ summary_stats <- function(df) {
     stop("There is no Spawn_type' column defined in df.")
   }
 
-  if(!"Result_Numeric" %in% colnames(df)) {
-    stop("There is no 'Result_Numeric' column defined in df.")
+  if(!"Result_cen" %in% colnames(df)) {
+    stop("There is no 'Result_cen' column defined in df.")
   }
 
   if(!"BacteriaCode" %in% colnames(df)) {
@@ -49,9 +49,9 @@ summary_stats <- function(df) {
   stat_df1 <- df %>%
     dplyr::filter(!(BacteriaCode == 3 & Char_Name == "Fecal Coliform")) %>%
     dplyr::group_by(MLocID, Char_Name, Spawn_type, status_period) %>%
-    dplyr::summarise(max = max(Result_Numeric, na.rm = TRUE),
-                     median = median(Result_Numeric, na.rm = TRUE),
-                     min = min(Result_Numeric, na.rm = TRUE)) %>%
+    dplyr::summarise(max = max(Result_cen, na.rm = TRUE),
+                     median = median(Result_cen, na.rm = TRUE),
+                     min = min(Result_cen, na.rm = TRUE)) %>%
     dplyr::ungroup() %>%
     dplyr::mutate(min=dplyr::if_else(grepl("Temperature|Dissolved oxygen", Char_Name), round(min, 1), min),
                   median=dplyr::if_else(grepl("Temperature|Dissolved oxygen", Char_Name), round(median, 1), median),

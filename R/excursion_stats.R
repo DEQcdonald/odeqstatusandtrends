@@ -39,8 +39,8 @@ excursion_stats <- function(df) {
     stop("There is no Spawn_type' column defined in df.")
   }
   
-  if(!"Result_Numeric" %in% colnames(df)) {
-    stop("There is no 'Result_Numeric' column defined in df.")
+  if(!"Result_cen" %in% colnames(df)) {
+    stop("There is no 'Result_cen' column defined in df.")
   }
   
   if(!"excursion_cen" %in% colnames(df)) {
@@ -55,9 +55,9 @@ excursion_stats <- function(df) {
     dplyr::filter(!(BacteriaCode == 3 & Char_Name == "Fecal Coliform")) %>%
     dplyr::filter(excursion_cen==1) %>%
     dplyr::group_by(MLocID, Char_Name, Spawn_type, status_period) %>%
-    dplyr::summarise(excursion_max = max(Result_Numeric, na.rm = TRUE),
-                     excursion_median = median(Result_Numeric, na.rm = TRUE),
-                     excursion_min = min(Result_Numeric, na.rm = TRUE)) %>%
+    dplyr::summarise(excursion_max = max(Result_cen, na.rm = TRUE),
+                     excursion_median = median(Result_cen, na.rm = TRUE),
+                     excursion_min = min(Result_cen, na.rm = TRUE)) %>%
     dplyr::ungroup() %>%
     dplyr::mutate(excursion_min=ifelse(grepl("Temperature|Dissolved oxygen", Char_Name), round(excursion_min, 1), excursion_min),
                   excursion_median=ifelse(grepl("Temperature|Dissolved oxygen", Char_Name), round(excursion_median, 1), excursion_median),
