@@ -563,8 +563,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
       leaflet::addPolygons(data = wql_streams_ws_shp,
                            opacity = 1,
                            weight = 3.5,
-                           color = "red",
-                           fillColor = "red",
+                           color = "#ff33be",
+                           fillColor = "#ff33be",
                            fillOpacity = 0.25,
                            popup = ~paste0("<b>", AU_Name,
                                            # "<br>Parameter:</b> ", Char_Name,
@@ -574,7 +574,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                            highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
                            label = ~AU_Name,
                            smoothFactor = 1.5,
-                           group = "WQ Listed Assessment Units"
+                           group = "2018/2020 303(d)/305(b) IR Status"
       )
   }
 
@@ -583,7 +583,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
       leaflet::addPolylines(data = wql_streams_lines_shp,
                             opacity = 1,
                             weight = 3.5,
-                            color = "red",
+                            color = "#ff33be",
                             popup = ~paste0("<b>", AU_Name,
                                             # "<br>Parameter:</b> ", Char_Name,
                                             "<br></b><br>",
@@ -592,7 +592,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                             highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
                             label = ~AU_Name,
                             smoothFactor = 1.5,
-                            group = "WQ Listed Assessment Units"
+                            group = "2018/2020 303(d)/305(b) IR Status"
       )
   }
 
@@ -601,7 +601,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
       leaflet::addPolylines(data = wql_bodies_shp,
                             opacity = 1,
                             weight = 3.5,
-                            color = "red",
+                            color = "#ff33be",
                             popup = ~paste0("<b>", AU_Name,
                                             # "<br>Parameter:</b> ", Char_Name,
                                             "<br></b><br>",
@@ -610,7 +610,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                             highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
                             label = ~AU_Name,
                             smoothFactor = 1.5,
-                            group = "WQ Listed Assessment Units"
+                            group = "2018/2020 303(d)/305(b) IR Status"
       )
   }
 
@@ -830,10 +830,10 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
       )
     )) %>%
     leaflet::addLayersControl(baseGroups = sort(layer_groups),
-                              overlayGroups = c("Assessment Area", "WQ Listed Assessment Units", "Ag WQ Management Areas",
+                              overlayGroups = c("Assessment Area", "2018/2020 303(d)/305(b) IR Status", "Ag WQ Management Areas",
                                                 "World Imagery", "Hydrography", "Land Cover (NLCD 2016)"),
                               options = leaflet::layersControlOptions(collapsed = FALSE)) %>%
-    leaflet::hideGroup(c("World Imagery", "Hydrography", "Ag WQ Management Areas", "Land Cover (NLCD 2016)", "WQ Listed Assessment Units")) %>%
+    leaflet::hideGroup(c("World Imagery", "Hydrography", "Ag WQ Management Areas", "Land Cover (NLCD 2016)", "2018/2020 303(d)/305(b) IR Status")) %>%
     leaflet::addControl(position = "bottomleft", className = "legend",
                         html = sprintf('<html><body><div style="opacity:0.95">
                                         <img width="375" height="180" src="data:image/png;base64,%s">
