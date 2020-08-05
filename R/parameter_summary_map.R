@@ -555,7 +555,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                          layers = "0")
   if(nrow(agwqma) > 0){
     map <- map %>%
-      leaflet::addPolygons(data = agwqma, fill = TRUE, color = "blue", fillColor = "blue", opacity = 0.05, weight = 5,
+      leaflet::addPolygons(data = agwqma, fill = TRUE, color = "blue", fillColor = "blue", opacity = 0.8, fillOpacity = 0.05, weight = 5,
                            group = "Ag WQ Management Areas", label = ~PlanName,
                            options = leaflet::pathOptions(pane = "agwqma"))
   }
