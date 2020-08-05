@@ -100,7 +100,59 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   #                  paste(unique(param_summary$HUC8), collapse = "', '"), "')"),
   #   stringsAsFactors = FALSE
   # )
+  
   huc_12s <- hucs[hucs$HUC_8 %in% unique(param_summary$HUC8),]$HUC_12
+  
+  if(unique(area$MAP) == "Columbia River"){
+    
+    wql_streams_lines <- sf::st_read(
+      dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
+      layer = "Impaired_Pollutant_Rivers_Coast",
+      query = paste0("SELECT * FROM Impaired_Pollutant_Rivers_Coast WHERE AU_ID IN ('",
+                     paste(columbia_aus, collapse = "', '"), "')"),
+      stringsAsFactors = FALSE
+    )
+    wql_streams_ws <- sf::st_read(
+      dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
+      layer = "Impaired_Pollutant_Watershed",
+      query = paste0("SELECT * FROM Impaired_Pollutant_Rivers_Coast WHERE AU_ID IN ('",
+                     paste(columbia_aus, collapse = "', '"), "')"),
+      stringsAsFactors = FALSE
+    )
+    wql_bodies <- sf::st_read(
+      dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
+      layer = "Impaired_Pollutant_Waterbodies",
+      query = paste0("SELECT * FROM Impaired_Pollutant_Rivers_Coast WHERE AU_ID IN ('",
+                     paste(columbia_aus, collapse = "', '"), "')"),
+      stringsAsFactors = FALSE
+    )
+    
+  } else if(unique(area$MAP) == "Snake River"){
+
+    wql_streams_lines <- sf::st_read(
+      dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
+      layer = "Impaired_Pollutant_Rivers_Coast",
+      query = paste0("SELECT * FROM Impaired_Pollutant_Rivers_Coast WHERE AU_ID IN ('",
+                     paste(snake_aus, collapse = "', '"), "')"),
+      stringsAsFactors = FALSE
+    )
+    wql_streams_ws <- sf::st_read(
+      dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
+      layer = "Impaired_Pollutant_Watershed",
+      query = paste0("SELECT * FROM Impaired_Pollutant_Rivers_Coast WHERE AU_ID IN ('",
+                     paste(snake_aus, collapse = "', '"), "')"),
+      stringsAsFactors = FALSE
+    )
+    wql_bodies <- sf::st_read(
+      dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
+      layer = "Impaired_Pollutant_Waterbodies",
+      query = paste0("SELECT * FROM Impaired_Pollutant_Rivers_Coast WHERE AU_ID IN ('",
+                     paste(snake_aus, collapse = "', '"), "')"),
+      stringsAsFactors = FALSE
+    )
+    
+  } else {
+  
   wql_streams_lines <- sf::st_read(
     dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
     layer = "Impaired_Pollutant_Rivers_Coast",
@@ -122,20 +174,6 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                    paste(huc_12s, collapse = "', '"), "')"),
     stringsAsFactors = FALSE
   )
-
-
-  if(unique(area$MAP) == "Columbia River"){
-
-    wql_streams_lines <- wql_streams_lines %>% dplyr::filter(AU_ID %in% columbia_aus)
-    wql_streams_ws <- wql_streams_ws %>% dplyr::filter(AU_ID %in% columbia_aus)
-    wql_bodies <- wql_bodies %>% dplyr::filter(AU_ID %in% columbia_aus)
-
-  } else if(unique(area$MAP) == "Snake River"){
-
-    wql_streams_lines <- wql_streams_lines %>% dplyr::filter(AU_ID %in% snake_aus)
-    wql_streams_ws <- wql_streams_ws %>% dplyr::filter(AU_ID %in% snake_aus)
-    wql_bodies <- wql_bodies %>% dplyr::filter(AU_ID %in% snake_aus)
-
   }
 
   if(NROW(wql_streams_lines) > 0){
@@ -505,7 +543,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                          layers = "0")
   if(nrow(agwqma) > 0){
     map <- map %>%
-      leaflet::addPolygons(data = agwqma, fill = FALSE, color = "blue", fillColor = "blue", opacity = 0.8, weight = 5,
+      leaflet::addPolygons(data = agwqma, fill = TRUE, color = "blue", fillColor = "blue", opacity = 0.05, weight = 5,
                            group = "Ag WQ Management Areas", label = ~PlanName)
   }
 
