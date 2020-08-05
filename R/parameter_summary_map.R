@@ -519,6 +519,15 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   print("Creating Map...")
 
   map <- leaflet() %>% addTiles() %>%
+    leaflet::addMapPane("Tiles", zIndex = 420) %>%
+    leaflet::addMapPane("hydroTiles", zIndex = 425) %>%
+    leaflet::addMapPane("assessment_area", zIndex = 430) %>%
+    leaflet::addMapPane("agwqma", zIndex = 440) %>%
+    leaflet::addMapPane("IRpolygons", zIndex = 450) %>%
+    leaflet::addMapPane("IRpolylines", zIndex = 460) %>%
+    leaflet::addMapPane("Status_polygons", zIndex = 470) %>%
+    leaflet::addMapPane("Status_polylines", zIndex = 480) %>%
+    leaflet::addMapPane("Status_points", zIndex = 490) %>% 
     # htmlwidgets::appendContent(HTML(table)) %>%
     #   htmlwidgets::onRender(
     #     "
@@ -529,33 +538,40 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     # "
     #   ) %>%
     leaflet.esri::addEsriDependency() %>%
-    leaflet::addProviderTiles(providers$Esri.WorldImagery, group = "World Imagery") %>%
+    leaflet::addProviderTiles(providers$Esri.WorldImagery, group = "World Imagery",
+                              options = leaflet::tileOptions(pane = "Tiles")) %>%
     leaflet::addWMSTiles(baseUrl = 'https://www.mrlc.gov/geoserver/mrlc_display/NLCD_2016_Land_Cover_L48/wms?',
                          group = "Land Cover (NLCD 2016)",
                          layers = "NLCD_2016_Land_Cover_L48",
                          options = leaflet::WMSTileOptions(version = '1.3.0',
                                                            format = 'image/png',
-                                                           transparent = TRUE)) %>%
+                                                           transparent = TRUE,
+                                                           pane = "Tiles")) %>%
     leaflet::addWMSTiles("https://basemap.nationalmap.gov/arcgis/services/USGSHydroCached/MapServer/WmsServer",
                          group = "Hydrography",
                          options = leaflet::WMSTileOptions(format = "image/png",
-                                                           transparent = TRUE),
+                                                           transparent = TRUE,
+                                                           pane = "hydroTiles"),
                          layers = "0")
   if(nrow(agwqma) > 0){
     map <- map %>%
       leaflet::addPolygons(data = agwqma, fill = TRUE, color = "blue", fillColor = "blue", opacity = 0.05, weight = 5,
-                           group = "Ag WQ Management Areas", label = ~PlanName)
+                           group = "Ag WQ Management Areas", label = ~PlanName,
+                           options = leaflet::pathOptions(pane = "agwqma"))
   }
 
   map <- map %>%
-    leaflet::addPolygons(data = area, color = "black", fillOpacity = 0.1, group = "Assessment Area", opacity = 0.8, label = ~paste("Subbasin:", HU_8_NAME)) %>%
+    leaflet::addPolygons(data = area, color = "black", fillOpacity = 0.1, group = "Assessment Area", 
+                         opacity = 0.8, label = ~paste("Subbasin:", HU_8_NAME),
+                         options = leaflet::leafletOptions(pane = "assessment_area")) %>%
     leaflet::addMarkers(data = unique(param_summary[,c("AU_ID", "MLocID", "StationDes", "Lat_DD", "Long_DD")]),
                         label = ~paste0(MLocID, ": ", StationDes),
                         popup = ~paste0("<b>", MLocID, "</b>: ", StationDes, "<br>",
                                         "AU: ", AU_ID),
                         lat = ~Lat_DD,
                         lng = ~Long_DD,
-                        group = "search"
+                        group = "search",
+                        options = leaflet::pathOptions(pane = "Status_points")
     )
 
   if(nrow(wql_streams_ws_shp)>0){
@@ -574,7 +590,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                            highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
                            label = ~AU_Name,
                            smoothFactor = 1.5,
-                           group = "2018/2020 303(d)/305(b) IR Status"
+                           group = "2018/2020 303(d)/305(b) IR Status",
+                           options = leaflet::pathOptions(pane = "IRpolygons")
       )
   }
 
@@ -592,7 +609,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                             highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
                             label = ~AU_Name,
                             smoothFactor = 1.5,
-                            group = "2018/2020 303(d)/305(b) IR Status"
+                            group = "2018/2020 303(d)/305(b) IR Status",
+                            options = leaflet::pathOptions(pane = "IRpolylines")
       )
   }
 
@@ -610,7 +628,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                             highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
                             label = ~AU_Name,
                             smoothFactor = 1.5,
-                            group = "2018/2020 303(d)/305(b) IR Status"
+                            group = "2018/2020 303(d)/305(b) IR Status",
+                            options = leaflet::pathOptions(pane = "IRpolygons")
       )
   }
 
@@ -669,7 +688,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                               popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300),
                               label = ~AU_Name,
                               smoothFactor = 2,
-                              options = leaflet::pathOptions(className = "assessmentUnits", interactive = TRUE),
+                              options = leaflet::pathOptions(className = "assessmentUnits", interactive = TRUE,
+                                                             pane = "Status_polylines"),
                               highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
                               group = standard_param
         )
@@ -693,7 +713,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                              popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300),
                              label = ~AU_Name,
                              smoothFactor = 2,
-                             options = leaflet::pathOptions(className = "assessmentUnits", interactive = TRUE),
+                             options = leaflet::pathOptions(className = "assessmentUnits", interactive = TRUE,
+                                                            pane = "Status_polygons"),
                              highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
                              group = standard_param
         )
@@ -717,7 +738,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                              popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300),
                              label = ~AU_Name,
                              smoothFactor = 2,
-                             options = leaflet::pathOptions(className = "assessmentUnits", interactive = TRUE),
+                             options = leaflet::pathOptions(className = "assessmentUnits", interactive = TRUE,
+                                                            pane = "Status_polygons"),
                              highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
                              group = standard_param
         )
@@ -792,7 +814,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                                  popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300),
                                  labelOptions = list(className = "stationLabels", noHide = T, permanent = T, interactive = T,
                                                      offset = c(-10,-25), opacity = 0.9, textsize = "14px", sticky = TRUE),
-                                 options = ~leaflet::markerOptions(zIndexOffset = z_offset, riseOnHover = TRUE),
+                                 options = ~leaflet::markerOptions(zIndexOffset = z_offset, riseOnHover = TRUE,
+                                                                   pane = "Status_points"),
                                  group = standard_param
       )
 
