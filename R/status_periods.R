@@ -42,7 +42,7 @@ status_periods <- function(datetime=NULL, periods=4, year_range=NULL, bins_only=
 
   years <- year_range[2]:year_range[1]
   breaks <- seq(year_range[2], year_range[1], by =(-1*periods))
-  cols <<- sapply(breaks, function(x){
+  cols <- sapply(breaks, function(x){
     start <- x - periods + 1
     return(paste0("status_",
       start, "_", x))

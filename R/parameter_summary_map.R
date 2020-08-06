@@ -658,7 +658,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     psum <- param_summary %>% dplyr::filter(Char_Name == i)
     psum$z_offset <- dplyr::if_else(!(psum[[status_current]] %in% c("Unassessed", "Insufficient Data") & psum$trend %in% c("Insufficient Data", "No Significant Trend")),
                                     100, 0)
-    psum_AU <- psum[!(psum[[status_current]] %in% c("Unassessed", "Insufficient Data") & psum$trend == "Insufficient Data"),]
+    psum_AU <- psum[!(psum[[status_current]] %in% c("Unassessed", "Insufficient Data")),]
     au_data <- dplyr::filter(assessment_units_lines[, c("AU_ID", "AU_Name")], AU_ID %in% unique(psum_AU$AU_ID))
     au_data <- merge(au_data, dplyr::filter(au_colors, Char_Name == i)[,c("AU_ID", "color", "HUC8_Name", "HUC8")], by = "AU_ID")
     au_data_ws <- dplyr::filter(assessment_units_ws[, c("AU_ID", "AU_Name")], AU_ID %in% unique(psum_AU$AU_ID))

@@ -53,14 +53,14 @@ status_stns <- function(df) {
       dplyr::summarise(samples = n(),
                        status = dplyr::if_else(samples < 1 | is.na(samples) | all(is.na(excursion_cen)),
                                                "Unassessed",
-                                               dplyr::if_else(any(excursion_cen == 1, na.rm = TRUE),
+                                               dplyr::if_else(any(excursion_cen %in% 1, na.rm = TRUE),
                                                               "Not Attaining",
                                                               "Attaining")
                        ),
                        reason = dplyr::if_else(status == "Unassessed",
-                                               dplyr::if_else(any(excursion_cen == 2),
+                                               dplyr::if_else(any(excursion_cen %in% 2),
                                                               "no_results",
-                                                              if_else(all(is.na(excursion_cen)),
+                                                              dplyr::if_else(all(is.na(excursion_cen)),
                                                                       "no_target",
                                                                       "no_results")
                                                ),
@@ -96,7 +96,7 @@ status_stns <- function(df) {
                                                   )),
                        status = dplyr::if_else(samples < 1 | is.na(samples) | all(is.na(excursion)),
                                                "Unassessed",
-                                               dplyr::if_else(any(excursion == 1, na.rm = TRUE),
+                                               dplyr::if_else(any(excursion %in% 1, na.rm = TRUE),
                                                               "Not Attaining",
                                                               "Attaining")
                        ),
