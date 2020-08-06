@@ -525,9 +525,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     leaflet::addMapPane("agwqma", zIndex = 440) %>%
     leaflet::addMapPane("IRpolygons", zIndex = 450) %>%
     leaflet::addMapPane("IRpolylines", zIndex = 460) %>%
-    leaflet::addMapPane("Status_polygons", zIndex = 470) %>%
-    leaflet::addMapPane("Status_polylines", zIndex = 480) %>%
-    leaflet::addMapPane("Status_points", zIndex = 490) %>% 
+    leaflet::addMapPane("Status_polygons", zIndex = 505) %>%
+    leaflet::addMapPane("Status_polylines", zIndex = 510) %>%
+    leaflet::addMapPane("Status_points", zIndex = 515) %>% 
     # htmlwidgets::appendContent(HTML(table)) %>%
     #   htmlwidgets::onRender(
     #     "
