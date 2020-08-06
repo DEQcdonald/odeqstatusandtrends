@@ -854,8 +854,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
       )
     )) %>%
     leaflet::addLayersControl(baseGroups = sort(layer_groups),
-                              overlayGroups = c("Assessment Area", "2018/2020 303(d)/305(b) IR Status", "Ag WQ Management Areas",
-                                                "World Imagery", "Hydrography", "Land Cover (NLCD 2016)"),
+                              overlayGroups = c("2018/2020 303(d)/305(b) IR Status", "Ag WQ Management Areas", "Assessment Area", 
+                                                "Hydrography", "Land Cover (NLCD 2016)", "World Imagery"),
                               options = leaflet::layersControlOptions(collapsed = FALSE)) %>%
     leaflet::hideGroup(c("World Imagery", "Hydrography", "Ag WQ Management Areas", "Land Cover (NLCD 2016)", "2018/2020 303(d)/305(b) IR Status")) %>%
     leaflet::addControl(position = "bottomleft", className = "legend",
