@@ -331,7 +331,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   target_table <- function(station = NULL, param){
     targets <- state_target_data %>%
       dplyr::filter(MLocID == station, Char_Name == param) %>%
-      dplyr::select(Pollutant = Char_Name, Target = target_value, "Statistical Base" = target_stat_base,
+      dplyr::mutate(Target = paste(target_value, target_units)) %>% 
+      dplyr::select(Pollutant = Char_Name, Target, "Statistical Base" = target_stat_base,
                     "Applicable Period" = tmdl_period, TMDL = tmdl)
     if(any(!is.na(targets$Target))){
       targets <- targets %>% dplyr::filter(!is.na(Target))
