@@ -27,7 +27,7 @@ AWQMS_Char_Names <- function(parameters){
                                          "fecal coliform",
                                          "ecoli", "e. coli", "e.coli",
                                          "enterococci","enterococcus",
-                                         "do", "dissolved oxygen (do)" "dissolved oxygen - cold water", 
+                                         "do", "dissolved oxygen (do)", "dissolved oxygen - cold water", 
                                          "dissolved oxygen - cool water", "dissolved oxygen - estuary",
                                          "dissolved oxygen"),
                              AWQMS.Name = c("Total suspended solids", "Total suspended solids",
