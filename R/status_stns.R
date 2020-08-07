@@ -230,13 +230,13 @@ status_stns <- function(df) {
   }
 
   status_check[is.na(status_check)] <- "Unassessed"
-  cols <- c("MLocID", "Char_Name", cols)
+  status_cols <- c("MLocID", "Char_Name", status_cols)
 
-  for(i in cols[!cols %in% colnames(status_check)]){
+  for(i in status_cols[!status_cols %in% colnames(status_check)]){
     status_check[,i] <- "Unassessed"
   }
 
-  status_check <- status_check[,cols]
+  status_check <- status_check[,status_cols]
 
   print(paste("Data should be sufficient for", NROW(status_check), "different statuses to be determined."))
 

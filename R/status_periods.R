@@ -42,21 +42,21 @@ status_periods <- function(datetime=NULL, periods=4, year_range=NULL, bins_only=
 
   years <- year_range[2]:year_range[1]
   breaks <- seq(year_range[2], year_range[1], by =(-1*periods))
-  assign("cols", sapply(breaks, function(x){
+  status_cols <<- sapply(breaks, function(x){
     start <- x - periods + 1
     return(paste0("status_",
       start, "_", x))
-  }))
+  })
 
   if(bins_only) {
-    return(cols)
+    return(status_cols)
   }
 
   bins <- lapply(breaks, function(x){
     start <- x - periods + 1
     return(c(start:x))
   })
-  names(bins) <- cols
+  names(bins) <- status_cols
   data_bins <- unlist(sapply(data_years, function(x){
     i <- sapply(bins, function(y){
       return(x %in% y)
