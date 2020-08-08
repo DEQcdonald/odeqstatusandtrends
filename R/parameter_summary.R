@@ -68,13 +68,13 @@ parameter_summary_by_au <- function(status, sea_ken, stations){
   
   assess_sum <- param_sum %>% 
     dplyr::select(-MLocID, -StationDes, -trend, -Lat_DD, -Long_DD) %>%
-    dplyr::group_by(AU_ID, AU_Name, Char_Name, HUC8_Name, HUC8) %>%
+    dplyr::group_by(AU_ID, AU_Name, Char_Name) %>%
     dplyr::summarise_all(function(x){
-      y <- dplyr::if_else(any(x == "Not Attaining"),
+      y <- dplyr::if_else(any(x %in% "Not Attaining"),
                           "Not Attaining",
-                          dplyr::if_else(any(x == "Attaining"),
+                          dplyr::if_else(any(x %in% "Attaining"),
                                          "Attaining",
-                                         dplyr::if_else(any(x == "Insufficient Data"),
+                                         dplyr::if_else(any(x %in% "Insufficient Data"),
                                                         "Insufficient Data",
                                                         "Unassessed"
                                          )
@@ -82,6 +82,9 @@ parameter_summary_by_au <- function(status, sea_ken, stations){
       )
       return(y)
     }) %>% dplyr::ungroup()
+  AU_HUC <- st_stations_info %>% dplyr::group_by(AU_ID) %>% dplyr::summarise(HUC_Name = first(HUC8_Name), HUC8 = first(HUC8))
+  
+  assess_sum <- merge(assess_sum, AU_HUC, by="AU_ID", all.x = TRUE, all.y = FALSE)
   
   return(assess_sum)
 }
