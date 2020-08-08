@@ -16,7 +16,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   load("//deqhq1/WQNPS/Status_and_Trend_Reports/2020-Revision/Oregon_target_data.RData")
   load(file = "//deqhq1/WQNPS/Status_and_Trend_Reports/Lookups_Statewide/huc_crosswalk.RData")
 
-  state_target_data <- state_target_data %>% dplyr::filter(!is.na(target_value))
+  state_target_data <- state_target_data %>% dplyr::filter(!is.na(target))
   status_current <- as.symbol(colnames(param_summary)[grep("trend", colnames(param_summary)) - 1])
   au_param_summary <- au_param_summary %>% dplyr::filter(AU_ID != "")
 
@@ -52,7 +52,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   assessment_units_bodies <- sf::st_read(
     dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
     layer = "AssessmentUnit_Waterbodies",
-    query = paste0("SELECT * FROM AssessmentUnit_Watershed WHERE AU_ID IN ('",
+    query = paste0("SELECT * FROM AssessmentUnit_Waterbodies WHERE AU_ID IN ('",
                    paste(unique(param_summary$AU_ID), collapse = "', '"), "')"), stringsAsFactors = FALSE
   )
 
@@ -116,14 +116,14 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     wql_streams_ws <- sf::st_read(
       dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
       layer = "Impaired_Pollutant_Watershed",
-      query = paste0("SELECT * FROM Impaired_Pollutant_Rivers_Coast WHERE AU_ID IN ('",
+      query = paste0("SELECT * FROM Impaired_Pollutant_Watershed WHERE AU_ID IN ('",
                      paste(columbia_aus, collapse = "', '"), "')"),
       stringsAsFactors = FALSE
     )
     wql_bodies <- sf::st_read(
       dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
       layer = "Impaired_Pollutant_Waterbodies",
-      query = paste0("SELECT * FROM Impaired_Pollutant_Rivers_Coast WHERE AU_ID IN ('",
+      query = paste0("SELECT * FROM Impaired_Pollutant_Waterbodies WHERE AU_ID IN ('",
                      paste(columbia_aus, collapse = "', '"), "')"),
       stringsAsFactors = FALSE
     )
@@ -140,14 +140,14 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     wql_streams_ws <- sf::st_read(
       dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
       layer = "Impaired_Pollutant_Watershed",
-      query = paste0("SELECT * FROM Impaired_Pollutant_Rivers_Coast WHERE AU_ID IN ('",
+      query = paste0("SELECT * FROM Impaired_Pollutant_Watershed WHERE AU_ID IN ('",
                      paste(snake_aus, collapse = "', '"), "')"),
       stringsAsFactors = FALSE
     )
     wql_bodies <- sf::st_read(
       dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
       layer = "Impaired_Pollutant_Waterbodies",
-      query = paste0("SELECT * FROM Impaired_Pollutant_Rivers_Coast WHERE AU_ID IN ('",
+      query = paste0("SELECT * FROM Impaired_Pollutant_Waterbodies WHERE AU_ID IN ('",
                      paste(snake_aus, collapse = "', '"), "')"),
       stringsAsFactors = FALSE
     )
