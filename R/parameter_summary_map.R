@@ -52,7 +52,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   assessment_units_bodies <- sf::st_read(
     dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
     layer = "AssessmentUnit_Waterbodies",
-    query = paste0("SELECT * FROM AssessmentUnit_OR_Waterbodies WHERE AU_ID IN ('",
+    query = paste0("SELECT * FROM AssessmentUnits_OR_Waterbodies WHERE AU_ID IN ('",
                    paste(unique(param_summary$AU_ID), collapse = "', '"), "')"), stringsAsFactors = FALSE
   )
 
