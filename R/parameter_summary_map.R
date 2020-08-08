@@ -16,6 +16,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   load("//deqhq1/WQNPS/Status_and_Trend_Reports/2020-Revision/Oregon_target_data.RData")
   load(file = "//deqhq1/WQNPS/Status_and_Trend_Reports/Lookups_Statewide/huc_crosswalk.RData")
 
+  state_target_data <- state_target_data %>% dplyr::filter(!is.na(target_value))
   status_current <- as.symbol(colnames(param_summary)[grep("trend", colnames(param_summary)) - 1])
   au_param_summary <- au_param_summary %>% dplyr::filter(AU_ID != "")
 
