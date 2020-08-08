@@ -192,7 +192,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   assessment_units_bodies <- sf::st_zm(assessment_units_bodies, what = "ZM")
   wql_streams_lines <- sf::st_zm(wql_streams_lines, what = "ZM")
   wql_streams_ws <- sf::st_zm(wql_streams_ws, what = "ZM")
-  wql_streams_bodies <- sf::st_zm(wql_bodies, what = "ZM")
+  wql_bodies <- sf::st_zm(wql_bodies, what = "ZM")
   agwqma <- sf::st_zm(agwqma, what = "ZM")
 
   assessment_units_lines <- st_transform(assessment_units_lines, 4326)
@@ -597,7 +597,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
       )
   }
 
-  if(nrow(wql_streams_ws_shp)>0){
+  if(nrow(wql_streams_lines_shp)>0){
     map <- map %>%
       leaflet::addPolylines(data = wql_streams_lines_shp,
                             opacity = 1,
