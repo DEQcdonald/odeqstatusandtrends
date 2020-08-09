@@ -240,7 +240,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   # Create functions for mapping --------------------------------------------------------
 
   au_colors <- param_summary %>% dplyr::group_by(AU_ID, Char_Name) %>%
-    dplyr::summarise(color = dplyr::if_else(all(!!status_current %in% c("Unassessed", "Insufficient Data")),
+    dplyr::summarise(HUC8_Name = first(HUC8_Name),
+                     HUC8 = first(HUC8),
+                     color = dplyr::if_else(all(!!status_current %in% c("Unassessed", "Insufficient Data")),
                                             "lightgray",
                                             dplyr::if_else(any(!!status_current == "Not Attaining"),
                                                            "orange",
