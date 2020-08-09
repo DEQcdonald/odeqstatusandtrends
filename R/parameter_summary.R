@@ -82,7 +82,7 @@ parameter_summary_by_au <- function(status, sea_ken, stations){
       )
       return(y)
     }) %>% dplyr::ungroup()
-  AU_HUC <- st_stations_info %>% dplyr::group_by(AU_ID) %>% dplyr::summarise(HUC_Name = first(HUC8_Name), HUC8 = first(HUC8))
+  AU_HUC <- st_stations_info %>% dplyr::group_by(AU_ID) %>% dplyr::summarise(HUC8_Name = first(HUC8_Name), HUC8 = first(HUC8))
   
   assess_sum <- merge(assess_sum, AU_HUC, by="AU_ID", all.x = TRUE, all.y = FALSE)
   
