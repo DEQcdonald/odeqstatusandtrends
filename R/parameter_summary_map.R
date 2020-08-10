@@ -60,7 +60,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
 
     columbia_aus <- sf::st_read(
       dsn = "//deqhq1/wqnps/Status_and_Trend_Reports/GIS/Assessment_Units.gdb",
-      layer = "Columbia_River"
+      layer = "Columbia_River", stringsAsFactors = FALSE
     )$AU_ID
 
     assessment_units_lines <- assessment_units_lines %>% dplyr::filter(AU_ID %in% columbia_aus)
@@ -72,13 +72,13 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     snake_aus <- c(
       sf::st_read(
         dsn = "//deqhq1/wqnps/Status_and_Trend_Reports/GIS/Assessment_Units.gdb",
-        layer = "Snake_River_Lines")$AU_ID,
+        layer = "Snake_River_Lines", stringsAsFactors = FALSE)$AU_ID,
       sf::st_read(
         dsn = "//deqhq1/wqnps/Status_and_Trend_Reports/GIS/Assessment_Units.gdb",
-        layer = "Snake_River_waterbodies")$AU_ID,
+        layer = "Snake_River_waterbodies", stringsAsFactors = FALSE)$AU_ID,
       sf::st_read(
         dsn = "//deqhq1/wqnps/Status_and_Trend_Reports/GIS/Assessment_Units.gdb",
-        layer = "Snake_River_Watershed")$AU_ID
+        layer = "Snake_River_Watershed", stringsAsFactors = FALSE)$AU_ID
     )
 
     assessment_units_lines <- assessment_units_lines %>% dplyr::filter(AU_ID %in% snake_aus)
@@ -527,11 +527,13 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     leaflet::addMapPane("hydroTiles", zIndex = 425) %>%
     leaflet::addMapPane("assessment_area", zIndex = 430) %>%
     leaflet::addMapPane("agwqma", zIndex = 440) %>%
-    leaflet::addMapPane("IRpolygons", zIndex = 450) %>%
+    leaflet::addMapPane("IRwatersheds", zIndex = 450) %>%
+    leaflet::addMapPane("IRwaterbodies", zIndex = 455) %>%
     leaflet::addMapPane("IRpolylines", zIndex = 460) %>%
-    leaflet::addMapPane("Status_polygons", zIndex = 505) %>%
-    leaflet::addMapPane("Status_polylines", zIndex = 510) %>%
-    leaflet::addMapPane("Status_points", zIndex = 515) %>% 
+    leaflet::addMapPane("Status_watersheds", zIndex = 505) %>%
+    leaflet::addMapPane("Status_waterbodies", zIndex = 510) %>%
+    leaflet::addMapPane("Status_polylines", zIndex = 515) %>%
+    leaflet::addMapPane("Status_points", zIndex = 520) %>% 
     # htmlwidgets::appendContent(HTML(table)) %>%
     #   htmlwidgets::onRender(
     #     "
@@ -582,7 +584,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     map <- map %>%
       leaflet::addPolygons(data = wql_streams_ws_shp,
                            opacity = 1,
-                           weight = 3.5,
+                           weight = 2.5,
                            color = "#ff33be",
                            fillColor = "#ff33be",
                            fillOpacity = 0.25,
@@ -594,8 +596,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                            highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
                            label = ~AU_Name,
                            smoothFactor = 1.5,
-                           group = "2018/2020 303(d)/305(b) IR Status",
-                           options = leaflet::pathOptions(pane = "IRpolygons")
+                           group = "2018/2020 IR Status - Watersheds",
+                           options = leaflet::pathOptions(pane = "IRwatersheds")
       )
   }
 
@@ -613,7 +615,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                             highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
                             label = ~AU_Name,
                             smoothFactor = 1.5,
-                            group = "2018/2020 303(d)/305(b) IR Status",
+                            group = "2018/2020 IR Status - Streams",
                             options = leaflet::pathOptions(pane = "IRpolylines")
       )
   }
@@ -624,6 +626,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                             opacity = 1,
                             weight = 3.5,
                             color = "#ff33be",
+                            fillColor = "#ff33be",
+                            fillOpacity = 0.25,
                             popup = ~paste0("<b>", AU_Name,
                                             # "<br>Parameter:</b> ", Char_Name,
                                             "<br></b><br>",
@@ -632,8 +636,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                             highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
                             label = ~AU_Name,
                             smoothFactor = 1.5,
-                            group = "2018/2020 303(d)/305(b) IR Status",
-                            options = leaflet::pathOptions(pane = "IRpolygons")
+                            group = "2018/2020 IR Status - Waterbodies",
+                            options = leaflet::pathOptions(pane = "IRwaterbodies")
       )
   }
 
@@ -718,7 +722,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                              label = ~AU_Name,
                              smoothFactor = 2,
                              options = leaflet::pathOptions(className = "assessmentUnits", interactive = TRUE,
-                                                            pane = "Status_polygons"),
+                                                            pane = "Status_waterbodies"),
                              highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
                              group = standard_param
         )
@@ -728,7 +732,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
         leaflet::addPolygons(data = au_data_ws,
                              stroke = TRUE,
                              opacity = 0.9,
-                             weight = 3,
+                             weight = 2,
                              color = ~color,
                              fillOpacity = 0.1,
                              fillColor = ~color,
@@ -743,7 +747,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                              label = ~AU_Name,
                              smoothFactor = 2,
                              options = leaflet::pathOptions(className = "assessmentUnits", interactive = TRUE,
-                                                            pane = "Status_polygons"),
+                                                            pane = "Status_watersheds"),
                              highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
                              group = standard_param
         )
@@ -857,7 +861,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
       )
     )) %>%
     leaflet::addLayersControl(baseGroups = sort(layer_groups),
-                              overlayGroups = c("2018/2020 303(d)/305(b) IR Status", "Ag WQ Management Areas", "Assessment Area", 
+                              overlayGroups = c("2018/2020 IR Status - Streams", "2018/2020 IR Status - Waterbodies", 
+                                                "2018/2020 IR Status - Watersheds", "Ag WQ Management Areas", "Assessment Area", 
                                                 "Hydrography", "Land Cover (NLCD 2016)", "World Imagery"),
                               options = leaflet::layersControlOptions(collapsed = FALSE)) %>%
     leaflet::hideGroup(c("World Imagery", "Hydrography", "Ag WQ Management Areas", "Land Cover (NLCD 2016)", "2018/2020 303(d)/305(b) IR Status")) %>%
@@ -909,7 +914,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
       icon = "fa-map-marker",
       title = "Toggle Station Markers",
       onClick = JS("function(btn, map){
-    var elements = document.getElementsByClassName('leaflet-pane leaflet-marker-pane');
+    var elements = document.getElementsByClassName('leaflet-pane leaflet-Status_points-pane');
     var index;
 
     elements = elements.length ? elements : [elements];
