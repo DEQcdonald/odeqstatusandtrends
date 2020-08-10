@@ -584,11 +584,11 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     map <- map %>%
       leaflet::addPolygons(data = wql_streams_ws_shp,
                            opacity = 1,
-                           weight = 2.5,
+                           weight = 1,
                            color = "#ff33be",
                            fillColor = "#ff33be",
                            fillOpacity = 0.25,
-                           popup = ~paste0("<b>", AU_Name,
+                           popup = ~paste0("<b>", AU_Name, "<br>", AU_ID,
                                            # "<br>Parameter:</b> ", Char_Name,
                                            "<br></b><br>",
                                            sapply(AU_ID, WQLpopupTable, USE.NAMES = FALSE)),
@@ -607,7 +607,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                             opacity = 1,
                             weight = 3.5,
                             color = "#ff33be",
-                            popup = ~paste0("<b>", AU_Name,
+                            popup = ~paste0("<b>", AU_Name, "<br>", AU_ID,
                                             # "<br>Parameter:</b> ", Char_Name,
                                             "<br></b><br>",
                                             sapply(AU_ID, WQLpopupTable, USE.NAMES = FALSE)),
@@ -622,13 +622,13 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
 
   if(nrow(wql_bodies_shp)>0){
     map <- map %>%
-      leaflet::addPolylines(data = wql_bodies_shp,
+      leaflet::addPolygons(data = wql_bodies_shp,
                             opacity = 1,
                             weight = 3.5,
                             color = "#ff33be",
                             fillColor = "#ff33be",
                             fillOpacity = 0.25,
-                            popup = ~paste0("<b>", AU_Name,
+                            popup = ~paste0("<b>", AU_Name, "<br>", AU_ID,
                                             # "<br>Parameter:</b> ", Char_Name,
                                             "<br></b><br>",
                                             sapply(AU_ID, WQLpopupTable, USE.NAMES = FALSE)),
@@ -732,7 +732,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
         leaflet::addPolygons(data = au_data_ws,
                              stroke = TRUE,
                              opacity = 0.9,
-                             weight = 2,
+                             weight = 1,
                              color = ~color,
                              fillOpacity = 0.1,
                              fillColor = ~color,
@@ -865,7 +865,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                                                 "2018/2020 IR Status - Watersheds", "Ag WQ Management Areas", "Assessment Area", 
                                                 "Hydrography", "Land Cover (NLCD 2016)", "World Imagery"),
                               options = leaflet::layersControlOptions(collapsed = FALSE)) %>%
-    leaflet::hideGroup(c("World Imagery", "Hydrography", "Ag WQ Management Areas", "Land Cover (NLCD 2016)", "2018/2020 303(d)/305(b) IR Status")) %>%
+    leaflet::hideGroup(c("World Imagery", "Hydrography", "Ag WQ Management Areas", "Land Cover (NLCD 2016)", 
+                         "2018/2020 IR Status - Streams", "2018/2020 IR Status - Waterbodies", 
+                         "2018/2020 IR Status - Watersheds")) %>%
     leaflet::addControl(position = "bottomleft", className = "legend",
                         html = sprintf('<html><body><div style="opacity:0.95">
                                         <img width="375" height="180" src="data:image/png;base64,%s">
