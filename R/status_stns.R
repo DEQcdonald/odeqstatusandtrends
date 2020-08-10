@@ -59,10 +59,10 @@ status_stns <- function(df) {
                        ),
                        reason = dplyr::if_else(status == "Unassessed",
                                                dplyr::if_else(any(excursion_cen %in% 2),
-                                                              "no_results",
+                                                              "No Results",
                                                               dplyr::if_else(all(is.na(excursion_cen)),
-                                                                      "no_target",
-                                                                      "no_results")
+                                                                      "No TMDL Target",
+                                                                      "No Results")
                                                ),
                                                NA_character_)
       ) %>%
@@ -104,8 +104,8 @@ status_stns <- function(df) {
                                                dplyr::if_else(samples < 5,
                                                               "less_than_5_samples",
                                                               if_else(all(is.na(excursion)),
-                                                                      "no_target",
-                                                                      "no_results")
+                                                                      "No TMDL Target",
+                                                                      "No Results")
                                                               ),
                                                NA_character_)
       ) %>%
@@ -143,10 +143,10 @@ status_stns <- function(df) {
                        ),
                        reason = dplyr::if_else(status == "Unassessed",
                                                dplyr::if_else(samples < 5,
-                                                              "no_results",
+                                                              "No Results",
                                                               if_else(all(is.na(excursion_cen)),
-                                                                      "no_target",
-                                                                      "no_results")
+                                                                      "No TMDL Target",
+                                                                      "No Results")
                                                ),
                                                NA_character_)
       ) %>%
@@ -212,7 +212,7 @@ status_stns <- function(df) {
                                                               "Unassessed")
                        ),
                        reason = dplyr::if_else(status == "Unassessed",
-                                               "no_results",
+                                               "No Results",
                                                NA_character_)
       ) %>%
       dplyr::ungroup() %>%
