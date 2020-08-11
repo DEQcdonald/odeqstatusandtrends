@@ -26,7 +26,7 @@ get_stations_AWQMS <- function(polygon, exclude.tribal.lands = TRUE, stations.ch
   # Clip stations to input polygon
   print("Clipping stations to your shapefile...")
   stations <- dplyr::filter(stations,
-                            MLocID %in% StationsInPoly(stations, polygon, outside = FALSE,
+                            MLocID %in% odeqstatusandtrends::StationsInPoly(stations, polygon, outside = FALSE,
                                                        id_col="MLocID", lat_col="Lat_DD",
                                                        lon_col="Long_DD", datum_col="Datum"),
                             MonLocType %in% c("River/Stream", "Reservoir", "Lake",
