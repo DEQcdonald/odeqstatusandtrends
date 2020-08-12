@@ -13,7 +13,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
 
   setwd(proj_dir)
 
-  load("//deqhq1/WQNPS/Status_and_Trend_Reports/2020-Revision/Oregon_target_data.RData")
+  load("//deqhq1/WQNPS/Status_and_Trend_Reports/2020/Oregon_target_data.RData")
   load(file = "//deqhq1/WQNPS/Status_and_Trend_Reports/Lookups_Statewide/huc_crosswalk.RData")
 
   state_target_data <- state_target_data %>% dplyr::filter(!is.na(target_value))
