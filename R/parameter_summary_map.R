@@ -461,7 +461,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
         if(file.exists(paste0("Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
                               charnames[charnames$awqms == param, "file"], "_", station, "_annual mean.jpeg"))){
           paste0("<a href='Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
-                 charnames[charnames$awqms == param, "file"], "_", station, "_annual mean.jpeg' style='width:600px' target='_blank'>Geomean</a>")
+                 charnames[charnames$awqms == param, "file"], "_", station, "_annual mean.jpeg' style='width:600px' target='_blank'>Annual Mean</a>")
         }
         ,
         if(file.exists(paste0("Plots/", sub_name, "/", charnames[charnames$awqms == param, "folder"], "/",
