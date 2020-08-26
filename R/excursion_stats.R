@@ -51,7 +51,7 @@ excursion_stats <- function(df) {
     stop("There is no 'BacteriaCode' column defined in df.")
   }
   
-  df <- df %>% dplyr::mutate(Spawn_type = case_when((Char_Name %in% c("Total Phosphorus, mixed forms", "Total suspended solids")) ~ NA,
+  df <- df %>% dplyr::mutate(Spawn_type = case_when((Char_Name %in% c("Total Phosphorus, mixed forms", "Total suspended solids")) ~ NA_character_,
                              TRUE ~ Spawn_type))
   
   excursion_stat_df1 <- df %>%
