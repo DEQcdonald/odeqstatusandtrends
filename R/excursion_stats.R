@@ -51,6 +51,9 @@ excursion_stats <- function(df) {
     stop("There is no 'BacteriaCode' column defined in df.")
   }
   
+  df <- df %>% dplyr::mutate(Spawn_type = case_when((Char_Name %in% c("Total Phosphorus, mixed forms", "Total suspended solids")) ~ NA),
+                             TRUE ~ Spawn_type)
+  
   excursion_stat_df1 <- df %>%
     dplyr::filter(!(BacteriaCode == 3 & Char_Name == "Fecal Coliform")) %>%
     dplyr::filter(excursion_cen==1) %>%
