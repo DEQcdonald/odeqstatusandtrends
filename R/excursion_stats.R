@@ -52,7 +52,7 @@ excursion_stats <- function(df) {
   }
   
   df <- df %>% dplyr::mutate(Spawn_type = case_when((Char_Name %in% c("Total Phosphorus, mixed forms", "Total suspended solids")) ~ NA_character_,
-                             TRUE ~ Spawn_type))
+                             TRUE ~ as.character(Spawn_type)))
   
   excursion_stat_df1 <- df %>%
     dplyr::filter(!(BacteriaCode == 3 & Char_Name == "Fecal Coliform")) %>%
