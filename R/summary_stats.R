@@ -45,7 +45,7 @@ summary_stats <- function(df) {
   if(!"BacteriaCode" %in% colnames(df)) {
     stop("There is no 'BacteriaCode' column defined in df.")
   }
-
+  
   stat_df1 <- df %>%
     dplyr::filter(!(BacteriaCode == 3 & Char_Name == "Fecal Coliform")) %>%
     dplyr::group_by(MLocID, Char_Name, Spawn_type, status_period) %>%
