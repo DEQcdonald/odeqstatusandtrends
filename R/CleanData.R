@@ -14,9 +14,9 @@ CleanData <- function(data)
     return(data)
   }
 
-  need_cols <- c('MLocID', 'StationDes', 'OrganizationID', 'Project1', 'Org_Name', 'Lat_DD', 'Long_DD', 'ELEV_Ft', 'Datum', 'HUC8', 'AU_ID',
-                 'Reachcode', 'Char_Name','SampleStartDate', 'SampleStartTime', 'Result','Result_Numeric', 'Result_Operator', 'Result_Unit',
-                 'Statistical_Base', 'act_depth_height', 'QualifierAbbr', 'Method_Code', 'Activity_Type', 'act_id', 'MRLValue', 'Result_status',
+  need_cols <- c('MLocID', 'StationDes', 'OrganizationID', 'Project1', 'org_name', 'Lat_DD', 'Long_DD', 'ELEV_Ft', 'Datum', 'HUC8', 'AU_ID',
+                 'Reachcode', 'Char_Name','SampleStartDate', 'SampleStartTime', 'Result_Text','Result_Numeric', 'Result_Operator', 'Result_Unit',
+                 'Statistical_Base', 'act_depth_height', 'DQL', 'Method_Code', 'Activity_Type', 'act_id', 'MRLValue', 'Result_status',
                  'FishCode','SpawnCode', 'WaterTypeCode', 'WaterBodyCode', 'BacteriaCode', 'DO_code', 'ben_use_code', 'pH_code', 'DO_SpawnCode')
 
   if(any(!need_cols %in% names(data))) {
@@ -43,7 +43,7 @@ CleanData <- function(data)
   # Removing DQL values lower than C and rejected results
   print("Removing DQL values below 'C' and 'rejected' results...")
   data_QA <- dplyr::filter(data,
-                 !QualifierAbbr %in% c("DQL=A", "DQL=B") | Result_status %in% c("Rejected", "Provisional")) %>%
+                 !DQL %in% c("A", "B") | Result_status %in% c("Rejected", "Provisional")) %>%
     dplyr::mutate(reason = "low_grade")
   data_dropped <<- dplyr::bind_rows(data_dropped, data_QA) %>%
     dplyr::group_by(MLocID, Char_Name) %>%
@@ -52,7 +52,7 @@ CleanData <- function(data)
                      low_grade = sum(reason == "low_grade", na.rm = TRUE),
                      missing_datetime = sum(reason == "missing_datetime", na.rm = TRUE))
   data <- dplyr::filter(data,
-                 QualifierAbbr %in% c("DQL=A", "DQL=B") | is.na(QualifierAbbr),
+                 DQL %in% c("A", "B") | is.na(DQL),
                  !Result_status %in% c("Rejected", "Provisional"))
 
   # Removing unnecessary columns
@@ -102,7 +102,7 @@ CleanData <- function(data)
                                                     TRUE ~ Result_Numeric),
                   Result = dplyr::case_when(Result_Unit == 'ug/l' ~ as.character(Result_Numeric),
                                             Result_Unit == 'deg F' ~ as.character(Result_Numeric),
-                                            TRUE ~ Result),
+                                            TRUE ~ Result_Text),
                   Result_Unit = dplyr::case_when(Result_Unit == 'ug/l' ~ 'mg/l',
                                                  Result_Unit == 'deg F' ~ 'deg C',
                                                  TRUE ~ Result_Unit))
@@ -121,8 +121,8 @@ CleanData <- function(data)
     dup_checks <- duplicates %>% dplyr::group_by(sample_id) %>%
       dplyr::summarise(n_dups = n(),
                        sample_routine = dplyr::if_else("Field Msr/Obs" %in% Activity_Type & "Sample-Routine" %in% Activity_Type, 1, 0),
-                       dup_results = dplyr::if_else(length(unique(Result)) == 1 & length(unique(QualifierAbbr)) == 1, 1, 0),
-                       diff_DQL = dplyr::if_else(length(unique(QualifierAbbr)) == 1, 0, 1),
+                       dup_results = dplyr::if_else(length(unique(Result)) == 1 & length(unique(DQL)) == 1, 1, 0),
+                       diff_DQL = dplyr::if_else(length(unique(DQL)) == 1, 0, 1),
                        out_of_range = dplyr::if_else(unique(Char_Name) %in% c("Temperature, water", "Dissolved oxygen (DO)") &
                                                        (max(Result_Numeric, na.rm = TRUE) - min(Result_Numeric, na.rm = TRUE)) > 1.0, 1,
                                                      dplyr::if_else(unique(Char_Name) %in% c("pH") &
@@ -150,9 +150,9 @@ CleanData <- function(data)
     DQL_resolve <- NULL
     for(i in unique(DQL_check$sample_id)){
       tmp <- DQL_check_data %>% dplyr::filter(sample_id == i)
-      if("DQL=A" %in% tmp$QualifierAbbr){
-        tmp <- tmp %>% dplyr::filter(QualifierAbbr == "DQL=A")
-      } else {tmp <- tmp %>% dplyr::filter(QualifierAbbr == "DQL=B")}
+      if("A" %in% tmp$DQL){
+        tmp <- tmp %>% dplyr::filter(DQL == "A")
+      } else {tmp <- tmp %>% dplyr::filter(DQL == "B")}
       DQL_resolve <- dplyr::bind_rows(DQL_resolve, tmp)
     }
 
