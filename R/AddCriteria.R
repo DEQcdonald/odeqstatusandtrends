@@ -29,10 +29,10 @@ add_criteria <- function(data) {
   }
   if(any("Dissolved oxygen (DO)" %in% parameters)) {
     print("Adding dissolved oxygen criteria values...")
-    data$Do_crit_30D <- AWQMSdata::DO_crit[match(data$DO_code, AWQMSdata::DO_crit$DO_code), "crit_30D"]
-    data$Do_crit_7Mi <- AWQMSdata::DO_crit[match(data$DO_code, AWQMSdata::DO_crit$DO_code), "crit_7Mi"]
-    data$DO_crit_min <- AWQMSdata::DO_crit[match(data$DO_code, AWQMSdata::DO_crit$DO_code), "crit_Min"]
-    data$Do_crit_instant <- AWQMSdata::DO_crit[match(data$DO_code, AWQMSdata::DO_crit$DO_code), "crit_Instant"]
+    data$Do_crit_30D <- AWQMSdata::DO_crit[match(data$DO_code, AWQMSdata::DO_crit$DO_code), "DO_30D_crit"]
+    data$Do_crit_7Mi <- AWQMSdata::DO_crit[match(data$DO_code, AWQMSdata::DO_crit$DO_code), "DO_7Mi_crit"]
+    data$DO_crit_min <- AWQMSdata::DO_crit[match(data$DO_code, AWQMSdata::DO_crit$DO_code), "DO_abs_min_crit"]
+    data$Do_crit_instant <- AWQMSdata::DO_crit[match(data$DO_code, AWQMSdata::DO_crit$DO_code), "DO_Instant_crit"]
     data$criteria <- "DO standard"
   }
   if(any("pH" %in% parameters)) {
@@ -43,9 +43,9 @@ add_criteria <- function(data) {
   }
   if(any(parameters %in% c("Escherichia coli", "Fecal Coliform", "Enterococcus"))) {
     print("adding bacteria criteria values...")
-    data$bact_crit_ss <- AWQMSdata::Bact_crit[match(data$BacteriaCode, AWQMSdata::Bact_crit$BacteriaCode), "SS_Crit"]
-    data$bact_crit_geomean <- AWQMSdata::Bact_crit[match(data$BacteriaCode, AWQMSdata::Bact_crit$BacteriaCode), "Geomean_Crit"]
-    data$bact_crit_percent <- AWQMSdata::Bact_crit[match(data$BacteriaCode, AWQMSdata::Bact_crit$BacteriaCode), "Perc_Crit"]
+    data$bact_crit_ss <- AWQMSdata::Bacteria_crit[match(data$BacteriaCode, AWQMSdata::Bacteria_crit$BacteriaCode), "Bacteria_SS_Crit"]
+    data$bact_crit_geomean <- AWQMSdata::Bacteria_crit[match(data$BacteriaCode, AWQMSdata::Bacteria_crit$BacteriaCode), "Bacteria_Geomean_Crit"]
+    data$bact_crit_percent <- AWQMSdata::Bacteria_crit[match(data$BacteriaCode, AWQMSdata::Bacteria_crit$BacteriaCode), "Bacteria_Percentage_Crit"]
     data$criteria <- "Bacteria standard"
   }
 
