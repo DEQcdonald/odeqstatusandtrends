@@ -38,20 +38,20 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   #                 paste(unique(param_summary$AU_ID), collapse = "', '"), "')")
 
   assessment_units_lines <- sf::st_read(
-    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
+    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
     layer = "AssessmentUnits_OR_Rivers_Coast",
     query = paste0("SELECT * FROM AssessmentUnits_OR_Rivers_Coast WHERE AU_ID IN ('",
                    paste(unique(param_summary$AU_ID), collapse = "', '"), "')"), stringsAsFactors = FALSE
   )
   assessment_units_ws <- sf::st_read(
-    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
-    layer = "AssessmentUnit_Watershed",
-    query = paste0("SELECT * FROM AssessmentUnit_Watershed WHERE AU_ID IN ('",
+    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
+    layer = "AssessmentUnit_OR_Watershed_Area",
+    query = paste0("SELECT * FROM AssessmentUnit_OR_Watershed_Area WHERE AU_ID IN ('",
                    paste(unique(param_summary$AU_ID), collapse = "', '"), "')"), stringsAsFactors = FALSE
   )
   assessment_units_bodies <- sf::st_read(
-    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
-    layer = "AssessmentUnit_Waterbodies",
+    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
+    layer = "AssessmentUnits_OR_Waterbodies",
     query = paste0("SELECT * FROM AssessmentUnits_OR_Waterbodies WHERE AU_ID IN ('",
                    paste(unique(param_summary$AU_ID), collapse = "', '"), "')"), stringsAsFactors = FALSE
   )
@@ -107,23 +107,23 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   if(unique(area$MAP) == "Columbia River"){
     
     wql_streams_lines <- sf::st_read(
-      dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
-      layer = "Impaired_Pollutant_Rivers_Coast",
-      query = paste0("SELECT * FROM Impaired_Pollutant_Rivers_Coast WHERE AU_ID IN ('",
+      dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
+      layer = "By_Parameter_Rivers_Coast",
+      query = paste0("SELECT * FROM By_Parameter_Rivers_Coast WHERE AU_ID IN ('",
                      paste(columbia_aus, collapse = "', '"), "')"),
       stringsAsFactors = FALSE
     )
     wql_streams_ws <- sf::st_read(
-      dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
-      layer = "Impaired_Pollutant_Watershed",
-      query = paste0("SELECT * FROM Impaired_Pollutant_Watershed WHERE AU_ID IN ('",
+      dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
+      layer = "By_Parameter_Watershed",
+      query = paste0("SELECT * FROM By_Parameter_Watershed WHERE AU_ID IN ('",
                      paste(columbia_aus, collapse = "', '"), "')"),
       stringsAsFactors = FALSE
     )
     wql_bodies <- sf::st_read(
-      dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
-      layer = "Impaired_Pollutant_Waterbodies",
-      query = paste0("SELECT * FROM Impaired_Pollutant_Waterbodies WHERE AU_ID IN ('",
+      dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
+      layer = "By_Parameter_Waterbodies",
+      query = paste0("SELECT * FROM By_Parameter_Waterbodies WHERE AU_ID IN ('",
                      paste(columbia_aus, collapse = "', '"), "')"),
       stringsAsFactors = FALSE
     )
@@ -131,23 +131,23 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   } else if(unique(area$MAP) == "Snake River"){
 
     wql_streams_lines <- sf::st_read(
-      dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
-      layer = "Impaired_Pollutant_Rivers_Coast",
-      query = paste0("SELECT * FROM Impaired_Pollutant_Rivers_Coast WHERE AU_ID IN ('",
+      dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
+      layer = "By_Parameter_Rivers_Coast",
+      query = paste0("SELECT * FROM By_Parameter_Rivers_Coast WHERE AU_ID IN ('",
                      paste(snake_aus, collapse = "', '"), "')"),
       stringsAsFactors = FALSE
     )
     wql_streams_ws <- sf::st_read(
-      dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
-      layer = "Impaired_Pollutant_Watershed",
-      query = paste0("SELECT * FROM Impaired_Pollutant_Watershed WHERE AU_ID IN ('",
+      dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
+      layer = "By_Parameter_Watershed",
+      query = paste0("SELECT * FROM By_Parameter_Watershed WHERE AU_ID IN ('",
                      paste(snake_aus, collapse = "', '"), "')"),
       stringsAsFactors = FALSE
     )
     wql_bodies <- sf::st_read(
-      dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
-      layer = "Impaired_Pollutant_Waterbodies",
-      query = paste0("SELECT * FROM Impaired_Pollutant_Waterbodies WHERE AU_ID IN ('",
+      dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
+      layer = "By_Parameter_Waterbodies",
+      query = paste0("SELECT * FROM By_Parameter_Waterbodies WHERE AU_ID IN ('",
                      paste(snake_aus, collapse = "', '"), "')"),
       stringsAsFactors = FALSE
     )
@@ -155,23 +155,23 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   } else {
   
   wql_streams_lines <- sf::st_read(
-    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
-    layer = "Impaired_Pollutant_Rivers_Coast",
-    query = paste0("SELECT * FROM Impaired_Pollutant_Rivers_Coast WHERE HUC12 IN ('",
+    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
+    layer = "By_Parameter_Rivers_Coast",
+    query = paste0("SELECT * FROM By_Parameter_Rivers_Coast WHERE HUC12 IN ('",
                    paste(huc_12s, collapse = "', '"), "')"),
     stringsAsFactors = FALSE
   )
   wql_streams_ws <- sf::st_read(
-    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
-    layer = "Impaired_Pollutant_Watershed",
-    query = paste0("SELECT * FROM Impaired_Pollutant_Watershed WHERE HUC12 IN ('",
+    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
+    layer = "By_Parameter_Watershed",
+    query = paste0("SELECT * FROM By_Parameter_Watershed WHERE HUC12 IN ('",
                    paste(huc_12s, collapse = "', '"), "')"),
     stringsAsFactors = FALSE
   )
   wql_bodies <- sf::st_read(
-    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_2018_IntegratedReport/WQ_Assessment_2018_20.gdb",
-    layer = "Impaired_Pollutant_Waterbodies",
-    query = paste0("SELECT * FROM Impaired_Pollutant_Waterbodies WHERE HUC12 IN ('",
+    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
+    layer = "By_Parameter_Waterbodies",
+    query = paste0("SELECT * FROM By_Parameter_Waterbodies WHERE HUC12 IN ('",
                    paste(huc_12s, collapse = "', '"), "')"),
     stringsAsFactors = FALSE
   )
@@ -208,10 +208,10 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   st_crs(wql_streams_ws)
   wql_streams_ws <- st_transform(wql_streams_ws, 4326)
   wql_streams_ws <- dplyr::filter(wql_streams_ws[, c("AU_Name", "AU_ID", "Period", "Char_Name", "IR_category")],
-                               Char_Name %in% unique(param_summary$Char_Name))
+                                  Char_Name %in% unique(param_summary$Char_Name))
   wql_bodies <- st_transform(wql_bodies, 4326)
   wql_bodies <- dplyr::filter(wql_bodies[, c("AU_Name", "AU_ID", "Period", "Char_Name", "IR_category")],
-                                  Char_Name %in% unique(param_summary$Char_Name))
+                              Char_Name %in% unique(param_summary$Char_Name))
   # wql_streams <- wql_streams[lapply(wql_streams$`_ogr_geometry_`, length) != 0,]
   # wql_streams$TMDL_INFO <- vapply(strsplit(wql_streams$TMDL_INFO, "<a"), `[`, 1, FUN.VALUE=character(1))
   st_crs(agwqma)
