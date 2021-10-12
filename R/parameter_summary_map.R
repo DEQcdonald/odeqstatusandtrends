@@ -225,7 +225,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   area <- st_transform(area, 4326)
   p_stns <- sf::st_as_sf(param_summary, coords = c("Long_DD", "Lat_DD"), crs = 4326)
   agwqma <- agwqma %>% dplyr::filter(lengths(st_intersects(., p_stns)) > 0)
-
+  
+  sf::sf_use_s2(FALSE)
   assessment_units_lines <- assessment_units_lines %>% dplyr::group_by(AU_ID, AU_Name) %>% dplyr::summarise()
   assessment_units_ws <- assessment_units_ws %>% dplyr::group_by(AU_ID, AU_Name) %>% dplyr::summarise()
   assessment_units_bodies <- assessment_units_bodies %>% dplyr::group_by(AU_ID, AU_Name) %>% dplyr::summarise()
