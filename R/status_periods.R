@@ -13,7 +13,7 @@
 #' @examples
 #' status_periods(datetime = data_assessed$sample_datetime, periods=4, year_range = c(start_year:end_year))
 #'
-status_periods <- function(datetime=NULL, periods=4, year_range=NULL, bins_only=FALSE) {
+status_periods <- function(datetime=NULL, periods=5, year_range=NULL, bins_only=FALSE) {
 
   #datetime <- data_assessed$sample_datetime
   #year_range <- c(1998,2018)
