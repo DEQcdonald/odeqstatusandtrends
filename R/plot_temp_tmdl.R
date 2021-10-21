@@ -16,7 +16,7 @@ plot_temp_tmdl <- function(data, seaKen, station, max_date = min(data$sample_dat
     seaken_temp <- seaKen %>% dplyr::filter(Char_Name == "Temperature, water",
                                             significance != "No Significant Trend",
                                             MLocID == station)
-  } else {seaKen_temp <- data.frame()}
+  } else {seaken_temp <- data.frame()}
 
   # obtain data range limits for plotting
   result_max <- max(c(data$Result_cen, data$target_value), na.rm = TRUE)

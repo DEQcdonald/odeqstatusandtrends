@@ -16,7 +16,7 @@ plot_TSS <- function(data, seaKen, station, max_date = min(data$sample_datetime,
     seaken_TSS <- seaKen %>% dplyr::filter(Char_Name == "Total suspended solids",
                                            significance != "No Significant Trend",
                                            MLocID == station)
-  } else {seaKen_TSS <- data.frame()}
+  } else {seaken_TSS <- data.frame()}
 
   # obtain data range limits for plotting
   result_max <- max(c(data$Result_cen, data$target_value), na.rm = TRUE)

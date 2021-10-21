@@ -16,7 +16,7 @@ plot_pH <- function(data, seaKen, station, max_date = min(data$sample_datetime, 
     seaken_pH <- seaKen %>% dplyr::filter(Char_Name == "pH",
                                           significance != "No Significant Trend",
                                           MLocID == station)
-  } else {seaKen_pH <- data.frame()}
+  } else {seaken_pH <- data.frame()}
 
   # obtain data range limits for plotting
   result_max <- max(c(data$Result_cen, data$pH_Max), na.rm = TRUE)

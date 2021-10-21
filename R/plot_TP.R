@@ -16,7 +16,7 @@ plot_TP <- function(data, seaKen, station, max_date = min(data$sample_datetime, 
     seaken_TP <- seaKen %>% dplyr::filter(Char_Name == odeqstatusandtrends::AWQMS_Char_Names('TP'),
                                           significance != "No Significant Trend",
                                           MLocID == station)
-  } else {seaKen_TP <- data.frame()}
+  } else {seaken_TP <- data.frame()}
 
   # obtain data range limits for plotting
   result_max <- max(c(data$Result_cen, data$target_value), na.rm = TRUE)
