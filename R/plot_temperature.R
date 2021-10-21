@@ -24,15 +24,17 @@ plot_temperature <- function(data, seaKen, station, max_date = min(data$sample_d
   }
 
   # obtain plotting values for trend line if applicable
-  if(station %in% seaKen$MLocID){
-    slope <- round(seaKen[seaKen$MLocID == station & seaKen$Char_Name == "Temperature, water", "slope"], digits=3)
-    trend <- seaKen[seaKen$MLocID == station & seaKen$Char_Name == "Temperature, water", "trend"]
-    p_val <- round(seaKen[seaKen$MLocID == station & seaKen$Char_Name == "Temperature, water", "p_value"], digits=3)
-    x_delta <- as.numeric((xmax-xmin)/2)
-    y_median <- median(data$Result_cen, na.rm = TRUE)
-    sk_min <- y_median - x_delta*slope/365.25
-    sk_max <- y_median + x_delta*slope/365.25
-  }
+  if(NROW(seaKen) > 0){
+    if(station %in% seaKen$MLocID){
+      slope <- round(seaKen[seaKen$MLocID == station & seaKen$Char_Name == "Temperature, water", "slope"], digits=3)
+      trend <- seaKen[seaKen$MLocID == station & seaKen$Char_Name == "Temperature, water", "trend"]
+      p_val <- round(seaKen[seaKen$MLocID == station & seaKen$Char_Name == "Temperature, water", "p_value"], digits=3)
+      x_delta <- as.numeric((xmax-xmin)/2)
+      y_median <- median(data$Result_cen, na.rm = TRUE)
+      sk_min <- y_median - x_delta*slope/365.25
+      sk_max <- y_median + x_delta*slope/365.25
+    }
+  } else {seaKen <- data.frame()}
 
   p <- ggplot2::ggplot(data)
 

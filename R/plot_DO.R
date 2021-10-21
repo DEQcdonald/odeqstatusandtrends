@@ -22,15 +22,17 @@ plot_DO <- function(data, seaKen, station, max_date = min(data$sample_datetime, 
   ymax <- ifelse(result_max > 20, result_max * 1.1, 20)
 
   # obtain plotting values for trend line if applicable
-  if(station %in% seaKen$MLocID){
-    slope <- round(seaKen[seaKen$MLocID == station & seaKen$Char_Name == "Dissolved oxygen (DO)", "slope"], digits=3)
-    trend <- seaKen[seaKen$MLocID == station & seaKen$Char_Name == "Dissolved oxygen (DO)", "trend"]
-    p_val <- round(seaKen[seaKen$MLocID == station & seaKen$Char_Name == "Dissolved oxygen (DO)", "p_value"], digits=3)
-    x_delta <- as.numeric((xmax-xmin)/2)
-    y_median <- median(data$Result_cen, na.rm = TRUE)
-    sk_min <- y_median - x_delta*slope/365.25
-    sk_max <- y_median + x_delta*slope/365.25
-  }
+  if(NROW(seaKen) > 0){
+    if(station %in% seaKen$MLocID){
+      slope <- round(seaKen[seaKen$MLocID == station & seaKen$Char_Name == "Dissolved oxygen (DO)", "slope"], digits=3)
+      trend <- seaKen[seaKen$MLocID == station & seaKen$Char_Name == "Dissolved oxygen (DO)", "trend"]
+      p_val <- round(seaKen[seaKen$MLocID == station & seaKen$Char_Name == "Dissolved oxygen (DO)", "p_value"], digits=3)
+      x_delta <- as.numeric((xmax-xmin)/2)
+      y_median <- median(data$Result_cen, na.rm = TRUE)
+      sk_min <- y_median - x_delta*slope/365.25
+      sk_max <- y_median + x_delta*slope/365.25
+    }
+  } else {seaKen <- data.frame()}
 
   get_legend <- function(myggplot){
     tmp <- ggplot2::ggplot_gtable(ggplot2::ggplot_build(myggplot))

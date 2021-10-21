@@ -12,9 +12,11 @@
 plot_bacteria <- function(data, seaKen, station, max_date = min(data$sample_datetime, na.rm = TRUE)){
   parameter <- unique(data$Char_Name)
   # subset seaken table to parameter and significant trends
+  if(NROW(seaKen) > 0){
   seaken_bact <- seaKen %>% dplyr::filter(Char_Name %in% odeqstatusandtrends::AWQMS_Char_Names("bacteria"),
                                           significance != "No Significant Trend",
                                           MLocID == station)
+  } else {seaKen_bact <- data.frame()}
 
   # obtain data range limits for plotting
   result_max <- max(c(data$Result_cen, data$bact_crit_ss, data$bact_crit_geomean), na.rm = TRUE)
