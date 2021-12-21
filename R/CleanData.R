@@ -38,6 +38,9 @@ CleanData <- function(data)
   if(any(is.na(data$sample_datetime))){
     data_dropped <- data %>% dplyr::filter(is.na(sample_datetime))
     data_dropped$reason <- "missing_datetime"
+  } else {
+    data_dropped <- data %>% dplyr::filter(is.na(sample_datetime))
+    data_dropped$reason <- NA_character_
   }
   data <- data %>% dplyr::filter(!is.na(sample_datetime))
   # Removing DQL values lower than C and rejected results
