@@ -24,7 +24,7 @@ add_criteria <- function(data) {
     
     # data <- dplyr::bind_rows(data[data$Char_Name != "Temperature, water",], sdadm)
     
-    data$temp_crit <- AWQMSdata::Temp_crit[match(data$FishCode, AWQMSdata::Temp_crit$FishUse_code), "Temp_Criteria"]
+    data$temp_crit <- AWQMSdata::Temp_crit[match(data$FishCode, AWQMSdata::Temp_crit$FishCode), "Temp_Criteria"]
     data$criteria <- "Temperature standard"
   }
   if(any("Dissolved oxygen (DO)" %in% parameters)) {
