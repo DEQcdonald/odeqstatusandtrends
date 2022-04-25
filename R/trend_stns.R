@@ -9,7 +9,7 @@
 #' @examples
 #' trend_stns(df = data_assessed, trend_years = c(format(min(data$sample_datetime), "%Y"):format(Sys.Date(), "%Y")))
 
-trend_stns <- function(df, trend_years=NULL) {
+trend_stns <- function(df, trend_years=NULL, min_years = 8) {
 
   if(!"sample_datetime" %in% colnames(df)) {
     stop("There is no 'sample_datetime' column defined in df.")
@@ -31,8 +31,8 @@ trend_stns <- function(df, trend_years=NULL) {
   trend_years <- c(format(min(df$sample_datetime, na.rm = TRUE), "%Y"):format(Sys.Date(), "%Y"))
   }
 
-  if(length(trend_years) < 8){
-    print("Number of years should be more than or equal to 8")
+  if(length(trend_years) < min_years){
+    print(paste("Number of years should be more than or equal to", min_years))
     trend_check <- NULL
   } else {
 
@@ -46,7 +46,7 @@ trend_stns <- function(df, trend_years=NULL) {
                          avg_obs = dplyr::n()/n_years,
                          min_year = min(year),
                          max_year = max(year)) %>%
-        dplyr::filter(n_years>=8)
+        dplyr::filter(n_years>=min_years)
 
       print(paste("Data may be sufficient for", NROW(trend_check), "different trends to be determined."))
 
