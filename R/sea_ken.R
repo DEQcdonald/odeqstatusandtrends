@@ -94,9 +94,17 @@ sea_ken <- function(data, seasonal_estimates = F){
     col_add <- if(!i %in% colnames(sample_size)){
       sample_size[i] <- NA
     }
+    if(seasonal_estimates){
+      col_add <- if(!i %in% colnames(seasonal_est_df)){
+        seasonal_est_df[i] <- NA
+      }
+    }
   }
 
   attr(sea_ken_df, "sample_size") <- sample_size[, c('ID', 'Char', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
                                                      'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Total')]
+  if(seasonal_estimates){
+    attr(seasonal_est_df, "seasonal_estimates") <- seasonal_est_df[, c('ID', 'Char', 'slope', 'tau', 'intercept')]
+  }
   return(sea_ken_df)
 }
