@@ -67,7 +67,11 @@ GetData <- function(parameters = NULL, stations_AWQMS, stations_WQP = NULL, star
     
   }
   # Include only relevant monitoring location types
-  data_AWQMS <- data_AWQMS %>% dplyr::filter(MonLocType %in% c("River/Stream", "Lake", "Other-Surface Water", ""))
+  data_AWQMS <- data_AWQMS %>% 
+    dplyr::filter(MonLocType %in% c("River/Stream", "Lake", "Other-Surface Water", "Estuary", 
+                                    "BEACH Program Site-Ocean", "BEACH Program Site-River/Stream",
+                                    "Canal Drainage", "Canal Irrigation", "Canal Transport",
+                                    "Ocean", "Reservoir", "River/Stream Perennial", "Spring"))
   
   data_AWQMS[is.na(data_AWQMS$SampleStartTime), "SampleStartTime"] <- "00:00:00.000000"
   data_AWQMS[is.na(data_AWQMS$SampleStartTime), "SampleStartTZ"] <- "unknown"
