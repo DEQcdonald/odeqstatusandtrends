@@ -18,8 +18,8 @@ st_report <- function(format = "word_document", table_format = "pandoc", file_na
 
   table_format <<- table_format
   out_dir <<- out_dir
-  
-  webshot::install_phantomjs()
+
+  webshot::install_phantomjs(force = TRUE)
 
   rmarkdown::render(input = paste0(rmd_dir, "/state_summary.Rmd"),
                     output_format = format,
