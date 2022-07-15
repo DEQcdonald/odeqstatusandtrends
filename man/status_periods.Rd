@@ -4,8 +4,12 @@
 \alias{status_periods}
 \title{Define status assessment periods}
 \usage{
-status_periods(datetime = NULL, periods = 4, year_range = NULL,
-  bins_only = FALSE)
+status_periods(
+  datetime = NULL,
+  periods = 5,
+  year_range = NULL,
+  bins_only = FALSE
+)
 }
 \arguments{
 \item{datetime}{Vector of datetimes in POSIXct format.}

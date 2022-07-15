@@ -1,10 +1,35 @@
 Package: odeqstatusandtrends
 Title: Analyze and Report on Water Quality Status and Trends
-Version: 0.2.3
+Version: 0.2.4
 Authors@R: person(given = "Colin", family = "Donald", email = "Donald.Colin@deq.state.or.us", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Description: This package supports development of Oregon DEQ's water quality status and trends report. 
 Depends: R (>= 3.5.1)
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.2
+Imports:
+    AWQMSdata,
+    base64enc (>= 0.1),
+    cowplot (>= 1.1),
+    dataRetrieval (>= 2.7.0),
+    dplyr (>= 1.0.0),
+    EnvStats (>= 2.6.0),
+    ggplot2 (>= 3.3.0),
+    htmlwidgets (>= 1.5),
+    kableExtra (>= 1.3),
+    knitr (>= 1.3),
+    leaflet (>= 2.0.0),
+    leaflet.esri (>= 1.0.0),
+    leaflet.extras (>= 1.0.0),
+    lubridate(>= 1.8),
+    magrittr (>= 1.5),
+    odeqassessment,
+    rgdal (>= 1.5),
+    rmapshaper (>= 0.4),
+    rmarkdown (>= 2.6.0),
+    RODBC (>= 1.3),
+    sf (>= 1.0),
+    sp (>= 1.0),
+    tidyr (>= 1.0.0),
+    webshot (>= 0.5)

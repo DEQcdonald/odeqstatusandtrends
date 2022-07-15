@@ -4,8 +4,12 @@
 \alias{plot_pH}
 \title{Create pH plots to display status and trend.}
 \usage{
-plot_pH(data, seaKen, station, max_date = min(data$sample_datetime, na.rm
-  = TRUE))
+plot_pH(
+  data,
+  seaKen,
+  station,
+  max_date = min(data$sample_datetime, na.rm = TRUE)
+)
 }
 \arguments{
 \item{data}{Dataframe to determine status from. Must have 'excursion' column generated.}

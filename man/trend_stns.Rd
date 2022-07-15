@@ -4,7 +4,7 @@
 \alias{trend_stns}
 \title{Determine stations with sufficient data for trend analysis}
 \usage{
-trend_stns(df, trend_years = NULL)
+trend_stns(df, trend_years = NULL, min_years = 8)
 }
 \arguments{
 \item{data}{Dataframe to determine stations for trend analysis}

@@ -4,8 +4,12 @@
 \alias{plot_bacteria}
 \title{Create bacteria plots to display status and trend.}
 \usage{
-plot_bacteria(data, seaKen, station, max_date = min(data$sample_datetime,
-  na.rm = TRUE))
+plot_bacteria(
+  data,
+  seaKen,
+  station,
+  max_date = min(data$sample_datetime, na.rm = TRUE)
+)
 }
 \arguments{
 \item{data}{Dataframe to determine status from. Must have 'excursion' column generated.}

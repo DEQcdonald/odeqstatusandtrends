@@ -4,8 +4,15 @@
 \alias{StationsInPoly}
 \title{Clip stations to a polygon}
 \usage{
-StationsInPoly(stations, polygon, outside = FALSE, id_col, datum_col,
-  lat_col, lon_col)
+StationsInPoly(
+  stations,
+  polygon,
+  outside = FALSE,
+  id_col,
+  datum_col,
+  lat_col,
+  lon_col
+)
 }
 \arguments{
 \item{stations}{Dataframe of stations with latitude, longitude, and source datum.}

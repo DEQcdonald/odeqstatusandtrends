@@ -4,7 +4,7 @@
 \alias{sea_ken}
 \title{Run Seasonal Kendall trend analysis for all stations with sufficient data}
 \usage{
-sea_ken(data)
+sea_ken(data, seasonal_estimates = F)
 }
 \arguments{
 \item{data}{Dataframe to conduct a Seasonal Kendall Trend Analysis.}

@@ -4,8 +4,12 @@
 \alias{plot_TSS}
 \title{Create Total Suspended Solids plots to display status and trend.}
 \usage{
-plot_TSS(data, seaKen, station, max_date = min(data$sample_datetime,
-  na.rm = TRUE))
+plot_TSS(
+  data,
+  seaKen,
+  station,
+  max_date = min(data$sample_datetime, na.rm = TRUE)
+)
 }
 \arguments{
 \item{data}{Dataframe to determine status from. Must have 'excursion' column generated.}
