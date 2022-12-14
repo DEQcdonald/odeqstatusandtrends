@@ -4,8 +4,12 @@
 \alias{plot_TP}
 \title{Create Total Phosphorus plots to display status and trend.}
 \usage{
-plot_TP(data, seaKen, station, max_date = min(data$sample_datetime, na.rm
-  = TRUE))
+plot_TP(
+  data,
+  seaKen,
+  station,
+  max_date = min(data$sample_datetime, na.rm = TRUE)
+)
 }
 \arguments{
 \item{data}{Dataframe to determine status from. Must have 'excursion' column generated.}

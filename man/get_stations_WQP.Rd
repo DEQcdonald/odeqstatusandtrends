@@ -4,8 +4,13 @@
 \alias{get_stations_WQP}
 \title{Get Water Quality Portal stations in Oregon for status and trends analysis}
 \usage{
-get_stations_WQP(polygon, start_date, end_date, huc8,
-  exclude.tribal.lands = TRUE)
+get_stations_WQP(
+  polygon,
+  start_date,
+  end_date,
+  huc8,
+  exclude.tribal.lands = TRUE
+)
 }
 \arguments{
 \item{polygon}{Shapefile of the area to query}

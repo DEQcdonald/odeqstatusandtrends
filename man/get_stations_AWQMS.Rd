@@ -4,8 +4,11 @@
 \alias{get_stations_AWQMS}
 \title{Get stations in Oregon from DEQ's Ambient Water Quality Monitoring System for status and trends analysis}
 \usage{
-get_stations_AWQMS(polygon, exclude.tribal.lands = TRUE,
-  stations.channel.name = "STATIONS")
+get_stations_AWQMS(
+  polygon,
+  exclude.tribal.lands = TRUE,
+  stations.channel.name = "STATIONS"
+)
 }
 \arguments{
 \item{polygon}{Shapefile of the area to query}
