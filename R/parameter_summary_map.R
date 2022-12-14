@@ -101,98 +101,98 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   #                  paste(unique(param_summary$HUC8), collapse = "', '"), "')"),
   #   stringsAsFactors = FALSE
   # )
-  
+
   huc_12s <- hucs[hucs$HUC_8 %in% unique(param_summary$HUC8),]$HUC_12
-  
-  if(unique(area$MAP) == "Columbia River"){
-    
-    wql_streams_lines <- sf::st_read(
-      dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
-      layer = "By_Parameter_Rivers_Coast",
-      query = paste0("SELECT * FROM By_Parameter_Rivers_Coast WHERE AU_ID IN ('",
-                     paste(columbia_aus, collapse = "', '"), "')"),
-      stringsAsFactors = FALSE
-    )
-    wql_streams_ws <- sf::st_read(
-      dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
-      layer = "By_Parameter_Watershed",
-      query = paste0("SELECT * FROM By_Parameter_Watershed WHERE AU_ID IN ('",
-                     paste(columbia_aus, collapse = "', '"), "')"),
-      stringsAsFactors = FALSE
-    )
-    wql_bodies <- sf::st_read(
-      dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
-      layer = "By_Parameter_Waterbodies",
-      query = paste0("SELECT * FROM By_Parameter_Waterbodies WHERE AU_ID IN ('",
-                     paste(columbia_aus, collapse = "', '"), "')"),
-      stringsAsFactors = FALSE
-    )
-    
-  } else if(unique(area$MAP) == "Snake River"){
 
-    wql_streams_lines <- sf::st_read(
-      dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
-      layer = "By_Parameter_Rivers_Coast",
-      query = paste0("SELECT * FROM By_Parameter_Rivers_Coast WHERE AU_ID IN ('",
-                     paste(snake_aus, collapse = "', '"), "')"),
-      stringsAsFactors = FALSE
-    )
-    wql_streams_ws <- sf::st_read(
-      dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
-      layer = "By_Parameter_Watershed",
-      query = paste0("SELECT * FROM By_Parameter_Watershed WHERE AU_ID IN ('",
-                     paste(snake_aus, collapse = "', '"), "')"),
-      stringsAsFactors = FALSE
-    )
-    wql_bodies <- sf::st_read(
-      dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
-      layer = "By_Parameter_Waterbodies",
-      query = paste0("SELECT * FROM By_Parameter_Waterbodies WHERE AU_ID IN ('",
-                     paste(snake_aus, collapse = "', '"), "')"),
-      stringsAsFactors = FALSE
-    )
-    
-  } else {
-  
-  wql_streams_lines <- sf::st_read(
-    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
-    layer = "By_Parameter_Rivers_Coast",
-    query = paste0("SELECT * FROM By_Parameter_Rivers_Coast WHERE HUC12 IN ('",
-                   paste(huc_12s, collapse = "', '"), "')"),
-    stringsAsFactors = FALSE
-  )
-  wql_streams_ws <- sf::st_read(
-    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
-    layer = "By_Parameter_Watershed",
-    query = paste0("SELECT * FROM By_Parameter_Watershed WHERE HUC12 IN ('",
-                   paste(huc_12s, collapse = "', '"), "')"),
-    stringsAsFactors = FALSE
-  )
-  wql_bodies <- sf::st_read(
-    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
-    layer = "By_Parameter_Waterbodies",
-    query = paste0("SELECT * FROM By_Parameter_Waterbodies WHERE HUC12 IN ('",
-                   paste(huc_12s, collapse = "', '"), "')"),
-    stringsAsFactors = FALSE
-  )
-  }
-
-  if(NROW(wql_streams_lines) > 0){
-    wql_streams_lines$Char_Name <- unlist(sapply(wql_streams_lines$Char_Name, AWQMS_Char_Names, USE.NAMES = FALSE))
-  }
-  if(NROW(wql_streams_ws) > 0){
-    wql_streams_ws$Char_Name <- unlist(sapply(wql_streams_ws$Char_Name, AWQMS_Char_Names, USE.NAMES = FALSE))
-  }
-  if(NROW(wql_bodies) > 0){
-    wql_bodies$Char_Name <- unlist(sapply(wql_bodies$Char_Name, AWQMS_Char_Names, USE.NAMES = FALSE))
-  }
+# if(unique(area$MAP) == "Columbia River"){
+#
+#   wql_streams_lines <- sf::st_read(
+#     dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
+#     layer = "By_Parameter_Rivers_Coast",
+#     query = paste0("SELECT * FROM By_Parameter_Rivers_Coast WHERE AU_ID IN ('",
+#                    paste(columbia_aus, collapse = "', '"), "')"),
+#     stringsAsFactors = FALSE
+#   )
+#   wql_streams_ws <- sf::st_read(
+#     dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
+#     layer = "By_Parameter_Watershed",
+#     query = paste0("SELECT * FROM By_Parameter_Watershed WHERE AU_ID IN ('",
+#                    paste(columbia_aus, collapse = "', '"), "')"),
+#     stringsAsFactors = FALSE
+#   )
+#   wql_bodies <- sf::st_read(
+#     dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
+#     layer = "By_Parameter_Waterbodies",
+#     query = paste0("SELECT * FROM By_Parameter_Waterbodies WHERE AU_ID IN ('",
+#                    paste(columbia_aus, collapse = "', '"), "')"),
+#     stringsAsFactors = FALSE
+#   )
+#
+# } else if(unique(area$MAP) == "Snake River"){
+#
+#     wql_streams_lines <- sf::st_read(
+#       dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
+#       layer = "By_Parameter_Rivers_Coast",
+#       query = paste0("SELECT * FROM By_Parameter_Rivers_Coast WHERE AU_ID IN ('",
+#                      paste(snake_aus, collapse = "', '"), "')"),
+#       stringsAsFactors = FALSE
+#     )
+#     wql_streams_ws <- sf::st_read(
+#       dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
+#       layer = "By_Parameter_Watershed",
+#       query = paste0("SELECT * FROM By_Parameter_Watershed WHERE AU_ID IN ('",
+#                      paste(snake_aus, collapse = "', '"), "')"),
+#       stringsAsFactors = FALSE
+#     )
+#     wql_bodies <- sf::st_read(
+#       dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
+#       layer = "By_Parameter_Waterbodies",
+#       query = paste0("SELECT * FROM By_Parameter_Waterbodies WHERE AU_ID IN ('",
+#                      paste(snake_aus, collapse = "', '"), "')"),
+#       stringsAsFactors = FALSE
+#     )
+#
+#   } else {
+#
+# wql_streams_lines <- sf::st_read(
+#   dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
+#   layer = "By_Parameter_Rivers_Coast",
+#   query = paste0("SELECT * FROM By_Parameter_Rivers_Coast WHERE HUC12 IN ('",
+#                  paste(huc_12s, collapse = "', '"), "')"),
+#   stringsAsFactors = FALSE
+# )
+# wql_streams_ws <- sf::st_read(
+#   dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
+#   layer = "By_Parameter_Watershed",
+#   query = paste0("SELECT * FROM By_Parameter_Watershed WHERE HUC12 IN ('",
+#                  paste(huc_12s, collapse = "', '"), "')"),
+#   stringsAsFactors = FALSE
+# )
+# wql_bodies <- sf::st_read(
+#   dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
+#   layer = "By_Parameter_Waterbodies",
+#   query = paste0("SELECT * FROM By_Parameter_Waterbodies WHERE HUC12 IN ('",
+#                  paste(huc_12s, collapse = "', '"), "')"),
+#   stringsAsFactors = FALSE
+# )
+# }
+#
+#   if(NROW(wql_streams_lines) > 0){
+#     wql_streams_lines$Char_Name <- unlist(sapply(wql_streams_lines$Char_Name, AWQMS_Char_Names, USE.NAMES = FALSE))
+#   }
+#   if(NROW(wql_streams_ws) > 0){
+#     wql_streams_ws$Char_Name <- unlist(sapply(wql_streams_ws$Char_Name, AWQMS_Char_Names, USE.NAMES = FALSE))
+#   }
+#   if(NROW(wql_bodies) > 0){
+#     wql_bodies$Char_Name <- unlist(sapply(wql_bodies$Char_Name, AWQMS_Char_Names, USE.NAMES = FALSE))
+#   }
 
   assessment_units_lines <- sf::st_zm(assessment_units_lines, what = "ZM")
   assessment_units_ws <- sf::st_zm(assessment_units_ws, what = "ZM")
   assessment_units_bodies <- sf::st_zm(assessment_units_bodies, what = "ZM")
-  wql_streams_lines <- sf::st_zm(wql_streams_lines, what = "ZM")
-  wql_streams_ws <- sf::st_zm(wql_streams_ws, what = "ZM")
-  wql_bodies <- sf::st_zm(wql_bodies, what = "ZM")
+  # wql_streams_lines <- sf::st_zm(wql_streams_lines, what = "ZM")
+  # wql_streams_ws <- sf::st_zm(wql_streams_ws, what = "ZM")
+  # wql_bodies <- sf::st_zm(wql_bodies, what = "ZM")
   agwqma <- sf::st_zm(agwqma, what = "ZM")
 
   assessment_units_lines <- st_transform(assessment_units_lines, 4326)
@@ -201,17 +201,17 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   assessment_units_ws <- assessment_units_ws[,c("AU_ID", "AU_Name")] %>% dplyr::filter(AU_ID != "99")
   assessment_units_bodies <- st_transform(assessment_units_bodies, 4326)
   assessment_units_bodies <- assessment_units_bodies[,c("AU_ID", "AU_Name")] %>% dplyr::filter(AU_ID != "99")
-  st_crs(wql_streams_lines)
-  wql_streams_lines <- st_transform(wql_streams_lines, 4326)
-  wql_streams_lines <- dplyr::filter(wql_streams_lines[, c("AU_Name", "AU_ID", "Period", "Char_Name", "IR_category")],
-                               Char_Name %in% unique(param_summary$Char_Name))
-  st_crs(wql_streams_ws)
-  wql_streams_ws <- st_transform(wql_streams_ws, 4326)
-  wql_streams_ws <- dplyr::filter(wql_streams_ws[, c("AU_Name", "AU_ID", "Period", "Char_Name", "IR_category")],
-                                  Char_Name %in% unique(param_summary$Char_Name))
-  wql_bodies <- st_transform(wql_bodies, 4326)
-  wql_bodies <- dplyr::filter(wql_bodies[, c("AU_Name", "AU_ID", "Period", "Char_Name", "IR_category")],
-                              Char_Name %in% unique(param_summary$Char_Name))
+  # st_crs(wql_streams_lines)
+  # wql_streams_lines <- st_transform(wql_streams_lines, 4326)
+  # wql_streams_lines <- dplyr::filter(wql_streams_lines[, c("AU_Name", "AU_ID", "Period", "Char_Name", "IR_category")],
+                               # Char_Name %in% unique(param_summary$Char_Name))
+  # st_crs(wql_streams_ws)
+  # wql_streams_ws <- st_transform(wql_streams_ws, 4326)
+  # wql_streams_ws <- dplyr::filter(wql_streams_ws[, c("AU_Name", "AU_ID", "Period", "Char_Name", "IR_category")],
+  #                                 Char_Name %in% unique(param_summary$Char_Name))
+  # wql_bodies <- st_transform(wql_bodies, 4326)
+  # wql_bodies <- dplyr::filter(wql_bodies[, c("AU_Name", "AU_ID", "Period", "Char_Name", "IR_category")],
+  #                             Char_Name %in% unique(param_summary$Char_Name))
   # wql_streams <- wql_streams[lapply(wql_streams$`_ogr_geometry_`, length) != 0,]
   # wql_streams$TMDL_INFO <- vapply(strsplit(wql_streams$TMDL_INFO, "<a"), `[`, 1, FUN.VALUE=character(1))
   st_crs(agwqma)
@@ -225,18 +225,18 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   area <- st_transform(area, 4326)
   p_stns <- sf::st_as_sf(param_summary, coords = c("Long_DD", "Lat_DD"), crs = 4326)
   agwqma <- agwqma %>% dplyr::filter(lengths(st_intersects(., p_stns)) > 0)
-  
+
   sf::sf_use_s2(FALSE)
   assessment_units_lines <- assessment_units_lines %>% dplyr::group_by(AU_ID, AU_Name) %>% dplyr::summarise()
   assessment_units_ws <- assessment_units_ws %>% dplyr::group_by(AU_ID, AU_Name) %>% dplyr::summarise()
   assessment_units_bodies <- assessment_units_bodies %>% dplyr::group_by(AU_ID, AU_Name) %>% dplyr::summarise()
-  wql_streams_data <- bind_rows(sf::st_drop_geometry(wql_streams_lines),
-                                sf::st_drop_geometry(wql_streams_ws),
-                                sf::st_drop_geometry(wql_bodies))
-
-  wql_streams_lines_shp <- wql_streams_lines %>% dplyr::group_by(AU_Name, AU_ID) %>% dplyr::summarise()
-  wql_streams_ws_shp <- wql_streams_ws %>% dplyr::group_by(AU_Name, AU_ID) %>% dplyr::summarise()
-  wql_bodies_shp <- wql_bodies %>% dplyr::group_by(AU_Name, AU_ID) %>% dplyr::summarise()
+  # wql_streams_data <- bind_rows(sf::st_drop_geometry(wql_streams_lines),
+  #                               sf::st_drop_geometry(wql_streams_ws),
+  #                               sf::st_drop_geometry(wql_bodies))
+  #
+  # wql_streams_lines_shp <- wql_streams_lines %>% dplyr::group_by(AU_Name, AU_ID) %>% dplyr::summarise()
+  # wql_streams_ws_shp <- wql_streams_ws %>% dplyr::group_by(AU_Name, AU_ID) %>% dplyr::summarise()
+  # wql_bodies_shp <- wql_bodies %>% dplyr::group_by(AU_Name, AU_ID) %>% dplyr::summarise()
 
   # Create functions for mapping --------------------------------------------------------
 
@@ -281,7 +281,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     if(!is.null(station)){
       data <- dplyr::filter(data[, c(2, 1, grep("status|trend", colnames(param_summary)))],
                             Station_ID == station, Parameter == param)
-      data$Parameter <- odeqstatusandtrends::simpleCap(odeqstatusandtrends::AWQMS_to_standard(data$Parameter))
+      data$Parameter <- odeqstatusandtrends::AWQMS_to_standard(data$Parameter)
+      data$Parameter <- sapply(data$Parameter, simpleCap, USE.NAMES = F)
 
       colnames(data) <- gsub("(?<=[0-9])[^0-9]", "-", colnames(data), perl = TRUE)
       colnames(data) <- gsub("_", " ", colnames(data), perl = TRUE)
@@ -297,7 +298,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
       data <- dplyr::filter(data[, c(2, 1, 3, grep("status|trend", colnames(param_summary)))],
                             AU_ID == AU, Parameter == param) %>%
         dplyr::select(-AU_ID)
-      data$Parameter <- odeqstatusandtrends::simpleCap(odeqstatusandtrends::AWQMS_to_standard(data$Parameter))
+      data$Parameter <- odeqstatusandtrends::AWQMS_to_standard(data$Parameter)
+      data$Parameter <- sapply(data$Parameter, simpleCap, USE.NAMES = F)
 
       colnames(data) <- gsub("(?<=[0-9])[^0-9]", "-", colnames(data), perl = TRUE)
       colnames(data) <- gsub("_", " ", colnames(data), perl = TRUE)
@@ -318,7 +320,8 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     data <- dplyr::filter(data, AU_ID == AU, Parameter == param)
     data <- data %>% dplyr::select(-AU_Name, -HUC8_Name, -HUC8, -Stations, -Organizations)
     data <- data[, c("AU_ID", colnames(data)[colnames(data) != "AU_ID"])]
-    data$Parameter <- odeqstatusandtrends::simpleCap(odeqstatusandtrends::AWQMS_to_standard(data$Parameter))
+    data$Parameter <- odeqstatusandtrends::AWQMS_to_standard(data$Parameter)
+    data$Parameter <- sapply(data$Parameter, simpleCap, USE.NAMES = F)
 
     colnames(data) <- gsub("(?<=[0-9])[^0-9]", "-", colnames(data), perl = TRUE)
     colnames(data) <- gsub("_", " ", colnames(data), perl = TRUE)
@@ -335,7 +338,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   target_table <- function(station = NULL, param){
     targets <- state_target_data %>%
       dplyr::filter(MLocID == station, Char_Name == param) %>%
-      dplyr::mutate(Target = paste(target_value, target_units)) %>% 
+      dplyr::mutate(Target = paste(target_value, target_units)) %>%
       dplyr::select(Pollutant = Char_Name, Target, "Statistical Base" = target_stat_base,
                     "Applicable Period" = tmdl_period, TMDL = tmdl)
     if(any(!is.na(targets$Target))){
@@ -534,7 +537,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     leaflet::addMapPane("Status_watersheds", zIndex = 505) %>%
     leaflet::addMapPane("Status_waterbodies", zIndex = 510) %>%
     leaflet::addMapPane("Status_polylines", zIndex = 515) %>%
-    leaflet::addMapPane("Status_points", zIndex = 520) %>% 
+    leaflet::addMapPane("Status_points", zIndex = 520) %>%
     # htmlwidgets::appendContent(HTML(table)) %>%
     #   htmlwidgets::onRender(
     #     "
@@ -568,7 +571,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   }
 
   map <- map %>%
-    leaflet::addPolygons(data = area, color = "black", fillOpacity = 0.1, group = "Assessment Area", 
+    leaflet::addPolygons(data = area, color = "black", fillOpacity = 0.1, group = "Assessment Area",
                          opacity = 0.8, label = ~paste("Subbasin:", HU_8_NAME),
                          options = leaflet::leafletOptions(pane = "assessment_area")) %>%
     leaflet::addMarkers(data = unique(param_summary[,c("AU_ID", "MLocID", "StationDes", "Lat_DD", "Long_DD")]),
@@ -581,66 +584,155 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                         options = leaflet::pathOptions(pane = "Status_points")
     )
 
-  if(nrow(wql_streams_ws_shp)>0){
-    map <- map %>%
-      leaflet::addPolygons(data = wql_streams_ws_shp,
-                           opacity = 1,
-                           weight = 1,
-                           color = "#ff33be",
-                           fillColor = "#ff33be",
-                           fillOpacity = 0.25,
-                           popup = ~paste0("<b>", AU_Name, "<br>", AU_ID,
-                                           # "<br>Parameter:</b> ", Char_Name,
-                                           "<br></b><br>",
-                                           sapply(AU_ID, WQLpopupTable, USE.NAMES = FALSE)),
-                           popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300),
-                           highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
-                           label = ~AU_Name,
-                           smoothFactor = 1.5,
-                           group = "2018/2020 IR Status - Watersheds",
-                           options = leaflet::pathOptions(pane = "IRwatersheds")
-      )
-  }
+  # if(nrow(wql_streams_ws_shp)>0){
+  #   map <- map %>%
+  #     leaflet::addPolygons(data = wql_streams_ws_shp,
+  #                          opacity = 1,
+  #                          weight = 1,
+  #                          color = "#ff33be",
+  #                          fillColor = "#ff33be",
+  #                          fillOpacity = 0.25,
+  #                          popup = ~paste0("<b>", AU_Name, "<br>", AU_ID,
+  #                                          # "<br>Parameter:</b> ", Char_Name,
+  #                                          "<br></b><br>",
+  #                                          sapply(AU_ID, WQLpopupTable, USE.NAMES = FALSE)),
+  #                          popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300),
+  #                          highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
+  #                          label = ~AU_Name,
+  #                          smoothFactor = 1.5,
+  #                          group = "2018/2020 IR Status - Watersheds",
+  #                          options = leaflet::pathOptions(pane = "IRwatersheds")
+  #     )
+  # }
+  #
+  # if(nrow(wql_streams_lines_shp)>0){
+  #   map <- map %>%
+  #     leaflet::addPolylines(data = wql_streams_lines_shp,
+  #                           opacity = 1,
+  #                           weight = 3.5,
+  #                           color = "#ff33be",
+  #                           popup = ~paste0("<b>", AU_Name, "<br>", AU_ID,
+  #                                           # "<br>Parameter:</b> ", Char_Name,
+  #                                           "<br></b><br>",
+  #                                           sapply(AU_ID, WQLpopupTable, USE.NAMES = FALSE)),
+  #                           popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300),
+  #                           highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
+  #                           label = ~AU_Name,
+  #                           smoothFactor = 1.5,
+  #                           group = "2018/2020 IR Status - Streams",
+  #                           options = leaflet::pathOptions(pane = "IRpolylines")
+  #     )
+  # }
+  #
+  # if(nrow(wql_bodies_shp)>0){
+  #   map <- map %>%
+  #     leaflet::addPolygons(data = wql_bodies_shp,
+  #                           opacity = 1,
+  #                           weight = 3.5,
+  #                           color = "#ff33be",
+  #                           fillColor = "#ff33be",
+  #                           fillOpacity = 0.25,
+  #                           popup = ~paste0("<b>", AU_Name, "<br>", AU_ID,
+  #                                           # "<br>Parameter:</b> ", Char_Name,
+  #                                           "<br></b><br>",
+  #                                           sapply(AU_ID, WQLpopupTable, USE.NAMES = FALSE)),
+  #                           popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300),
+  #                           highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
+  #                           label = ~AU_Name,
+  #                           smoothFactor = 1.5,
+  #                           group = "2018/2020 IR Status - Waterbodies",
+  #                           options = leaflet::pathOptions(pane = "IRwaterbodies")
+  #     )
+  # }
 
-  if(nrow(wql_streams_lines_shp)>0){
-    map <- map %>%
-      leaflet::addPolylines(data = wql_streams_lines_shp,
-                            opacity = 1,
-                            weight = 3.5,
-                            color = "#ff33be",
-                            popup = ~paste0("<b>", AU_Name, "<br>", AU_ID,
-                                            # "<br>Parameter:</b> ", Char_Name,
-                                            "<br></b><br>",
-                                            sapply(AU_ID, WQLpopupTable, USE.NAMES = FALSE)),
-                            popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300),
-                            highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
-                            label = ~AU_Name,
-                            smoothFactor = 1.5,
-                            group = "2018/2020 IR Status - Streams",
-                            options = leaflet::pathOptions(pane = "IRpolylines")
-      )
-  }
-
-  if(nrow(wql_bodies_shp)>0){
-    map <- map %>%
-      leaflet::addPolygons(data = wql_bodies_shp,
-                            opacity = 1,
-                            weight = 3.5,
-                            color = "#ff33be",
-                            fillColor = "#ff33be",
-                            fillOpacity = 0.25,
-                            popup = ~paste0("<b>", AU_Name, "<br>", AU_ID,
-                                            # "<br>Parameter:</b> ", Char_Name,
-                                            "<br></b><br>",
-                                            sapply(AU_ID, WQLpopupTable, USE.NAMES = FALSE)),
-                            popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300),
-                            highlightOptions = leaflet::highlightOptions(color = "black", weight = 8, opacity = 1),
-                            label = ~AU_Name,
-                            smoothFactor = 1.5,
-                            group = "2018/2020 IR Status - Waterbodies",
-                            options = leaflet::pathOptions(pane = "IRwaterbodies")
-      )
-  }
+  map <- map %>%
+    leaflet.esri::addEsriFeatureLayer(
+      url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/28",
+      # options = leaflet.esri::featureLayerOptions(where = where_au_yearRound),
+      useServiceSymbology = TRUE,
+      group = "2022 303(d) Listed Waters",
+      pathOptions = leaflet::pathOptions(pane="IRpolylines"),
+      color = "red",
+      weight = 3,
+      opacity = 0.8,
+      fill=FALSE,
+      highlightOptions = leaflet::highlightOptions(color="red",
+                                                   weight = 5,
+                                                   fillOpacity = 0.5,
+                                                   bringToFront = TRUE,
+                                                   sendToBack = TRUE),
+      labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
+      labelOptions = leaflet::labelOptions(#noHide = T,
+        style = list("color" = "red","font-size" = "12px")),
+      popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                             '<b>AU Name:</b> \"+props.AU_Name+\"',
+                                             '<br><b>AU ID:</b> \"+props.AU_ID+\"',
+                                             '<br><b>Impaired Parameter:</b> \"+props.Impaired_parameters+\"',
+                                             '<br><b>Category 5 Parameters:</b> \"+props.Cat_5_parameters+\"',
+                                             '<br><b>Category 4 Parameters:</b> \"+props.Cat_4_parameters+\"',
+                                             '<br><b>Impaired Beneficial Uses:</b> \"+props.Impaired_Ben_Uses+\"',
+                                             '<br><b>Year Listed:</b> \"+props.Year_listed+\"',
+                                             '<br><b>Year Last Assessed:</b> \"+props.year_last_assessed+\"',
+                                             '<br><b>HUC12:</b> \"+props.HUC_12+\"',
+                                             ' \"}'))) %>%
+    leaflet.esri::addEsriFeatureLayer(
+      url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/31",
+      # options = leaflet.esri::featureLayerOptions(where = where_au_yearRound),
+      useServiceSymbology = TRUE,
+      group = "2022 303(d) Listed Waters",
+      pathOptions = leaflet::pathOptions(pane="IRwaterbodies"),
+      color = "red",
+      weight = 3,
+      opacity = 0.8,
+      fill=FALSE,
+      highlightOptions = leaflet::highlightOptions(color="red",
+                                                   weight = 5,
+                                                   fillOpacity = 0.5,
+                                                   bringToFront = TRUE,
+                                                   sendToBack = TRUE),
+      labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
+      labelOptions = leaflet::labelOptions(#noHide = T,
+        style = list("color" = "red","font-size" = "12px")),
+      popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                             '<b>AU Name:</b> \"+props.AU_Name+\"',
+                                             '<br><b>AU ID:</b> \"+props.AU_ID+\"',
+                                             '<br><b>Impaired Parameter:</b> \"+props.Impaired_parameters+\"',
+                                             '<br><b>Category 5 Parameters:</b> \"+props.Cat_5_parameters+\"',
+                                             '<br><b>Category 4 Parameters:</b> \"+props.Cat_4_parameters+\"',
+                                             '<br><b>Impaired Beneficial Uses:</b> \"+props.Impaired_Ben_Uses+\"',
+                                             '<br><b>Year Listed:</b> \"+props.Year_listed+\"',
+                                             '<br><b>Year Last Assessed:</b> \"+props.year_last_assessed+\"',
+                                             '<br><b>HUC12:</b> \"+props.HUC_12+\"',
+                                             ' \"}'))) %>%
+    leaflet.esri::addEsriFeatureLayer(
+      url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/32",
+      # options = leaflet.esri::featureLayerOptions(where = where_au_yearRound),
+      useServiceSymbology = TRUE,
+      group = "2022 303(d) Listed Waters",
+      pathOptions = leaflet::pathOptions(pane="IRwatersheds"),
+      color = "red",
+      weight = 3,
+      opacity = 0.8,
+      fill=FALSE,
+      highlightOptions = leaflet::highlightOptions(color="red",
+                                                   weight = 5,
+                                                   fillOpacity = 0.5,
+                                                   bringToFront = TRUE,
+                                                   sendToBack = TRUE),
+      labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.AU_Name+\" \"}"),
+      labelOptions = leaflet::labelOptions(#noHide = T,
+        style = list("color" = "red","font-size" = "12px")),
+      popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                             '<b>AU Name:</b> \"+props.AU_Name+\"',
+                                             '<br><b>AU ID:</b> \"+props.AU_ID+\"',
+                                             '<br><b>Impaired Parameter:</b> \"+props.Impaired_parameters+\"',
+                                             '<br><b>Category 5 Parameters:</b> \"+props.Cat_5_parameters+\"',
+                                             '<br><b>Category 4 Parameters:</b> \"+props.Cat_4_parameters+\"',
+                                             '<br><b>Impaired Beneficial Uses:</b> \"+props.Impaired_Ben_Uses+\"',
+                                             '<br><b>Year Listed:</b> \"+props.Year_listed+\"',
+                                             '<br><b>Year Last Assessed:</b> \"+props.year_last_assessed+\"',
+                                             '<br><b>HUC12:</b> \"+props.HUC_12+\"',
+                                             ' \"}')))
 
   # if(nrow(wql_streams_data) > 0){
   # map <- map %>%
@@ -742,7 +834,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                                              HUC8, ")<br>",
                                              # "<br><b>Parameter:</b> ", i, "<br>",
                                              sapply(AU_ID, au_table, param = i, USE.NAMES = FALSE),
-                                             sapply(AU_ID, popupTable, station = NULL, param = i, USE.NAMES = FALSE)
+                                             sapply(AU_ID, FUN = popupTable, station = NULL, param = i, USE.NAMES = FALSE)
                              ),
                              popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 300),
                              label = ~AU_Name,
@@ -862,13 +954,11 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
       )
     )) %>%
     leaflet::addLayersControl(baseGroups = sort(layer_groups),
-                              overlayGroups = c("2018/2020 IR Status - Streams", "2018/2020 IR Status - Waterbodies", 
-                                                "2018/2020 IR Status - Watersheds", "Ag WQ Management Areas", "Assessment Area", 
+                              overlayGroups = c("2022 303(d) Listed Waters", "Ag WQ Management Areas", "Assessment Area",
                                                 "Hydrography", "Land Cover (NLCD 2016)", "World Imagery"),
                               options = leaflet::layersControlOptions(collapsed = FALSE)) %>%
-    leaflet::hideGroup(c("World Imagery", "Hydrography", "Ag WQ Management Areas", "Land Cover (NLCD 2016)", 
-                         "2018/2020 IR Status - Streams", "2018/2020 IR Status - Waterbodies", 
-                         "2018/2020 IR Status - Watersheds")) %>%
+    leaflet::hideGroup(c("World Imagery", "Hydrography", "Ag WQ Management Areas", "Land Cover (NLCD 2016)",
+                         "2022 303(d) Listed Waters")) %>%
     leaflet::addControl(position = "bottomleft", className = "legend",
                         html = sprintf('<html><body><div style="opacity:0.95">
                                         <img width="375" height="180" src="data:image/png;base64,%s">
