@@ -60,12 +60,9 @@ status_stns <- function(df) {
                        reason = dplyr::if_else(status == "Unassessed",
                                                dplyr::if_else(any(excursion_cen %in% 2),
                                                               "No Results",
-                                                              dplyr::if_else(any(excursion_cen %in% 3),
-                                                                             "Less than 5 samples in a 90 day period",
-                                                                             dplyr::if_else(all(is.na(excursion_cen)),
-                                                                                            "No TMDL Target",
-                                                                                            "No Results")
-                                                              )
+                                                              dplyr::if_else(all(is.na(excursion_cen)),
+                                                                             "No TMDL Target",
+                                                                             "No Results")
                                                ),
                                                NA_character_)
       ) %>%
