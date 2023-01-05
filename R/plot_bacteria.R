@@ -30,8 +30,8 @@ plot_bacteria <- function(data, seaKen, station, max_date = min(data$sample_date
   xmax <- max_date
   ymin <- 0
   ymax <- ifelse(result_max > uylim, result_max * 1.1, uylim)
-  data$ss_excursion <- dplyr::if_else(data$ss_excursion == 1, "Excursion", "Result") # change numeric value to descriptor
-  data$geomean_excursion <- dplyr::if_else(data$geomean_excursion == 1, "Excursion", "Result") # change numeric value to descriptor
+  data$ss_excursion <- dplyr::if_else(data$ss_excursion == 1 & data$excursion_cen == 1, "Excursion", "Result") # change numeric value to descriptor
+  data$geomean_excursion <- dplyr::if_else(data$geomean_excursion == 1 & data$excursion_cen == 1, "Excursion", "Result") # change numeric value to descriptor
 
   # obtain plotting values for trend line if applicable
   if(nrow(seaken_bact) > 0){
