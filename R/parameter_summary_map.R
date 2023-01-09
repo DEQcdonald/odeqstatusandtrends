@@ -725,13 +725,14 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
       popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
                                              '<b>AU Name:</b> \"+props.AU_Name+\"',
                                              '<br><b>AU ID:</b> \"+props.AU_ID+\"',
-                                             '<br><b>Impaired Parameter:</b> \"+props.Impaired_parameters+\"',
-                                             '<br><b>Category 5 Parameters:</b> \"+props.Cat_5_parameters+\"',
-                                             '<br><b>Category 4 Parameters:</b> \"+props.Cat_4_parameters+\"',
+                                             '<br><b>GNIS Status:</b> \"+props.GNIS_status+\"',
+                                             '<br><a href=\"+props.Status_Link+\">Status Link</a>',
+                                             '<br><b>Category 5 Parameters:</b> \"+props.Category_5_Pollutants+\"',
+                                             '<br><b>Category 4 Parameters:</b> \"+props.Category_4_Pollutants+\"',
                                              '<br><b>Impaired Beneficial Uses:</b> \"+props.Impaired_Ben_Uses+\"',
-                                             '<br><b>Year Listed:</b> \"+props.Year_listed+\"',
-                                             '<br><b>Year Last Assessed:</b> \"+props.year_last_assessed+\"',
-                                             '<br><b>HUC12:</b> \"+props.HUC12+\"',
+                                             # '<br><b>Year Listed:</b> \"+props.Year_listed+\"',
+                                             # '<br><b>Year Last Assessed:</b> \"+props.year_last_assessed+\"',
+                                             # '<br><b>HUC12:</b> \"+props.AU_GNIS+\"',
                                              ' \"}')))
 
   # if(nrow(wql_streams_data) > 0){
