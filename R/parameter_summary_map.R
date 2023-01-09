@@ -650,7 +650,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
       url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/28",
       # options = leaflet.esri::featureLayerOptions(where = where_au_yearRound),
       useServiceSymbology = TRUE,
-      group = "2022 303(d) Listed Waters",
+      group = "2022 Integrated Report Status",
       pathOptions = leaflet::pathOptions(pane="IRpolylines"),
       color = "#9A00C4",
       weight = 3,
@@ -667,6 +667,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
       popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
                                              '<b>AU Name:</b> \"+props.AU_Name+\"',
                                              '<br><b>AU ID:</b> \"+props.AU_ID+\"',
+                                             '<br><a href=\"+props.Status_Link+\">Status Link</a>',
                                              '<br><b>Impaired Parameter:</b> \"+props.Impaired_parameters+\"',
                                              '<br><b>Category 5 Parameters:</b> \"+props.Cat_5_parameters+\"',
                                              '<br><b>Category 4 Parameters:</b> \"+props.Cat_4_parameters+\"',
@@ -679,7 +680,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
       url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/31",
       # options = leaflet.esri::featureLayerOptions(where = where_au_yearRound),
       useServiceSymbology = TRUE,
-      group = "2022 303(d) Listed Waters",
+      group = "2022 Integrated Report Status",
       pathOptions = leaflet::pathOptions(pane="IRwaterbodies"),
       color = "#9A00C4",
       weight = 3,
@@ -696,6 +697,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
       popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
                                              '<b>AU Name:</b> \"+props.AU_Name+\"',
                                              '<br><b>AU ID:</b> \"+props.AU_ID+\"',
+                                             '<br><a href=\"+props.Status_Link+\">Status Link</a>',
                                              '<br><b>Impaired Parameter:</b> \"+props.Impaired_parameters+\"',
                                              '<br><b>Category 5 Parameters:</b> \"+props.Cat_5_parameters+\"',
                                              '<br><b>Category 4 Parameters:</b> \"+props.Cat_4_parameters+\"',
@@ -708,7 +710,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
       url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/32",
       # options = leaflet.esri::featureLayerOptions(where = where_au_yearRound),
       useServiceSymbology = TRUE,
-      group = "2022 303(d) Listed Waters",
+      group = "2022 Integrated Report Status",
       pathOptions = leaflet::pathOptions(pane="IRwatersheds"),
       color = "#9A00C4",
       weight = 3,
@@ -955,11 +957,11 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
       )
     )) %>%
     leaflet::addLayersControl(baseGroups = sort(layer_groups),
-                              overlayGroups = c("2022 303(d) Listed Waters", "Ag WQ Management Areas", "Assessment Area",
+                              overlayGroups = c("2022 Integrated Report Status", "Ag WQ Management Areas", "Assessment Area",
                                                 "Hydrography", "Land Cover (NLCD 2016)", "World Imagery"),
                               options = leaflet::layersControlOptions(collapsed = FALSE)) %>%
     leaflet::hideGroup(c("World Imagery", "Hydrography", "Ag WQ Management Areas", "Land Cover (NLCD 2016)",
-                         "2022 303(d) Listed Waters")) %>%
+                         "2022 Integrated Report Status")) %>%
     leaflet::addControl(position = "bottomleft", className = "legend",
                         html = sprintf('<html><body><div style="opacity:0.95">
                                         <img width="375" height="180" src="data:image/png;base64,%s">
