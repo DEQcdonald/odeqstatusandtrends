@@ -673,7 +673,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                                              '<br><b>Impaired Beneficial Uses:</b> \"+props.Impaired_Ben_Uses+\"',
                                              '<br><b>Year Listed:</b> \"+props.Year_listed+\"',
                                              '<br><b>Year Last Assessed:</b> \"+props.year_last_assessed+\"',
-                                             '<br><b>HUC12:</b> \"+props.HUC_12+\"',
+                                             '<br><b>HUC12:</b> \"+props.HUC12+\"',
                                              ' \"}'))) %>%
     leaflet.esri::addEsriFeatureLayer(
       url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/31",
@@ -731,7 +731,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                                              '<br><b>Impaired Beneficial Uses:</b> \"+props.Impaired_Ben_Uses+\"',
                                              '<br><b>Year Listed:</b> \"+props.Year_listed+\"',
                                              '<br><b>Year Last Assessed:</b> \"+props.year_last_assessed+\"',
-                                             '<br><b>HUC12:</b> \"+props.HUC_12+\"',
+                                             '<br><b>HUC12:</b> \"+props.HUC12+\"',
                                              ' \"}')))
 
   # if(nrow(wql_streams_data) > 0){
