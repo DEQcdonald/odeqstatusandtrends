@@ -10,19 +10,19 @@
 #' get_stations_AWQMS(polygon = "your-shapefile-here", exclude.tribal.lands = TRUE, stations.channel.name = "STATIONS")
 
 get_stations_AWQMS <- function(polygon, exclude.tribal.lands = TRUE, stations.channel.name = "STATIONS") {
-  
+
   # Get Stations within station database
   stations.channel <- RODBC::odbcConnect(stations.channel.name)
-  
+
   print("Retrieving all available stations from AWQMS...")
-  
+
   s.time <- Sys.time()
   stations <- RODBC::sqlQuery(stations.channel, "SELECT * FROM VWStationsFinal", na.strings = "NA", stringsAsFactors=FALSE)
   e.time <- Sys.time()
   print(paste("This query took approximately", difftime(e.time, s.time, units = "secs"), "seconds"))
-  
+
   RODBC::odbcClose(stations.channel)
-  
+
   # Clip stations to input polygon
   print("Clipping stations to your shapefile...")
   stations <- dplyr::filter(stations,
@@ -32,20 +32,21 @@ get_stations_AWQMS <- function(polygon, exclude.tribal.lands = TRUE, stations.ch
                             MonLocType %in% c("River/Stream", "Reservoir", "Lake",
                                               "River/Stream Perennial", "Other-Surface Water",
                                               "Estuary", "BEACH Program Site-Ocean", "Ocean", "Spring")
+
   )
-  
+
   if(exclude.tribal.lands){
-    
+
     print("Removing stations within tribal lands...")
-    
+
     tribal.lands <- rgdal::readOGR(dsn = "//deqhq1/GISLIBRARY/Base_Data/Admin_Boundaries/Tribal_Res_and_trust/OR_tribal_res_and_trust.gdb",
                                    layer = 'OR_tribal_res_and_trust', integer64="warn.loss", verbose = FALSE)
-    
+
     stations <- dplyr::filter(stations, MLocID %in% StationsInPoly(stations, tribal.lands, outside = TRUE,
                                                                    id_col="MLocID", lat_col="Lat_DD",
                                                                    lon_col="Long_DD", datum_col="Datum"))
   }
-  
+
   if(any(is.na(stations$AU_ID))){
     print("The following stations have missing AU IDs and were removed...")
     missing_au <<- stations[is.na(stations$AU_ID),]
@@ -53,12 +54,12 @@ get_stations_AWQMS <- function(polygon, exclude.tribal.lands = TRUE, stations.ch
     print(missing_au[,c("OrgID", "MLocID", "MonLocType", "AU_ID", "Lat_DD", "Long_DD")])
     attr(stations, 'missing_AUs') <- missing_au
   }
-  
+
   if(any(stations$AU_ID == "99")){
     print("Removing Assessment Unit '99'...")
     stations <- stations %>% dplyr::filter(AU_ID != "99")
   }
-  
+
   return(stations)
 }
 
@@ -77,52 +78,52 @@ get_stations_AWQMS <- function(polygon, exclude.tribal.lands = TRUE, stations.ch
 #@param parameters A list of parameters with which to filter the query.
 
 get_stations_WQP <- function(polygon, start_date, end_date, huc8, exclude.tribal.lands = TRUE) {
-  
+
   # Get Stations within WQP database
   wqp_siteType = 'Estuary;Ocean;Stream;Lake, Reservoir, Impoundment'
   wqp_hucs <- paste(huc8, collapse = ";")
   wqp_enddate <- format(as.Date(end.date, format = "%Y-%m-%d"), "%m-%d-%Y")
-  
+
   s.time <- Sys.time()
   stations <- dataRetrieval::whatWQPsites(huc = wqp_hucs, providers = "STORET", startDateLo = "11-01-2018",
                                           startDateHi = wqp_enddate, siteType = wqp_siteType)
   e.time <- Sys.time()
   print(paste("This query took approximately", difftime(e.time, s.time, units = "secs"), "seconds"))
-  
+
   if(nrow(stations) < 1 | is.na(stations[1,])){
     return(paste("There are no STORET stations available for these query parameters"))
   }
-  
+
   stations <- stations %>% dplyr::rename(OrgID = OrganizationIdentifier, MLocID = MonitoringLocationIdentifier,
                                          StationDes = MonitoringLocationName, Lat_DD = LatitudeMeasure, Long_DD = LongitudeMeasure,
                                          Datum = HorizontalCoordinateReferenceSystemDatumName)
-  
+
   stations <- as.data.frame(stations)
-  
+
   stations <- stations %>% dplyr::filter(!OrgID == "OREGONDEQ")
-  
+
   if(nrow(stations) < 1 | is.na(stations[1,])){
     return(paste("There are no STORET stations available for these query parameters"))
   }
-  
+
   # Clip stations to input polygon
   print("Clipping stations to your shapefile...")
   stations <- dplyr::filter(stations, MLocID %in% StationsInPoly(stations, polygon, outside = FALSE,
                                                                  id_col="MLocID", lat_col="Lat_DD",
                                                                  lon_col="Long_DD", datum_col="Datum"))
-  
+
   if(exclude.tribal.lands){
-    
+
     print("Removing stations within tribal lands...")
-    
+
     tribal.lands <- rgdal::readOGR(dsn = "//deqhq1/GISLIBRARY/Base_Data/Admin_Boundaries/Tribal_Res_and_trust/OR_tribal_res_and_trust.gdb",
                                    layer = 'OR_tribal_res_and_trust', integer64="warn.loss", verbose = FALSE)
-    
+
     stations <- dplyr::filter(stations, MLocID %in% StationsInPoly(stations, tribal.lands, outside = TRUE,
                                                                    id_col="MLocID", lat_col="Lat_DD",
                                                                    lon_col="Long_DD", datum_col="Datum"))
   }
-  
+
   return(stations)
 }
 
@@ -137,10 +138,10 @@ get_stations_WQP <- function(polygon, start_date, end_date, huc8, exclude.tribal
 #' get_stations_NWIS(polygon = "your-shapefile-here", exclude.tribal.lands = TRUE)
 
 get_stations_NWIS <- function(polygon, exclude.tribal.lands = TRUE) {
-  
+
   # Get Stations within NWIS database
   print("Retrieving USGS station information for all of Oregon...")
-  
+
   s.time <- Sys.time()
   stations <- dataRetrieval::readNWISdata(stateCd = "OR",
                                           hasDataTypeCd="dv",
@@ -148,25 +149,25 @@ get_stations_NWIS <- function(polygon, exclude.tribal.lands = TRUE) {
                                           siteType=c("ES", "LK", "SP", "ST", "ST-CA", "ST-DCH", "ST-TS", "WE"))
   e.time <- Sys.time()
   print(paste("This query took approximately", difftime(e.time, s.time, units = "secs"), "seconds"))
-  
+
   # Clip stations to input polygon
   print("Clipping stations to your shapefile...")
   stations <- dplyr::filter(stations, site_no %in% StationsInPoly(stations=stations, polygon=polygon, outside = FALSE,
                                                                   id_col="site_no", lat_col="dec_lat_va",
                                                                   lon_col="dec_long_va", datum_col="dec_coord_datum_cd"))
-  
+
   if(exclude.tribal.lands){
-    
+
     print("Removing staions within tribal lands...")
-    
+
     tribal.lands <- rgdal::readOGR(dsn = "//deqhq1/GISLIBRARY/Base_Data/Admin_Boundaries/Tribal_Res_and_trust/OR_tribal_res_and_trust.gdb",
                                    layer = 'OR_tribal_res_and_trust', integer64="warn.loss", verbose = FALSE)
-    
+
     stations <- dplyr::filter(stations, site_no %in% StationsInPoly(stations, tribal.lands, outside = TRUE,
                                                                     id_col="site_no", lat_col="dec_lat_va",
                                                                     lon_col="dec_long_va", datum_col="dec_coord_datum_cd"))
   }
-  
+
   return(stations)
 }
 
@@ -187,44 +188,63 @@ get_stations_NWIS <- function(polygon, exclude.tribal.lands = TRUE) {
 #' id_col = "MLocID", datum_col = "Datum", lat_col = "Lat_DD", lon_col = "Lon_DD")
 
 StationsInPoly <- function(stations, polygon, outside=FALSE, id_col, datum_col, lat_col, lon_col) {
-  
+
+  stations <- stations %>% dplyr::filter(Long_DD < -115,
+                                  Long_DD > -125,
+                                  Lat_DD > 41,
+                                  Long_DD < 47)
   # make a spatial object
   df.shp <- stations[,c(id_col, datum_col, lat_col, lon_col)]
-  sp::coordinates(df.shp) <- c(lon_col, lat_col)
-  
+  # sp::coordinates(df.shp) <- c(lon_col, lat_col)
+
+
   # Datums to search for
   # NAD83 : EPSG:4269 <- This is assumed if it is not one of the other two
   # NAD27 : EPSG:4267
   # WGS84 : EPSG:4326
-  
-  df.nad83 <- df.shp[!grepl("NAD27|4267|WGS84|4326",toupper(df.shp@data[,datum_col])), ]
-  df.nad27 <- df.shp[grepl("NAD27|4267",toupper(df.shp@data[,datum_col])), ]
-  df.wgs84 <- df.shp[grepl("WGS84|4326",toupper(df.shp@data[,datum_col])), ]
-  
-  sp::proj4string(df.nad27) <- sp::CRS("+init=epsg:4267")
-  sp::proj4string(df.nad83) <- sp::CRS("+init=epsg:4269")
-  sp::proj4string(df.wgs84) <- sp::CRS("+init=epsg:4326")
-  
+
+  # df.nad83 <- df.shp[!grepl("NAD27|4267|WGS84|4326",toupper(df.shp@data[,datum_col])), ]
+  # df.nad27 <- df.shp[grepl("NAD27|4267",toupper(df.shp@data[,datum_col])), ]
+  # df.wgs84 <- df.shp[grepl("WGS84|4326",toupper(df.shp@data[,datum_col])), ]
+
+  # sp::proj4string(df.nad27) <- sp::CRS("+init=epsg:4267")
+  # sp::proj4string(df.nad83) <- sp::CRS("+init=epsg:4269")
+  # sp::proj4string(df.wgs84) <- sp::CRS("+init=epsg:4326")
+
+  df.nad83 <- df.shp[!grepl("NAD27|4267|WGS84|4326", toupper(df.shp[,datum_col])), ]
+  df.nad27 <- df.shp[grepl("NAD27|4267",toupper(df.shp[,datum_col])), ]
+  df.wgs84 <- df.shp[grepl("WGS84|4326",toupper(df.shp[,datum_col])), ]
+
+  df.nad83 <- sf::st_as_sf(df.nad83, coords = c(lon_col, lat_col))
+  df.nad27 <- sf::st_as_sf(df.nad27, coords = c(lon_col, lat_col))
+  df.wgs84 <- sf::st_as_sf(df.wgs84, coords = c(lon_col, lat_col))
+
+  st_crs(df.nad83) <- 4269
+  st_crs(df.nad27) <- 4267
+  st_crs(df.wgs84) <- 4326
+
   # convert to NAD 83
   if (nrow(df.nad27)>0) {
-    df.nad27.nad83 <- sp::spTransform(df.nad27, sp::CRS("+init=epsg:4269"))
+    df.nad27.nad83 <- sf::st_transform(df.nad27, 4269)
     df.nad83 <- rbind(df.nad83, df.nad27.nad83)
   }
-  
+
   if (nrow(df.wgs84)>0) {
-    df.wgs84.nad83 <- sp::spTransform(df.wgs84, sp::CRS("+init=epsg:4269"))
+    df.wgs84.nad83 <- sf::st_transform(df.wgs84, 4269)
     df.nad83 <- rbind(df.nad83, df.wgs84.nad83)
   }
-  
-  poly.nad83 <- sp::spTransform(polygon, sp::CRS("+init=epsg:4269"))
-  
-  
+
+  poly.nad83 <- sf::st_transform(polygon, 4269)
+
+
   if(outside) {
     # stations outside polygon
-    stations.out <- unique(df.nad83[!df.nad83@data[,id_col] %in% unique(df.nad83[poly.nad83,]@data[,id_col]),]@data[,id_col])
+    # stations.out <- unique(df.nad83[!df.nad83@data[,id_col] %in% unique(df.nad83[poly.nad83,]@data[,id_col]),]@data[,id_col])
+    stations.out <- df.nad83 %>% dplyr::filter(!MLocID %in% st_filter(df.nad83, poly.nad83)$MLocID)
     return(stations.out)
   } else {
-    stations.in <- unique(df.nad83[poly.nad83,]@data[,id_col])
+    # stations.in <- unique(df.nad83[poly.nad83,]@data[,id_col])
+    stations.in <- st_filter(df.nad83, poly.nad83)
     return(stations.in)
   }
 }
