@@ -39,8 +39,13 @@ get_stations_AWQMS <- function(polygon, exclude.tribal.lands = TRUE, stations.ch
 
     print("Removing stations within tribal lands...")
 
-    tribal.lands <- rgdal::readOGR(dsn = "//deqhq1/GISLIBRARY/Base_Data/Admin_Boundaries/Tribal_Res_and_trust/OR_tribal_res_and_trust.gdb",
-                                   layer = 'OR_tribal_res_and_trust', integer64="warn.loss", verbose = FALSE)
+    # tribal.lands <- rgdal::readOGR(dsn = "//deqhq1/GISLIBRARY/Base_Data/Admin_Boundaries/Tribal_Res_and_trust/OR_tribal_res_and_trust.gdb",
+    #                                layer = 'OR_tribal_res_and_trust', integer64="warn.loss", verbose = FALSE)
+
+    tribal.lands <- sf::st_read(dsn = "//deqhq1/GISLIBRARY/Base_Data/Admin_Boundaries/Tribal_Res_and_trust/OR_tribal_res_and_trust.gdb",
+                           layer = 'OR_tribal_res_and_trust',
+                           # integer64="warn.loss",
+                           quiet = T, stringsAsFactors = FALSE)
 
     stations <- dplyr::filter(stations, MLocID %in% StationsInPoly(stations, tribal.lands, outside = TRUE,
                                                                    id_col="MLocID", lat_col="Lat_DD",
