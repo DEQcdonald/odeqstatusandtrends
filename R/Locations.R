@@ -28,7 +28,7 @@ get_stations_AWQMS <- function(polygon, exclude.tribal.lands = TRUE, stations.ch
   stations <- dplyr::filter(stations,
                             MLocID %in% odeqstatusandtrends::StationsInPoly(stations, polygon, outside = FALSE,
                                                        id_col="MLocID", lat_col="Lat_DD",
-                                                       lon_col="Long_DD", datum_col="Datum"),
+                                                       lon_col="Long_DD", datum_col="Datum")$MLocID,
                             MonLocType %in% c("River/Stream", "Reservoir", "Lake",
                                               "River/Stream Perennial", "Other-Surface Water",
                                               "Estuary", "BEACH Program Site-Ocean", "Ocean", "Spring")
@@ -49,7 +49,7 @@ get_stations_AWQMS <- function(polygon, exclude.tribal.lands = TRUE, stations.ch
 
     stations <- dplyr::filter(stations, MLocID %in% StationsInPoly(stations, tribal.lands, outside = TRUE,
                                                                    id_col="MLocID", lat_col="Lat_DD",
-                                                                   lon_col="Long_DD", datum_col="Datum"))
+                                                                   lon_col="Long_DD", datum_col="Datum"))&MLocID
   }
 
   if(any(is.na(stations$AU_ID))){
