@@ -49,7 +49,7 @@ get_stations_AWQMS <- function(polygon, exclude.tribal.lands = TRUE, stations.ch
 
     stations <- dplyr::filter(stations, MLocID %in% StationsInPoly(stations, tribal.lands, outside = TRUE,
                                                                    id_col="MLocID", lat_col="Lat_DD",
-                                                                   lon_col="Long_DD", datum_col="Datum")&MLocID)
+                                                                   lon_col="Long_DD", datum_col="Datum")$MLocID)
   }
 
   if(any(is.na(stations$AU_ID))){
