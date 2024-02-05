@@ -647,7 +647,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
 
   map <- map %>%
     leaflet.esri::addEsriFeatureLayer(
-      url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/28",
+      url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/36",
       # options = leaflet.esri::featureLayerOptions(where = where_au_yearRound),
       useServiceSymbology = TRUE,
       group = "2022 Integrated Report Status",
@@ -677,7 +677,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                                              "<br><b>HUC12:</b> '+props.HUC12+'",
                                              " '}"))) %>%
     leaflet.esri::addEsriFeatureLayer(
-      url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/31",
+      url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/35",
       # options = leaflet.esri::featureLayerOptions(where = where_au_yearRound),
       useServiceSymbology = TRUE,
       group = "2022 Integrated Report Status",
@@ -707,7 +707,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                                              "<br><b>HUC12:</b> '+props.HUC12+'",
                                              " '}"))) %>%
     leaflet.esri::addEsriFeatureLayer(
-      url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/32",
+      url="https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/38",
       # options = leaflet.esri::featureLayerOptions(where = where_au_yearRound),
       useServiceSymbology = TRUE,
       group = "2022 Integrated Report Status",
@@ -953,9 +953,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   function isElementHidden (element) {
     return window.getComputedStyle(element, null).getPropertyValue('display') === 'none';
   }
-               }"
-      )
-    )) %>%
+               }"))) %>%
     leaflet::addLayersControl(baseGroups = sort(layer_groups),
                               overlayGroups = c("2022 Integrated Report Status", "Ag WQ Management Areas", "Assessment Area",
                                                 "Hydrography", "Land Cover (NLCD 2016)", "World Imagery"),
@@ -1003,9 +1001,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   function isElementHidden (element) {
     return window.getComputedStyle(element, null).getPropertyValue('display') === 'none';
   }
-               }"
-      )
-    )) %>%
+               }"))) %>%
     leaflet::addEasyButton(leaflet::easyButton(
       icon = "fa-map-marker",
       title = "Toggle Station Markers",
@@ -1053,9 +1049,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   function isElementHidden(shadow) {
     return window.getComputedStyle(shadow, null).getPropertyValue('display') === 'none';
   }
-               }"
-      )
-    )) %>%
+               }"))) %>%
     leaflet::addEasyButton(leaflet::easyButton(
       icon = "fa-map-signs",
       title = "Toggle Station ID labels",
@@ -1082,8 +1076,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     return window.getComputedStyle(element, null).getPropertyValue('display') === 'none';
   }
                }"
-      )
-    )) %>%
+      ))) %>%
     leaflet::addEasyButton(leaflet::easyButton(
       position = "bottomleft",
       icon = "fa-info-circle",
@@ -1111,8 +1104,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     return window.getComputedStyle(element, null).getPropertyValue('display') === 'none';
   }
                }"
-      )
-    )) %>%
+      ))) %>%
     # registerPlugin(htmlDependency(name = "leaflet-easyprint",
     #                               version = "2.2.1",
     #                               src = "https://rawgit.com/rowanwins/leaflet-easyPrint/gh-pages/dist/bundle.js",
