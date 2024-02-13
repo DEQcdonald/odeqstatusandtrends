@@ -37,23 +37,45 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   # query <- paste0("SELECT * FROM AssessmentUnits_OR_Dissolve WHERE AU_ID IN ('",
   #                 paste(unique(param_summary$AU_ID), collapse = "', '"), "')")
 
-  assessment_units_lines <- sf::st_read(
-    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
-    layer = "AssessmentUnits_OR_Rivers_Coast",
-    query = paste0("SELECT * FROM AssessmentUnits_OR_Rivers_Coast WHERE AU_ID IN ('",
-                   paste(unique(param_summary$AU_ID), collapse = "', '"), "')"), stringsAsFactors = FALSE
+  ws_aus <- unique(grep("ws", param_summary$AU_ID, ignore.case = T, value = T))
+  sr_aus <- unique(grep("sr", param_summary$AU_ID, ignore.case = T, value = T))
+  lk_aus <- unique(grep("lk", param_summary$AU_ID, ignore.case = T, value = T))
+  eb_aus <- unique(grep("eb", param_summary$AU_ID, ignore.case = T, value = T))
+
+  # assessment_units_lines <- sf::st_read(
+  #   dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2022_IntegratedReport_FINAL/IR_2022_Final.gdb",
+  #   layer = "AssessmentUnits_OR_Rivers_Coast",
+  #   query = paste0("SELECT * FROM AssessmentUnits_OR_Rivers_Coast WHERE AU_ID IN ('",
+  #                  paste(unique(param_summary$AU_ID), collapse = "', '"), "')"), stringsAsFactors = FALSE
+  # )
+
+  assessment_units_lines <- arcpullr::get_spatial_layer(
+    url = "https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/36",
+    where = paste0("AU_ID IN('", paste0(c(sr_aus, eb_aus), collapse = ("','")), "')")
   )
-  assessment_units_ws <- sf::st_read(
-    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
-    layer = "AssessmentUnit_OR_Watershed_Area",
-    query = paste0("SELECT * FROM AssessmentUnit_OR_Watershed_Area WHERE AU_ID IN ('",
-                   paste(unique(param_summary$AU_ID), collapse = "', '"), "')"), stringsAsFactors = FALSE
+
+  # assessment_units_ws <- sf::st_read(
+  #   dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2022_IntegratedReport_FINAL/IR_2022_Final.gdb",
+  #   layer = "AssessmentUnit_OR_Watershed_Area",
+  #   query = paste0("SELECT * FROM AssessmentUnit_OR_Watershed_Area WHERE AU_ID IN ('",
+  #                  paste(unique(param_summary$AU_ID), collapse = "', '"), "')"), stringsAsFactors = FALSE
+  # )
+
+  assessment_units_ws <- arcpullr::get_spatial_layer(
+    url = "https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/38",
+    where = paste0("AU_ID IN('", paste0(ws_aus, collapse = ("','")), "')")
   )
-  assessment_units_bodies <- sf::st_read(
-    dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2018_20_IntegratedReport_FINAL/WQ_Assessment_2018_20.gdb",
-    layer = "AssessmentUnits_OR_Waterbodies",
-    query = paste0("SELECT * FROM AssessmentUnits_OR_Waterbodies WHERE AU_ID IN ('",
-                   paste(unique(param_summary$AU_ID), collapse = "', '"), "')"), stringsAsFactors = FALSE
+
+  # assessment_units_bodies <- sf::st_read(
+  #   dsn = "//deqhq1/GISLIBRARY/Base_Data/DEQ_Data/Water_Quality/WQ_Assessment/WQ_2022_IntegratedReport_FINAL/IR_2022_Final.gdb",
+  #   layer = "AssessmentUnits_OR_Waterbodies",
+  #   query = paste0("SELECT * FROM AssessmentUnits_OR_Waterbodies WHERE AU_ID IN ('",
+  #                  paste(unique(param_summary$AU_ID), collapse = "', '"), "')"), stringsAsFactors = FALSE
+  # )
+
+  assessment_units_bodies <- arcpullr::get_spatial_layer(
+    url = "https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/35",
+    where = paste0("AU_ID IN('", paste0(lk_aus, collapse = ("','")), "')")
   )
 
   if(unique(area$MAP) == "Columbia River"){
@@ -250,6 +272,10 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                                                            "green")
     )
     ) %>% dplyr::ungroup()
+
+  au_color <- function(x){
+    au_colors[match(x, au_colors$AU_ID),]$color
+  }
 
   param_summary <- param_summary %>% dplyr::mutate(
     color = dplyr::if_else(!!status_current %in% c("Unassessed", "Insufficient Data"),
@@ -825,13 +851,13 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     }
     if(nrow(au_data_ws) > 0){
       map <- map %>%
-        leaflet::addPolygons(data = au_data_ws,
+        leaflet::addPolylines(data = au_data_ws,
                              stroke = TRUE,
-                             opacity = 0.9,
-                             weight = 1,
+                             opacity = 0.8,
+                             weight = 3,
                              color = ~color,
-                             fillOpacity = 0.1,
-                             fillColor = ~color,
+                             # fillOpacity = 0.1,
+                             # fillColor = ~color,
                              popup = ~paste0("<b>", AU_Name, "<br>",
                                              "<b>HUC8: </b>", HUC8_Name, " (",
                                              HUC8, ")<br>",
