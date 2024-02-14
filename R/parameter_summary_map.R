@@ -87,8 +87,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
 
     assessment_units_lines <- assessment_units_lines %>% dplyr::filter(AU_ID %in% columbia_aus)
     assessment_units_ws <- assessment_units_ws %>% dplyr::filter(AU_ID %in% columbia_aus)
+    if(nrow(assessment_units_bodies) > 0){
     assessment_units_bodies <- assessment_units_bodies %>% dplyr::filter(AU_ID %in% columbia_aus)
-
+    }
   } else if(unique(area$MAP) == "Snake River"){
 
     snake_aus <- c(
@@ -105,8 +106,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
 
     assessment_units_lines <- assessment_units_lines %>% dplyr::filter(AU_ID %in% snake_aus)
     assessment_units_ws <- assessment_units_ws %>% dplyr::filter(AU_ID %in% snake_aus)
+    if(nrow(assessment_units_bodies) > 0){
     assessment_units_bodies <- assessment_units_bodies %>% dplyr::filter(AU_ID %in% snake_aus)
-
+    }
   }
 
   agwqma <- sf::st_read(
@@ -211,7 +213,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
 
   assessment_units_lines <- sf::st_zm(assessment_units_lines, what = "ZM")
   assessment_units_ws <- sf::st_zm(assessment_units_ws, what = "ZM")
+  if(nrow(assessment_units_bodies) > 0){
   assessment_units_bodies <- sf::st_zm(assessment_units_bodies, what = "ZM")
+  }
   # wql_streams_lines <- sf::st_zm(wql_streams_lines, what = "ZM")
   # wql_streams_ws <- sf::st_zm(wql_streams_ws, what = "ZM")
   # wql_bodies <- sf::st_zm(wql_bodies, what = "ZM")
@@ -221,8 +225,10 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   assessment_units_lines <- assessment_units_lines[,c("AU_ID", "AU_Name")] %>% dplyr::filter(AU_ID != "99")
   assessment_units_ws <- st_transform(assessment_units_ws, 4326)
   assessment_units_ws <- assessment_units_ws[,c("AU_ID", "AU_Name")] %>% dplyr::filter(AU_ID != "99")
+  if(nrow(assessment_units_bodies) > 0){
   assessment_units_bodies <- st_transform(assessment_units_bodies, 4326)
   assessment_units_bodies <- assessment_units_bodies[,c("AU_ID", "AU_Name")] %>% dplyr::filter(AU_ID != "99")
+  }
   # st_crs(wql_streams_lines)
   # wql_streams_lines <- st_transform(wql_streams_lines, 4326)
   # wql_streams_lines <- dplyr::filter(wql_streams_lines[, c("AU_Name", "AU_ID", "Period", "Char_Name", "IR_category")],
@@ -251,7 +257,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
   sf::sf_use_s2(FALSE)
   assessment_units_lines <- assessment_units_lines %>% dplyr::group_by(AU_ID, AU_Name) %>% dplyr::summarise()
   assessment_units_ws <- assessment_units_ws %>% dplyr::group_by(AU_ID, AU_Name) %>% dplyr::summarise()
+  if(nrow(assessment_units_bodies) > 0){
   assessment_units_bodies <- assessment_units_bodies %>% dplyr::group_by(AU_ID, AU_Name) %>% dplyr::summarise()
+  }
   # wql_streams_data <- bind_rows(sf::st_drop_geometry(wql_streams_lines),
   #                               sf::st_drop_geometry(wql_streams_ws),
   #                               sf::st_drop_geometry(wql_bodies))
@@ -792,9 +800,10 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     au_data <- merge(au_data, dplyr::filter(au_colors, Char_Name == i)[,c("AU_ID", "color", "HUC8_Name", "HUC8")], by = "AU_ID")
     au_data_ws <- dplyr::filter(assessment_units_ws[, c("AU_ID", "AU_Name")], AU_ID %in% unique(psum_AU$AU_ID))
     au_data_ws <- merge(au_data_ws, dplyr::filter(au_colors, Char_Name == i)[,c("AU_ID", "color", "HUC8_Name", "HUC8")], by = "AU_ID")
+    if(nrow(assessment_units_bodies) > 0){
     au_data_bodies <- dplyr::filter(assessment_units_bodies[, c("AU_ID", "AU_Name")], AU_ID %in% unique(psum_AU$AU_ID))
     au_data_bodies <- merge(au_data_bodies, dplyr::filter(au_colors, Char_Name == i)[,c("AU_ID", "color", "HUC8_Name", "HUC8")], by = "AU_ID")
-
+    } else {au_data_bodies <- NULL}
     # au_data <- au_colors %>% dplyr::filter(Char_Name == i)
     # wql_streams_tmp <- dplyr::filter(wql_streams, Char_Name == i)
     # green_ids <- au_data[au_data$color == "green", ]$AU_ID
@@ -824,7 +833,7 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                               group = standard_param
         )
     }
-    if(nrow(au_data_bodies) > 0){
+    if(!is.null(au_data_bodies)){
       map <- map %>%
         leaflet::addPolygons(data = au_data_bodies,
                              stroke = TRUE,
