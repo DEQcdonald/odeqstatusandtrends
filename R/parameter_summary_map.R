@@ -86,7 +86,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     )$AU_ID
 
     assessment_units_lines <- assessment_units_lines %>% dplyr::filter(AU_ID %in% columbia_aus)
+    if(nrow(assessment_units_ws) > 0){
     assessment_units_ws <- assessment_units_ws %>% dplyr::filter(AU_ID %in% columbia_aus)
+    }
     if(nrow(assessment_units_bodies) > 0){
     assessment_units_bodies <- assessment_units_bodies %>% dplyr::filter(AU_ID %in% columbia_aus)
     }
@@ -105,7 +107,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     )
 
     assessment_units_lines <- assessment_units_lines %>% dplyr::filter(AU_ID %in% snake_aus)
+    if(nrow(assessment_units_ws) > 0){
     assessment_units_ws <- assessment_units_ws %>% dplyr::filter(AU_ID %in% snake_aus)
+    }
     if(nrow(assessment_units_bodies) > 0){
     assessment_units_bodies <- assessment_units_bodies %>% dplyr::filter(AU_ID %in% snake_aus)
     }
@@ -212,7 +216,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
 #   }
 
   assessment_units_lines <- sf::st_zm(assessment_units_lines, what = "ZM")
+  if(nrow(assessment_units_ws) > 0){
   assessment_units_ws <- sf::st_zm(assessment_units_ws, what = "ZM")
+  }
   if(nrow(assessment_units_bodies) > 0){
   assessment_units_bodies <- sf::st_zm(assessment_units_bodies, what = "ZM")
   }
@@ -223,8 +229,10 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
 
   assessment_units_lines <- st_transform(assessment_units_lines, 4326)
   assessment_units_lines <- assessment_units_lines[,c("AU_ID", "AU_Name")] %>% dplyr::filter(AU_ID != "99")
+  if(nrow(assessment_units_ws) > 0){
   assessment_units_ws <- st_transform(assessment_units_ws, 4326)
   assessment_units_ws <- assessment_units_ws[,c("AU_ID", "AU_Name")] %>% dplyr::filter(AU_ID != "99")
+  }
   if(nrow(assessment_units_bodies) > 0){
   assessment_units_bodies <- st_transform(assessment_units_bodies, 4326)
   assessment_units_bodies <- assessment_units_bodies[,c("AU_ID", "AU_Name")] %>% dplyr::filter(AU_ID != "99")
@@ -256,7 +264,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
 
   sf::sf_use_s2(FALSE)
   assessment_units_lines <- assessment_units_lines %>% dplyr::group_by(AU_ID, AU_Name) %>% dplyr::summarise()
+  if(nrow(assessment_units_ws) > 0){
   assessment_units_ws <- assessment_units_ws %>% dplyr::group_by(AU_ID, AU_Name) %>% dplyr::summarise()
+  }
   if(nrow(assessment_units_bodies) > 0){
   assessment_units_bodies <- assessment_units_bodies %>% dplyr::group_by(AU_ID, AU_Name) %>% dplyr::summarise()
   }
@@ -798,8 +808,10 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     psum_AU <- psum[!(psum[[status_current]] %in% c("Unassessed", "Insufficient Data")),]
     au_data <- dplyr::filter(assessment_units_lines[, c("AU_ID", "AU_Name")], AU_ID %in% unique(psum_AU$AU_ID))
     au_data <- merge(au_data, dplyr::filter(au_colors, Char_Name == i)[,c("AU_ID", "color", "HUC8_Name", "HUC8")], by = "AU_ID")
+    if(nrow(assessment_units_ws) > 0){
     au_data_ws <- dplyr::filter(assessment_units_ws[, c("AU_ID", "AU_Name")], AU_ID %in% unique(psum_AU$AU_ID))
     au_data_ws <- merge(au_data_ws, dplyr::filter(au_colors, Char_Name == i)[,c("AU_ID", "color", "HUC8_Name", "HUC8")], by = "AU_ID")
+    } else {au_data_ws <- NULL}
     if(nrow(assessment_units_bodies) > 0){
     au_data_bodies <- dplyr::filter(assessment_units_bodies[, c("AU_ID", "AU_Name")], AU_ID %in% unique(psum_AU$AU_ID))
     au_data_bodies <- merge(au_data_bodies, dplyr::filter(au_colors, Char_Name == i)[,c("AU_ID", "color", "HUC8_Name", "HUC8")], by = "AU_ID")
@@ -833,7 +845,12 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                               group = standard_param
         )
     }
-    if(!is.null(au_data_bodies)){
+    if(ifelse(!is.null(au_data_bodies),
+              ifelse(nrow(au_data_bodies) > 0,
+                     TRUE,
+                     FALSE),
+              FALSE)
+    ){
       map <- map %>%
         leaflet::addPolygons(data = au_data_bodies,
                              stroke = TRUE,
@@ -858,7 +875,12 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                              group = standard_param
         )
     }
-    if(nrow(au_data_ws) > 0){
+    if(ifelse(!is.null(au_data_ws),
+              ifelse(nrow(au_data_ws) > 0,
+                     TRUE,
+                     FALSE),
+              FALSE)
+       ){
       map <- map %>%
         leaflet::addPolylines(data = au_data_ws,
                              stroke = TRUE,
