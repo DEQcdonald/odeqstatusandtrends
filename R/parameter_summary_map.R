@@ -594,9 +594,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
     leaflet.esri::addEsriDependency() %>%
     leaflet::addProviderTiles(providers$Esri.WorldImagery, group = "World Imagery",
                               options = leaflet::tileOptions(pane = "Tiles")) %>%
-    leaflet::addWMSTiles(baseUrl = 'https://www.mrlc.gov/geoserver/mrlc_display/NLCD_2016_Land_Cover_L48/wms?',
-                         group = "Land Cover (NLCD 2016)",
-                         layers = "NLCD_2016_Land_Cover_L48",
+    leaflet::addWMSTiles(baseUrl = 'https://www.mrlc.gov/geoserver/mrlc_display/NLCD_2021_Land_Cover_L48/wms?',
+                         group = "Land Cover (NLCD 2021)",
+                         layers = "NLCD_2021_Land_Cover_L48",
                          options = leaflet::WMSTileOptions(version = '1.3.0',
                                                            format = 'image/png',
                                                            transparent = TRUE,
@@ -1013,9 +1013,9 @@ parameter_summary_map <- function(param_summary, au_param_summary, area, proj_di
                }"))) %>%
     leaflet::addLayersControl(baseGroups = sort(layer_groups),
                               overlayGroups = c("2022 Integrated Report Status", "Ag WQ Management Areas", "Assessment Area",
-                                                "Hydrography", "Land Cover (NLCD 2016)", "World Imagery"),
+                                                "Hydrography", "Land Cover (NLCD 2021)", "World Imagery"),
                               options = leaflet::layersControlOptions(collapsed = FALSE)) %>%
-    leaflet::hideGroup(c("World Imagery", "Hydrography", "Ag WQ Management Areas", "Land Cover (NLCD 2016)",
+    leaflet::hideGroup(c("World Imagery", "Hydrography", "Ag WQ Management Areas", "Land Cover (NLCD 2021)",
                          "2022 Integrated Report Status")) %>%
     leaflet::addControl(position = "bottomleft", className = "legend",
                         html = sprintf('<html><body><div style="opacity:0.95">
