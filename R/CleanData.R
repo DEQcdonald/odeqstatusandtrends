@@ -14,7 +14,7 @@ CleanData <- function(data)
     return(data)
   }
 
-  need_cols <- c('MLocID', 'StationDes', 'OrganizationID', 'Project1', 'org_Name', 'Lat_DD', 'Long_DD', 'ELEV_Ft', 'Datum', 'HUC8', 'AU_ID',
+  need_cols <- c('MLocID', 'StationDes', 'OrganizationID', 'Project1', 'org_name', 'Lat_DD', 'Long_DD', 'ELEV_Ft', 'Datum', 'HUC8', 'AU_ID',
                  'Reachcode', 'Char_Name','SampleStartDate', 'SampleStartTime', 'Result_Text','Result_Numeric', 'Result_Operator', 'Result_Unit',
                  'Statistical_Base', 'act_depth_height', 'DQL', 'Method_Code', 'Activity_Type', 'act_id', 'MRLValue', 'Result_status',
                  'FishCode','SpawnCode', 'WaterTypeCode', 'WaterBodyCode', 'BacteriaCode', 'DO_code', 'ben_use_code', 'pH_code', 'DO_SpawnCode')
