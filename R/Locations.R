@@ -121,8 +121,8 @@ get_stations_WQP <- function(polygon, start_date, end_date, huc8, exclude.tribal
 
     print("Removing stations within tribal lands...")
 
-    tribal.lands <- rgdal::readOGR(dsn = "//deqhq1/GISLIBRARY/Base_Data/Admin_Boundaries/Tribal_Res_and_trust/OR_tribal_res_and_trust.gdb",
-                                   layer = 'OR_tribal_res_and_trust', integer64="warn.loss", verbose = FALSE)
+    tribal.lands <- sf::st_read(dsn = "//deqhq1/GISLIBRARY/Base_Data/Admin_Boundaries/Tribal_Res_and_trust/OR_tribal_res_and_trust.gdb",
+                                   layer = 'OR_tribal_res_and_trust')
 
     stations <- dplyr::filter(stations, MLocID %in% StationsInPoly(stations, tribal.lands, outside = TRUE,
                                                                    id_col="MLocID", lat_col="Lat_DD",
@@ -165,8 +165,8 @@ get_stations_NWIS <- function(polygon, exclude.tribal.lands = TRUE) {
 
     print("Removing staions within tribal lands...")
 
-    tribal.lands <- rgdal::readOGR(dsn = "//deqhq1/GISLIBRARY/Base_Data/Admin_Boundaries/Tribal_Res_and_trust/OR_tribal_res_and_trust.gdb",
-                                   layer = 'OR_tribal_res_and_trust', integer64="warn.loss", verbose = FALSE)
+    tribal.lands <- sf::st_read(dsn = "//deqhq1/GISLIBRARY/Base_Data/Admin_Boundaries/Tribal_Res_and_trust/OR_tribal_res_and_trust.gdb",
+                                   layer = 'OR_tribal_res_and_trust')
 
     stations <- dplyr::filter(stations, site_no %in% StationsInPoly(stations, tribal.lands, outside = TRUE,
                                                                     id_col="site_no", lat_col="dec_lat_va",
