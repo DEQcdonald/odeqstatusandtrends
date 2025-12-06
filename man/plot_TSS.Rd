@@ -8,7 +8,7 @@ plot_TSS(
   data,
   seaKen,
   station,
-  max_date = min(data$sample_datetime, na.rm = TRUE)
+  max_date = max(data$sample_datetime, na.rm = TRUE)
 )
 }
 \arguments{

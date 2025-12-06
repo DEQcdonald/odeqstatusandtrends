@@ -25,7 +25,6 @@ Imports:
     lubridate(>= 1.8),
     magrittr (>= 1.5),
     odeqassessment,
-    rgdal (>= 1.5),
     rmapshaper (>= 0.4),
     rmarkdown (>= 2.6.0),
     RODBC (>= 1.3),
