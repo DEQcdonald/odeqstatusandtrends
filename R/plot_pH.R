@@ -10,7 +10,7 @@
 #' @examples
 #' plot_pH(data = data.frame, seaKen, station)
 
-plot_pH <- function(data, seaKen, station, max_date = min(data$sample_datetime, na.rm = TRUE)){
+plot_pH <- function(data, seaKen, station, max_date = max(data$sample_datetime, na.rm = TRUE)){
   # subset seaken table to parameter and significant trends
   if(NROW(seaKen) > 0){
     seaken_pH <- seaKen %>% dplyr::filter(Char_Name == "pH",
@@ -41,24 +41,35 @@ plot_pH <- function(data, seaKen, station, max_date = min(data$sample_datetime, 
 
   # add pH min and max criteria lines
   p <- p + ggplot2::geom_segment(aes(x=xmin, xend=xmax, y=pH_Min, yend=pH_Min,
-                                     color = "pH Criteria", linetype = "pH Criteria", shape = "pH Criteria"))
+                                     color = "pH Criteria",
+                                     linetype = "pH Criteria"
+                                     , shape = "pH Criteria"
+  )
+  )
   p <- p + ggplot2::geom_segment(aes(x=xmin, xend=xmax, y=pH_Max, yend=pH_Max,
-                                     color = "pH Criteria", linetype = "pH Criteria", shape = "pH Criteria"))
+                                     color = "pH Criteria", linetype = "pH Criteria"
+                                     , shape = "pH Criteria"
+  ))
 
   title <- paste(station, unique(data$StationDes))
   subtitle <- paste0("Assessment Unit: ", unique(data$AU_ID), " ", unique(data$AU_Name))
 
   # plot data with excursion colors
-  p <- p + ggplot2::geom_point(aes(x=sample_datetime, y=Result_cen, color = excursion, linetype = excursion, shape = excursion)) +
-    ggplot2::ggtitle(title, subtitle = subtitle) +
+  p <- p + ggplot2::geom_point(aes(x=sample_datetime, y=Result_cen, color = excursion,
+                                   linetype = excursion,
+                                   shape = excursion)) +
+    ggplot2::ggtitle(paste0('<b>', title, '</b>\n', subtitle)) +
     ggplot2::ylab("pH (s.u.)") +
     ggplot2::xlab("Datetime")
 
   # plot the trend line if applicable
   if(nrow(seaken_pH) > 0){
-    p <- p + ggplot2::geom_segment(aes(x=xmin, xend=xmax, y=sk_min, yend=sk_max, color = "Trend", linetype = "Trend", shape = "Trend"), lwd = 1) +
-      ggplot2::annotate("text", x = xmin, y = ymax, label = paste0("Trend Results: ", trend, ",  Z-Stat: ", p_val, ",  Slope: ", slope), hjust = 0, vjust = 0)
+    p <- p + ggplot2::geom_segment(aes(x=xmin, xend=xmax, y=sk_min, yend=sk_max, color = "Trend", linetype = "Trend"
+                                       , shape = "Trend"), lwd = 1) +
+      ggplot2::ggtitle(paste0('<b>', title, '</b>\n', subtitle, '\n', "Trend Results: ", trend, ",  Z-Stat: ", p_val, ",  Slope: ", slope))
   }
+      # ggplot2::annotate("text", x = xmin+lubridate::days(31), y = ymax, label = paste0("Trend Results: ", trend, ",  Z-Stat: ", p_val, ",  Slope: ", slope), hjust = 0, vjust = 0)
+  # }
 
   # apply color, shape, line types, and range limits
   p <- p +
@@ -74,7 +85,8 @@ plot_pH <- function(data, seaKen, station, max_date = min(data$sample_datetime, 
     ggplot2::theme_linedraw() +
     ggplot2::theme(legend.position="bottom", legend.direction = "horizontal", legend.box = "horizontal",
                    panel.grid.major = element_line(color = "gray"),
-                   panel.grid.minor = element_line(color = "gray"))
+                   panel.grid.minor = element_line(color = "gray")
+                   )
 
   return(p)
 }

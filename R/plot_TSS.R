@@ -10,7 +10,7 @@
 #' @examples
 #' plot_TSS(data = data.frame, seaKen, station)
 
-plot_TSS <- function(data, seaKen, station, max_date = min(data$sample_datetime, na.rm = TRUE)){
+plot_TSS <- function(data, seaKen, station, max_date = max(data$sample_datetime, na.rm = TRUE)){
   # subset seaken table to parameter and significant trends
   if(NROW(seaKen) > 0){
     seaken_TSS <- seaKen %>% dplyr::filter(Char_Name == "Total suspended solids",
@@ -64,7 +64,8 @@ plot_TSS <- function(data, seaKen, station, max_date = min(data$sample_datetime,
   # plot the trend line if applicable
   if(nrow(seaken_TSS) > 0){
     p <- p + ggplot2::geom_segment(aes(x=xmin, xend=xmax, y=sk_min, yend=sk_max, color = "Trend", linetype = "Trend", shape = "Trend"), lwd = 1) +
-      ggplot2::annotate("text", x = xmin, y = ymax, label = paste0("Trend Results: ", trend, ",  Z-Stat: ", p_val, ",  Slope: ", slope), hjust = 0, vjust = 0)
+      ggplot2::ggtitle(paste0('<b>', title, '</b>\n', subtitle, '\n', "Trend Results: ", trend, ",  Z-Stat: ", p_val, ",  Slope: ", slope))
+      # ggplot2::annotate("text", x = xmin, y = ymax, label = paste0("Trend Results: ", trend, ",  Z-Stat: ", p_val, ",  Slope: ", slope), hjust = 0, vjust = 0)
   }
 
   # apply color, shape, line types, and range limits
